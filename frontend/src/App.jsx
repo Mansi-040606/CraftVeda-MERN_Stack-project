@@ -12,6 +12,7 @@ import Cart from './pages/Cart';
 import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
 import GISearch from './pages/GISearch';
 import About from './pages/About';
 import Donate from './pages/Donate';
@@ -43,11 +44,27 @@ function App() {
           <Route path="/artisan/:id" element={<ArtisanProfile />} />
           <Route path="/workshops" element={<Workshops />} />
           <Route path="/workshop/:id" element={<Workshops />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
+              <Cart />
+            </ProtectedRoute>
+          } />
           <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/order/:id" element={<Orders />} />
+          <Route path="/checkout" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
+              <Checkout />
+            </ProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
+              <Orders />
+            </ProtectedRoute>
+          } />
+          <Route path="/order/:id" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
+              <OrderDetail />
+            </ProtectedRoute>
+          } />
           <Route path="/gi-search" element={<GISearch />} />
           <Route path="/about" element={<About />} />
           <Route path="/donate" element={<Donate />} />
