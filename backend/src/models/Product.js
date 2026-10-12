@@ -21,6 +21,8 @@ const productSchema = new mongoose.Schema({
   weight: { type: Number, unit: String },
   color: [{ type: String }],
   stock: { type: Number, default: 1, min: 0 },
+  averageRating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
   artisan: { type: mongoose.Schema.Types.ObjectId, ref: 'Artisan', required: true },
   giTag: { type: mongoose.Schema.Types.ObjectId, ref: 'GITag' },
   isCustomizable: { type: Boolean, default: false },

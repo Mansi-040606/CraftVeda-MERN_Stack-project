@@ -22,8 +22,10 @@ function Cart() {
   };
 
   const remove = async (item) => {
-    if (!item.product) return;
-    const ok = await removeFromCart(item.product._id);
+    // productId survives even when the product itself was deleted.
+    const id = item.productId || item.product?._id;
+    if (!id) return;
+    const ok = await removeFromCart(id);
     if (!ok) reload();
   };
 
@@ -117,7 +119,7 @@ function Cart() {
           <div className="lg:col-span-2">
             {items.map((item, index) => {
               const product = item.product;
-              const productId = product?._id || `missing-${index}`;
+              const productId = item.productId || product?._id || `missing-${index}`;
               const stock = product?.stock ?? 0;
               // Only lines the API will accept a quantity change for.
               const canEditQty = Boolean(product) && product.isActive !== false && stock >= 1;
@@ -196,7 +198,7 @@ function Cart() {
 
                     <button
                       onClick={() => remove(item)}
-                      disabled={!product}
+                      disabled={!item.productId && !product}
                       className="text-red-500 text-sm hover:underline disabled:text-red-300 disabled:no-underline disabled:cursor-not-allowed"
                     >
                       Remove

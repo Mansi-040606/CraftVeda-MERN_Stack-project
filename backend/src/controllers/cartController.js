@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Product from '../models/Product.js';
 import Artisan from '../models/Artisan.js';
@@ -38,10 +39,20 @@ export const applyCartAdd = (user, product, quantity) => {
   else user.cart.push({ product: product._id, quantity });
 };
 
+// The raw id behind a cart line. Populate turns deleted products into null,
+// so the id has to be captured BEFORE populate or the line becomes unremovable.
+const rawLineId = (value) => {
+  if (!value) return null;
+  if (value instanceof mongoose.Types.ObjectId) return value;
+  return value._id ?? null;
+};
+
 // Build the cart payload sent to the client.
 // Products that were deleted or are out of stock are KEPT in the cart but
 // marked unavailable and excluded from the totals (never silently removed).
 export const buildCart = async (user) => {
+  const lineIds = user.cart.map((line) => rawLineId(line.product));
+
   await User.populate(user, {
     path: 'cart.product',
     select: PRODUCT_SELECT,
@@ -52,8 +63,9 @@ export const buildCart = async (user) => {
   let availableCount = 0;
   let unavailableCount = 0;
 
-  const items = user.cart.map((line) => {
+  const items = user.cart.map((line, index) => {
     const product = line.product; // null when the product was deleted
+    const productId = lineIds[index]; // always present, so the line can be removed
 
     let available = true;
     let reason = null;
@@ -85,6 +97,7 @@ export const buildCart = async (user) => {
     }
 
     return {
+      productId,
       product,
       quantity: line.quantity,
       unitPrice,

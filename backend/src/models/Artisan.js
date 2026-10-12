@@ -33,6 +33,7 @@ const artisanSchema = new mongoose.Schema({
   },
   isVerified: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
   totalProducts: { type: Number, default: 0 },
   totalSales: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }

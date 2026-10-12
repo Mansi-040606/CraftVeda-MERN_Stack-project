@@ -19,6 +19,14 @@ const reviewSchema = new mongoose.Schema({
 reviewSchema.index({ product: 1, createdAt: -1 });
 reviewSchema.index({ artisan: 1 });
 reviewSchema.index({ rating: -1 });
+// One review per user per product, enforced at the DB level as well as in the
+// controller. partialFilterExpression leaves workshop-only reviews (product
+// null) unconstrained. Verified safe: craftveda and craftveda_dev had 0
+// reviews (hence 0 duplicate pairs) before this index was added.
+reviewSchema.index(
+  { user: 1, product: 1 },
+  { unique: true, partialFilterExpression: { product: { $type: 'objectId' } } }
+);
 
 const Review = mongoose.model('Review', reviewSchema);
 export default Review;

@@ -6,6 +6,8 @@ import { useCart } from '../../context/CartContext';
 import { errMsg } from '../../components/Toast';
 import { inr } from '../../utils/format';
 import { categoryLabel } from '../../constants/categories';
+import StarRating from '../../components/review/StarRating';
+import ReviewsSection from '../../components/review/ReviewsSection';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -133,6 +135,14 @@ function ProductDetail() {
                 {categoryLabel(product.category)}
               </span>
               <h1 className="text-2xl font-bold text-amber-900 mt-2">{product.name}</h1>
+              <div className="flex items-center gap-2 mt-2">
+                <StarRating value={product.averageRating || 0} size="text-base" />
+                <span className="text-sm text-amber-600">
+                  {product.averageRating > 0
+                    ? `${product.averageRating.toFixed(1)} (${product.reviewCount || 0} review${product.reviewCount === 1 ? '' : 's'})`
+                    : 'No reviews yet'}
+                </span>
+              </div>
               <p className="text-amber-600 mt-2">
                 by{' '}
                 {product.artisan ? (
@@ -254,6 +264,8 @@ function ProductDetail() {
             </div>
           </div>
         )}
+        {/* ----- reviews ----- */}
+        <ReviewsSection productId={product._id} />
       </div>
     </div>
   );
