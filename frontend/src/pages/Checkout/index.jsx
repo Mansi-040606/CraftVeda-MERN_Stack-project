@@ -94,10 +94,18 @@ function Checkout() {
 
     await new Promise((resolve, reject) => {
       let settled = false;
-      const fail = (message) => {
+      let failureMessage = null;
+
+      // Only settles when the modal is actually closed, so a retry inside the
+      // Razorpay window can still reach `handler` and be verified.
+      const settleFailure = () => {
         if (settled) return;
         settled = true;
-        reject(new Error(message));
+        reject(
+          new Error(
+            failureMessage || 'Payment was cancelled. Your order is saved — you can retry below.'
+          )
+        );
       };
 
       const checkout = new Razorpay({
@@ -132,13 +140,15 @@ function Checkout() {
           }
         },
         modal: {
-          ondismiss: () => fail('Payment was cancelled. Your order is saved — you can retry below.'),
+          ondismiss: settleFailure,
         },
       });
 
-      checkout.on('payment.failed', (resp) =>
-        fail(resp.error?.description || 'Payment failed. Please try again.')
-      );
+      // Remember the reason but keep the promise pending: Razorpay keeps its
+      // failure screen open and lets the shopper retry in the same window.
+      checkout.on('payment.failed', (resp) => {
+        failureMessage = resp.error?.description || 'Payment failed. Please try again.';
+      });
       checkout.open();
     });
   };
