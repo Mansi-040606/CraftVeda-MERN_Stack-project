@@ -77,6 +77,25 @@ function Header() {
                       Dashboard
                     </Link>
                     
+                    {user?.role === 'ARTISAN' && (
+                      <>
+                        <Link
+                          to="/artisan/products"
+                          className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          My Products
+                        </Link>
+                        <Link
+                          to="/artisan/orders"
+                          className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          My Orders
+                        </Link>
+                      </>
+                    )}
+
                     {user?.role === 'CUSTOMER' && (
                       <Link
                         to="/become-artisan"
@@ -86,13 +105,13 @@ function Header() {
                         Become an Artisan
                       </Link>
                     )}
-                    
+
                     <Link
                       to="/orders"
                       className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition"
                       onClick={() => setShowDropdown(false)}
                     >
-                      My Orders
+                      {user?.role === 'ARTISAN' ? 'My Purchases' : 'My Orders'}
                     </Link>
                     
                     <button

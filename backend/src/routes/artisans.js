@@ -3,10 +3,12 @@ import { body } from 'express-validator';
 import Artisan from '../models/Artisan.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
-import { protect, allowRoles } from '../middleware/auth.js';
+import { protect, allowRoles, artisanOnly } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import { getMyStats, getMyOrders } from '../controllers/artisanController.js';
+import { myOrdersQueryValidators } from '../validators/artisanValidators.js';
 
 const router = express.Router();
 
@@ -62,6 +64,10 @@ router.get('/', catchAsync(async (req, res) => {
     total
   });
 }));
+
+// --- Logged-in artisan: own dashboard data (never reachable via /:id) ---
+router.get('/me/stats', protect, artisanOnly, getMyStats);
+router.get('/me/orders', protect, artisanOnly, myOrdersQueryValidators, validate, getMyOrders);
 
 router.get('/:id', catchAsync(async (req, res) => {
   const artisan = await Artisan.findById(req.params.id)

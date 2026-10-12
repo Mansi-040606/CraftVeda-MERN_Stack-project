@@ -6,6 +6,10 @@ export const artisanService = {
   getProducts: (id) => api.get(`/artisans/${id}/products`),
   create: (data) => api.post('/artisans', data),
   update: (id, data) => api.put(`/artisans/${id}`, data),
+
+  // Logged-in artisan: own dashboard data.
+  myStats: () => api.get('/artisans/me/stats'),
+  myOrders: (params) => api.get('/artisans/me/orders', { params }),
 };
 
 export default artisanService;

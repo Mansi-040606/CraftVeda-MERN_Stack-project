@@ -127,6 +127,35 @@ router.get('/admin', protect, adminOnly, catchAsync(async (req, res) => {
   });
 }));
 
+// The logged-in artisan's own products — includes inactive ones, unlike the public list.
+router.get('/mine', protect, artisanOnly, catchAsync(async (req, res) => {
+  const artisan = await getOwnArtisan(req);
+  if (!artisan) throw new ApiError(403, 'You need an artisan profile to manage products');
+
+  const { page = 1, limit = 20, search, isActive } = req.query;
+
+  const query = { artisan: artisan._id };
+  if (isActive !== undefined && isActive !== '') query.isActive = isActive === 'true';
+  if (search) {
+    const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    query.$or = [{ name: regex }, { category: regex }, { craftType: regex }];
+  }
+
+  const total = await Product.countDocuments(query);
+  const products = await Product.find(query)
+    .sort('-createdAt')
+    .skip((page - 1) * limit)
+    .limit(Number(limit));
+
+  res.json({
+    success: true,
+    products,
+    page: Number(page),
+    pages: Math.ceil(total / limit),
+    total
+  });
+}));
+
 router.get('/:id', catchAsync(async (req, res) => {
   // `user` lets the frontend detect "this is my own product" (artisan ownership).
   const product = await Product.findById(req.params.id)

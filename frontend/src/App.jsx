@@ -29,6 +29,8 @@ import AdminReviews from './pages/Admin/Reviews';
 import ToastHost from './components/Toast';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ArtisanDashboard from './pages/ArtisanDashboard';
+import ArtisanProducts from './pages/ArtisanProducts';
+import ArtisanOrders from './pages/ArtisanOrders';
 import BecomeArtisan from './pages/BecomeArtisan';
 
 function App() {
@@ -115,6 +117,16 @@ function App() {
           <Route path="/artisan/dashboard" element={
             <ProtectedRoute allowedRoles={['ARTISAN']}>
               <ArtisanDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/artisan/products" element={
+            <ProtectedRoute allowedRoles={['ARTISAN']}>
+              <ArtisanProducts />
+            </ProtectedRoute>
+          } />
+          <Route path="/artisan/orders" element={
+            <ProtectedRoute allowedRoles={['ARTISAN']}>
+              <ArtisanOrders />
             </ProtectedRoute>
           } />
           
