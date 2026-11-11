@@ -34,12 +34,20 @@ router.patch('/:id', protect, adminOnly, [
   res.json({ success: true, giTag });
 }));
 
+// Craft types accepted by the public list filter. The GITag model stores `type`
+// as a free string, so unknown/invalid values are ignored instead of erroring.
+const GI_TYPES = ['textiles', 'pottery', 'jewelry', 'woodwork', 'metalwork', 'painting', 'sculpture', 'embroidery', 'other'];
+
 router.get('/', catchAsync(async (req, res) => {
   const { page = 1, limit = 12, state, search } = req.query;
-  
+  const type = typeof req.query.type === 'string' ? req.query.type.trim().toLowerCase() : '';
+
   const query = { isActive: true };
-  
+
   if (state) query['location.state'] = state;
+  if (type && GI_TYPES.includes(type)) {
+    query.type = new RegExp(`^${type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+  }
   if (search) {
     query.$text = { $search: search };
   }

@@ -31,7 +31,8 @@ function Footer() {
               <li><Link to="/artisans" className="hover:text-white transition">Our Artisans</Link></li>
               <li><Link to="/workshops" className="hover:text-white transition">Workshops</Link></li>
               <li><Link to="/gi-search" className="hover:text-white transition">GI Tags</Link></li>
-              <li><Link to="/about" className="hover:text-white transition">Heritage Stories</Link></li>
+              <li><Link to="/stories" className="hover:text-white transition">Craft Stories</Link></li>
+              <li><Link to="/about" className="hover:text-white transition">About Us</Link></li>
             </ul>
           </div>
 
@@ -39,6 +40,7 @@ function Footer() {
             <h3 className="text-white font-semibold mb-4">Support</h3>
             <ul className="space-y-2 text-sm">
               <li><Link to="/donate" className="hover:text-white transition">Donate</Link></li>
+              <li><Link to="/verify" className="hover:text-white transition">Verify Certificate</Link></li>
               <li><Link to="/orders" className="hover:text-white transition">Track Order</Link></li>
               <li><Link to="/auth" className="hover:text-white transition">Seller Registration</Link></li>
               <li><Link to="/admin" className="hover:text-white transition">Admin</Link></li>

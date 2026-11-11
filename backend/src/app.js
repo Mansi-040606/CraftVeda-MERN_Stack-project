@@ -40,13 +40,24 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Read NODE_ENV lazily: app.js is evaluated before dotenv.config() runs in server.js.
+const isDev = () => process.env.NODE_ENV !== 'production';
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: () => (isDev() ? 100000 : 100),
+  skip: (req) => isDev() && req.method === 'GET',
   message: { message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
 
+// Strict limit only on credential endpoints — profile reads must never be throttled.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { message: 'Too many authentication attempts, please try again later.' }
+});
+app.use(['/api/auth/login', '/api/auth/register'], authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/artisans', artisanRoutes);

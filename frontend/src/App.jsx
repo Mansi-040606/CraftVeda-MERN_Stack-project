@@ -18,6 +18,9 @@ import OrderDetail from './pages/OrderDetail';
 import GISearch from './pages/GISearch';
 import About from './pages/About';
 import Donate from './pages/Donate';
+import Stories from './pages/Stories';
+import StoryDetail from './pages/Stories/Detail';
+import VerifyCertificate from './pages/VerifyCertificate';
 import Auth from './pages/Auth';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/Admin/Users';
@@ -79,6 +82,10 @@ function App() {
           <Route path="/gi-search" element={<GISearch />} />
           <Route path="/about" element={<About />} />
           <Route path="/donate" element={<Donate />} />
+          <Route path="/stories" element={<Stories />} />
+          <Route path="/stories/:slug" element={<StoryDetail />} />
+          <Route path="/verify" element={<VerifyCertificate />} />
+          <Route path="/verify/:certificateNumber" element={<VerifyCertificate />} />
           <Route path="/auth" element={<Auth />} />
           
           <Route path="/admin" element={
