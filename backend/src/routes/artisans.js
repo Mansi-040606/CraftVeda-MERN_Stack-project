@@ -66,6 +66,13 @@ router.get('/', catchAsync(async (req, res) => {
 }));
 
 // --- Logged-in artisan: own dashboard data (never reachable via /:id) ---
+// Own profile (used by the /artisan/profile edit page).
+router.get('/me', protect, artisanOnly, catchAsync(async (req, res) => {
+  const artisan = await Artisan.findOne({ user: req.user._id })
+    .populate('user', 'name email phone avatar');
+  if (!artisan) throw new ApiError(403, 'You need an artisan profile to view this');
+  res.json({ success: true, artisan });
+}));
 router.get('/me/stats', protect, artisanOnly, getMyStats);
 router.get('/me/orders', protect, artisanOnly, myOrdersQueryValidators, validate, getMyOrders);
 

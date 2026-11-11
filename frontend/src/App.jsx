@@ -8,6 +8,8 @@ import ProductDetail from './pages/ProductDetail';
 import Artisans from './pages/Artisans';
 import ArtisanProfile from './pages/ArtisanProfile';
 import Workshops from './pages/Workshops';
+import WorkshopDetail from './pages/WorkshopDetail';
+import MyBookings from './pages/MyBookings';
 import Cart from './pages/Cart';
 import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
@@ -31,6 +33,8 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import ArtisanDashboard from './pages/ArtisanDashboard';
 import ArtisanProducts from './pages/ArtisanProducts';
 import ArtisanOrders from './pages/ArtisanOrders';
+import ArtisanWorkshops from './pages/ArtisanWorkshops';
+import ArtisanProfileEdit from './pages/ArtisanProfileEdit';
 import BecomeArtisan from './pages/BecomeArtisan';
 
 function App() {
@@ -45,7 +49,12 @@ function App() {
           <Route path="/artisans" element={<Artisans />} />
           <Route path="/artisan/:id" element={<ArtisanProfile />} />
           <Route path="/workshops" element={<Workshops />} />
-          <Route path="/workshop/:id" element={<Workshops />} />
+          <Route path="/workshop/:id" element={<WorkshopDetail />} />
+          <Route path="/my-bookings" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
+              <MyBookings />
+            </ProtectedRoute>
+          } />
           <Route path="/cart" element={
             <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN']}>
               <Cart />
@@ -127,6 +136,16 @@ function App() {
           <Route path="/artisan/orders" element={
             <ProtectedRoute allowedRoles={['ARTISAN']}>
               <ArtisanOrders />
+            </ProtectedRoute>
+          } />
+          <Route path="/artisan/workshops" element={
+            <ProtectedRoute allowedRoles={['ARTISAN']}>
+              <ArtisanWorkshops />
+            </ProtectedRoute>
+          } />
+          <Route path="/artisan/profile" element={
+            <ProtectedRoute allowedRoles={['ARTISAN']}>
+              <ArtisanProfileEdit />
             </ProtectedRoute>
           } />
           

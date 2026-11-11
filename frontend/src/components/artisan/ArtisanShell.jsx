@@ -4,6 +4,8 @@ const links = [
   { to: '/artisan/dashboard', label: 'Dashboard' },
   { to: '/artisan/products', label: 'My Products' },
   { to: '/artisan/orders', label: 'My Orders' },
+  { to: '/artisan/workshops', label: 'My Workshops' },
+  { to: '/artisan/profile', label: 'My Profile' },
 ];
 
 // Shared layout for the artisan pages (mirrors AdminShell).

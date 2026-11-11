@@ -113,6 +113,13 @@ function Header() {
                     >
                       {user?.role === 'ARTISAN' ? 'My Purchases' : 'My Orders'}
                     </Link>
+                    <Link
+                      to="/my-bookings"
+                      className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      My Bookings
+                    </Link>
                     
                     <button
                       onClick={handleLogout}

@@ -56,6 +56,9 @@ const CustomerDashboard = () => {
               <Link to="/workshops" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
                 Join Workshops
               </Link>
+              <Link to="/my-bookings" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
+                My Bookings
+              </Link>
               <Link to="/gi-search" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
                 Search GI Tags
               </Link>
