@@ -270,6 +270,60 @@ const seed = async () => {
     console.log('  created 10 orders');
   }
 
+  // --- Admin dashboard charts: orders spread across the recent months ---
+  // Find-or-created by their `notes` marker (never deleteMany), so re-running
+  // the seed does not duplicate them and the charts are not empty in the demo.
+  // createdAt is stamped with the native driver because mongoose timestamps
+  // would otherwise write "now" and collapse every order into the current month.
+  const chartOrderSeeds = [
+    { marker: 'seed:chart:1', monthsAgo: 5, day: 9, product: 'Hand Block Printed Dupatta', quantity: 2, buyer: 'priya@craftveda.com', orderStatus: 'delivered' },
+    { marker: 'seed:chart:2', monthsAgo: 5, day: 21, product: 'Kundan Necklace Set', quantity: 1, buyer: 'rahul@craftveda.com', orderStatus: 'cancelled' },
+    { marker: 'seed:chart:3', monthsAgo: 4, day: 6, product: 'Blue Pottery Vase', quantity: 1, buyer: 'anita@craftveda.com', orderStatus: 'shipped' },
+    { marker: 'seed:chart:4', monthsAgo: 3, day: 14, product: 'Madhubani Painting', quantity: 1, buyer: 'priya@craftveda.com', orderStatus: 'delivered' },
+    { marker: 'seed:chart:5', monthsAgo: 3, day: 25, product: 'Terracotta Water Jug', quantity: 3, buyer: 'meena@craftveda.com', orderStatus: 'processing' },
+    { marker: 'seed:chart:6', monthsAgo: 2, day: 8, product: 'Bandhani Silk Scarf', quantity: 2, buyer: 'rahul@craftveda.com', orderStatus: 'confirmed' },
+    { marker: 'seed:chart:7', monthsAgo: 2, day: 19, product: 'Meenakari Brass Plate', quantity: 1, buyer: 'anita@craftveda.com', orderStatus: 'pending' },
+    { marker: 'seed:chart:8', monthsAgo: 1, day: 11, product: 'Pashmina Shawl', quantity: 1, buyer: 'priya@craftveda.com', orderStatus: 'delivered' },
+    { marker: 'seed:chart:9', monthsAgo: 1, day: 24, product: 'Sandalwood Elephant Carving', quantity: 1, buyer: 'rahul@craftveda.com', orderStatus: 'cancelled' },
+    { marker: 'seed:chart:10', monthsAgo: 0, day: 4, product: 'Hand Block Printed Dupatta', quantity: 1, buyer: 'anita@craftveda.com', orderStatus: 'shipped' },
+    { marker: 'seed:chart:11', monthsAgo: 0, day: 12, product: 'Blue Pottery Vase', quantity: 2, buyer: 'priya@craftveda.com', orderStatus: 'confirmed' }
+  ];
+
+  const backdated = (monthsAgo, day) => {
+    const now = new Date();
+    const safeDay = monthsAgo === 0 ? Math.min(day, now.getUTCDate()) : Math.min(day, 28);
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, safeDay, 12, 0, 0));
+  };
+
+  for (const seedOrder of chartOrderSeeds) {
+    const exists = await Order.findOne({ notes: seedOrder.marker });
+    if (exists) continue;
+
+    const product = products.find((p) => p.name === seedOrder.product);
+    const buyer = await User.findOne({ email: seedOrder.buyer });
+    if (!product || !buyer) continue;
+
+    const subtotal = product.price * seedOrder.quantity;
+    const order = await Order.create({
+      user: buyer._id,
+      items: [{ product: product._id, quantity: seedOrder.quantity, price: product.price }],
+      shippingAddress,
+      subtotal,
+      shippingCost: 0,
+      tax: 0,
+      total: subtotal,
+      paymentMethod: 'upi',
+      paymentStatus: seedOrder.orderStatus === 'cancelled' ? 'refunded' : ['delivered', 'shipped'].includes(seedOrder.orderStatus) ? 'paid' : 'pending',
+      orderStatus: seedOrder.orderStatus,
+      notes: seedOrder.marker
+    });
+    await Order.collection.updateOne(
+      { _id: order._id },
+      { $set: { createdAt: backdated(seedOrder.monthsAgo, seedOrder.day) } }
+    );
+    console.log(`  created chart order ${seedOrder.marker} (${seedOrder.orderStatus}, ${seedOrder.monthsAgo} months back)`);
+  }
+
   for (let i = 0; i < workshopsData.length; i++) {
     const data = workshopsData[i];
     const exists = await Workshop.findOne({ title: data.title });
@@ -345,6 +399,12 @@ const seed = async () => {
   }
 
   const seedCertificateNumbers = ['CV-SEED-0001', 'CV-SEED-0002'];
+  // Numbers a previous run already handed out must never be reused: backdated
+  // chart orders change which delivered order the loop sees first.
+  const usedCertNumbers = new Set(
+    (await Certificate.find({ certificateNumber: { $in: seedCertificateNumbers } })
+      .select('certificateNumber').lean()).map((cert) => cert.certificateNumber)
+  );
   let seedCertIndex = 0;
   for (const order of deliveredOrders) {
     if (seedCertIndex >= seedCertificateNumbers.length) break;
@@ -353,7 +413,13 @@ const seed = async () => {
     const alreadyIssued = await Certificate.findOne({ order: order._id, product: product._id });
     if (alreadyIssued) continue;
 
+    while (seedCertIndex < seedCertificateNumbers.length && usedCertNumbers.has(seedCertificateNumbers[seedCertIndex])) {
+      seedCertIndex += 1;
+    }
+    if (seedCertIndex >= seedCertificateNumbers.length) break;
+
     const certificateNumber = seedCertificateNumbers[seedCertIndex++];
+    usedCertNumbers.add(certificateNumber);
     const qrCode = await QRCode.toDataURL(JSON.stringify({
       cert: certificateNumber,
       product: product._id.toString(),

@@ -9,6 +9,9 @@ import Workshop from '../models/Workshop.js';
 import Donation from '../models/Donation.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import validate from '../middleware/validate.js';
+import { timeSeriesValidators } from '../validators/adminValidators.js';
+import { getTimeSeries } from '../controllers/adminStatsController.js';
 
 const router = express.Router();
 
@@ -43,6 +46,8 @@ router.get('/stats', protect, adminOnly, catchAsync(async (req, res) => {
     }
   });
 }));
+
+router.get('/stats/timeseries', protect, adminOnly, timeSeriesValidators, validate, getTimeSeries);
 
 router.get('/users', protect, adminOnly, catchAsync(async (req, res) => {
   const { page = 1, limit = 20, role, search } = req.query;

@@ -2,6 +2,7 @@ import api from './api';
 
 const adminApi = {
   stats: () => api.get('/admin/stats'),
+  statsTimeSeries: (months) => api.get('/admin/stats/timeseries', { params: { months } }),
 
   users: (params) => api.get('/admin/users', { params }),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),

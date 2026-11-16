@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import adminApi from '../../services/adminApi';
 import { toast, errMsg } from '../../components/Toast';
 import { AdminShell, Loading, ErrorState } from '../../components/admin/AdminShell';
+import DashboardCharts from './DashboardCharts';
 
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
@@ -64,6 +65,8 @@ function Admin() {
               </div>
             ))}
           </div>
+
+          <DashboardCharts />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white rounded-xl shadow-md p-6">
