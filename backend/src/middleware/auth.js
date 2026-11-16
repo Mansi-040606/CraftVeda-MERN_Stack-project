@@ -23,7 +23,7 @@ export const protect = catchAsync(async (req, res, next) => {
     }
     
     next();
-  } catch (error) {
+  } catch {
     throw new ApiError(401, 'Not authorized, token invalid');
   }
 });

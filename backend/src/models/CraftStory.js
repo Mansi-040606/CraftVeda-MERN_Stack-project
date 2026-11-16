@@ -21,7 +21,6 @@ const craftStorySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-craftStorySchema.index({ slug: 1 });
 craftStorySchema.index({ category: 1 });
 craftStorySchema.index({ featured: 1 });
 

@@ -1,7 +1,8 @@
-# CraftVeda — Project Status Summary
+# CraftVeda — Project Status
 
-> **Date:** 2026-09-21
-> **Mode:** Read-only inspection (no files modified)
+> **Date:** 2026-11-16 (Step 9 — final polish)
+> **Scope:** Single merged status document (replaces `PROJECT_STATUS.md` + `project_status_new.md`).
+> All statements below were verified against the current code and a full regression run on this date.
 
 ---
 
@@ -9,426 +10,199 @@
 
 ```
 CraftVeda/
+├── README.md                  ← root readme (setup, accounts, env, demo, tests)
+├── PROJECT_STATUS.md          ← this file
+├── DATABASE_SCHEMA.docx       ← schema document (update from the tables in README)
+├── .gitignore
 ├── backend/
+│   ├── server.js              ← dotenv → connectDB → app.listen
+│   ├── seed.js                ← idempotent demo seed (npm run seed)
+│   ├── .env / .env.example
 │   ├── src/
+│   │   ├── app.js             ← middleware + 15 route mounts + /api/health
 │   │   ├── config/db.js
-│   │   ├── middleware/auth.js, errorHandler.js
-│   │   ├── models/ (12 models)
-│   │   ├── routes/ (13 route files)
+│   │   ├── middleware/        ← auth.js, errorHandler.js, validate.js
+│   │   ├── models/            ← 12 models
+│   │   ├── routes/            ← 15 route files
+│   │   ├── controllers/       ← 6 controllers (cart, wishlist, review, workshop, artisan, adminStats)
+│   │   ├── validators/        ← 6 express-validator rule sets
 │   │   ├── scripts/seedAdmin.js
-│   │   ├── utils/ApiError.js, catchAsync.js
-│   │   └── app.js
-│   ├── .env
-│   ├── package.json
-│   └── server.js
-├── frontend/
-│   ├── public/favicon.svg, icons.svg
-│   ├── src/
-│   │   ├── components/layout/Header.jsx, Footer.jsx, index.js
-│   │   ├── components/ProtectedRoute.jsx
-│   │   ├── context/AuthContext.jsx
-│   │   ├── pages/ (18 page directories)
-│   │   ├── services/ (8 service files)
-│   │   ├── App.jsx, main.jsx, index.css
-│   │   └── ...
-│   ├── package.json
-│   ├── postcss.config.js
-│   └── vite.config.js
+│   │   └── utils/             ← ApiError.js, catchAsync.js
+│   └── tests/                 ← 4 E2E scripts (steps 4, 5, 6, 8)
+└── frontend/
+    ├── index.html, vite.config.js (port 3000, /api → :5000), postcss, .oxlintrc.json
+    ├── public/favicon.svg
+    └── src/
+        ├── App.jsx            ← all routes + role guards
+        ├── components/        ← layout (Header/Footer), ProtectedRoute, Toast,
+        │                        admin/AdminShell, artisan/ArtisanShell, order, product, review
+        ├── context/           ← AuthContext, CartContext
+        ├── pages/             ← 27 page directories (37 jsx files)
+        ├── services/          ← 15 axios service modules
+        └── constants/, utils/format.js
 ```
 
-**Total source files (excluding node_modules):** ~60
+**Counts:** 12 models · 15 route files · 6 controllers · 6 validator files · 27 frontend pages · 15 services.
 
 ---
 
 ## 2. Tech Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| **Frontend** | React | ^19.2.8 |
-| | React Router DOM | ^7.5.1 |
-| | Vite | ^8.2.2 |
-| | Tailwind CSS (v4) | ^4.3.3 |
-| | Axios | ^1.8.4 |
-| | PostCSS + Autoprefixer | ^8.5.26 / ^10.5.4 |
-| | Linter: Oxlint | ^1.79.0 |
-| **Backend** | Node.js | Not pinned (ESM) |
-| | Express | ^4.18.3 |
-| | Mongoose | ^8.2.1 |
-| | JWT (jsonwebtoken) | ^9.0.2 |
-| | bcryptjs | ^2.4.3 |
-| | express-validator | ^7.0.1 |
-| | Cloudinary | ^2.0.1 |
-| | Multer | ^1.4.5-lts.1 |
-| | QRCode | ^1.5.3 |
-| | Nodemailer | ^6.9.12 |
-| | Helmet | ^7.1.0 |
-| | Morgan | ^1.10.0 |
-| | express-rate-limit | ^7.2.0 |
-| | dotenv | ^16.4.5 |
-| | cors | ^2.8.5 |
-| **Database** | MongoDB (Mongoose ODM) | ^8.2.1 |
-| **Runtime** | Vite dev proxy → localhost:5000 | |
-
-**Tailwind v4** — uses `@theme` directive in CSS (no `tailwind.config.js` needed). Custom theme: primary (#8B4513 sienna), secondary (#D4A574 tan), accent (#AA3BFF purple), cream background.
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, React Router v7, Vite 8, Tailwind CSS v4 (`@theme`, no config file), Axios, Chart.js + react-chartjs-2, Oxlint |
+| Backend | Node.js (ESM), Express 4, Mongoose 8, jsonwebtoken, bcryptjs, express-validator, helmet, morgan, express-rate-limit, cors (origin restricted to `CLIENT_URL`), qrcode, razorpay, multer/cloudinary/nodemailer (installed, not wired) |
+| Database | MongoDB (local, port 27017) |
+| Dev proxy | Vite on `:3000` proxies `/api` → `http://localhost:5000` |
 
 ---
 
-## 3. Backend Details
+## 3. Backend
 
-### Server Config
-- **Port:** 5000 (from `.env`)
-- **Middleware stack:** Helmet → CORS → JSON parser → Morgan (dev) → Rate limiter (100 req/15min on `/api/`)
-- **DB:** `mongodb://localhost:27017/craftveda` (direct connect, no replica set)
-- **JWT Secret:** `your-super-secret-jwt-key-change-in-production` (placeholder)
+### Server / middleware stack
+`helmet → cors(origin callback on CLIENT_URL, credentials) → express.json → morgan(dev) → rate limiter (/api/: 100000/15min in dev, 100/15min in production, GETs skipped in dev) → auth limiter (login/register: 20/15min) → 15 route mounts → /api/health → errorHandler → 404`
 
-### Database Connection (`config/db.js`)
-- `mongoose.connect(MONGO_URI)` — no deprecated options, clean
-- Event listeners for `disconnected` and `error`
+- **dotenv quirk:** `server.js` calls `dotenv.config()` after imports are hoisted, so every env read in `src/**` is deliberately lazy (inside functions/request handlers). Verified: `JWT_SECRET`, `MONGO_URI`, `RAZORPAY_*`, `CLIENT_URL`, `NODE_ENV` are all read lazily.
+- **Auth:** JWT Bearer, 30-day expiry, env-only `JWT_SECRET` (no hardcoded fallback). Middleware: `protect`, `adminOnly`, `artisanOnly`, `allowRoles(...)`. Passwords hashed with bcrypt (12 rounds) in a pre-save hook; `comparePassword()` method.
+- **Validation:** `express-validator` + shared `validate` middleware on auth, cart, wishlist, reviews, workshops, artisan applications, orders, products, admin time-series, certificates, GI-tag admin, artisan my-orders.
+- **Errors:** `ApiError` + `catchAsync` everywhere; `errorHandler` maps CastError→404, duplicate key→400, ValidationError→400, else 500; stack only when `NODE_ENV=development`.
 
-### All API Routes
+### API routes (all mounted under `/api`)
 
-| Route | Methods | Auth | Description |
+| Area | Method + path | Access | Notes |
 |---|---|---|---|
-| `/api/health` | GET | Public | Health check |
-| **Auth** | | | |
-| `/api/auth/register` | POST | Public | Register (CUSTOMER) |
-| `/api/auth/login` | POST | Public | Login |
-| `/api/auth/me` | GET | Protected | Get profile |
-| `/api/auth/profile` | PUT | Protected | Update profile |
-| `/api/auth/password` | PUT | Protected | Change password |
-| **Products** | | | |
-| `/api/products` | GET | Public | List (paginated, filterable) |
-| `/api/products/:id` | GET | Public | Get by ID |
-| `/api/products` | POST | Admin | Create product |
-| `/api/products/:id` | PUT | Admin | Update product |
-| `/api/products/:id` | DELETE | Admin | Delete product |
-| **Artisans** | | | |
-| `/api/artisans` | GET | Public | List verified artisans |
-| `/api/artisans/:id` | GET | Public | Get artisan profile |
-| `/api/artisans/:id/products` | GET | Public | Get artisan's products |
-| `/api/artisans` | POST | Artisan/Admin | Create artisan profile |
-| `/api/artisans/:id` | PUT | Artisan/Admin | Update artisan |
-| **Artisan Applications** | | | |
-| `/api/artisan-applications` | POST | Customer | Submit application |
-| `/api/artisan-applications` | GET | Admin | List all applications |
-| `/api/artisan-applications/my-application` | GET | Customer | My application status |
-| `/api/artisan-applications/:id` | GET | Protected | Get application |
-| `/api/artisan-applications/:id/approve` | PUT | Admin | Approve → creates Artisan + updates User role |
-| `/api/artisan-applications/:id/reject` | PUT | Admin | Reject application |
-| **Workshops** | | | |
-| `/api/workshops` | GET | Public | List workshops |
-| `/api/workshops/:id` | GET | Public | Get workshop |
-| `/api/workshops/:id/book` | POST | Protected | Book workshop |
-| `/api/workshops/my-bookings` | GET | Protected | My bookings |
-| **Orders** | | | |
-| `/api/orders` | GET | Protected | List user's orders |
-| `/api/orders/:id` | GET | Protected | Get order detail |
-| `/api/orders` | POST | Protected | Create order (calculates subtotal, shipping, 18% GST) |
-| `/api/orders/:id/cancel` | PUT | Protected | Cancel order |
-| **Payments** | | | |
-| `/api/payments/create-order` | POST | Protected | Stub — returns options object |
-| `/api/payments/verify` | POST | Protected | Stub — returns success |
-| **Reviews** | | | |
-| `/api/reviews/product/:productId` | GET | Public | Product reviews + avg rating |
-| `/api/reviews/artisan/:artisanId` | GET | Public | Artisan reviews |
-| `/api/reviews` | POST | Protected | Create review |
-| `/api/reviews/:id/helpful` | PUT | Protected | Increment helpful |
-| **Donations** | | | |
-| `/api/donations` | GET | Public | List donations + total |
-| `/api/donations` | POST | Protected | Create donation |
-| **Certificates** | | | |
-| `/api/certificates/:certificateNumber` | GET | Public | Get certificate |
-| `/api/certificates/generate` | POST | Protected | Generate (QR code) |
-| `/api/certificates/verify/:certificateNumber` | GET | Public | Verify validity |
-| **GI Tags** | | | |
-| `/api/gi-tags` | GET | Public | List GI tags |
-| `/api/gi-tags/:id` | GET | Public | Get GI tag |
-| **Craft Stories** | | | |
-| `/api/craft-stories` | GET | Public | List stories |
-| `/api/craft-stories/:slug` | GET | Public | Get story by slug |
-| `/api/craft-stories` | POST | Admin | Create story |
-| `/api/craft-stories/:id` | PUT | Admin | Update story |
-| `/api/craft-stories/:id` | DELETE | Admin | Delete story |
-| **Admin** | | | |
-| `/api/admin/stats` | GET | Admin | Dashboard stats |
-| `/api/admin/users` | GET | Admin | List users |
-| `/api/admin/users/:id` | PUT | Admin | Update user |
-| `/api/admin/users/:id` | DELETE | Admin | Delete user |
-
-### Auth/Roles
-- **JWT-based** with Bearer token, 30-day expiry
-- **3 roles:** CUSTOMER, ARTISAN, ADMIN
-- **Middleware:** `protect` (JWT verify), `adminOnly`, `artisanOnly`, `allowRoles(...roles)`
-- Password hashing: bcrypt 12 rounds via Mongoose pre-save hook
-
-### Error Handling
-- Custom `ApiError` class with statusCode
-- `catchAsync` wrapper for all async routes
-- `errorHandler` middleware handles: CastError (404), duplicate key (400), ValidationError (400), generic (500)
-- Stack trace exposed only in development mode
-
-### Validation
-- `express-validator` used only in auth routes (register/login)
-- **All other routes have NO input validation** — relies entirely on Mongoose schema validators
+| Health | GET `/health` | public | `{status:'ok'}` |
+| Auth | POST `/auth/register`, POST `/auth/login` | public | validated, rate-limited |
+| | GET `/auth/me`, PUT `/auth/profile`, PUT `/auth/password` | logged in | |
+| Products | GET `/products` | public | pagination, search, category/craft/price filters, hides inactive |
+| | GET `/products/:id`, GET `/artisans/:id/products` | public | |
+| | GET `/products/admin` | admin | includes inactive |
+| | GET `/products/mine` | artisan | own products incl. inactive, search filter |
+| | POST/PUT `/products`, PATCH `/products/:id`, DELETE `/products/:id` | artisan | ownership enforced |
+| Artisans | GET `/artisans`, GET `/artisans/:id` | public | |
+| | GET `/artisans/me` | artisan | own profile |
+| | POST `/artisans`, PUT `/artisans/:id` | artisan/admin | |
+| | GET `/artisans/me/stats`, GET `/artisans/me/orders` | artisan | dashboard stats + scoped orders |
+| Applications | POST `/artisan-applications` | customer | one per user (unique index) |
+| | GET `/artisan-applications`, PUT `/:id/approve`, PUT `/:id/reject` | admin | approve creates Artisan + upgrades role |
+| | GET `/artisan-applications/my-application` | customer | |
+| Workshops | GET `/workshops` | public | filters, `seatsLeft`, hides inactive |
+| | GET `/workshops/:id` | public | |
+| | POST `/workshops/:id/book` | logged in | capacity + one-booking-per-user checks |
+| | GET `/workshops/my-bookings`, DELETE `/workshops/bookings/:id` | logged in | cancel restores seats |
+| | GET `/workshops/mine`, POST `/workshops/mine`, PUT/DELETE `/workshops/mine/:id`, GET `/workshops/mine/:id/bookings` | artisan | full CRUD + booking list |
+| | GET `/workshops/admin`, PATCH `/workshops/:id` | admin | |
+| Orders | POST `/orders` | shopper | server-side pricing, atomic stock decrement w/ rollback |
+| | GET `/orders`, GET `/orders/:id`, PUT `/orders/:id/cancel` | owner | cancel restores stock |
+| Cart | GET/POST `/cart`, PUT/DELETE `/cart/:productId`, DELETE `/cart` | shopper | server-side cart |
+| Wishlist | GET `/wishlist`, POST/DELETE `/wishlist/:productId`, POST `/wishlist/:productId/move-to-cart` | shopper | |
+| Payments | POST `/payments/create-order`, POST `/payments/verify` | logged in | Razorpay (order + donation refs), HMAC verify; 500 if keys unset |
+| Reviews | GET `/reviews/product/:productId`, GET `/reviews/artisan/:artisanId` | public | approved only + averages |
+| | GET `/reviews/product/:productId/can-review` | logged in | delivered-purchase rule |
+| | POST `/reviews` | logged in | verified purchase, one per user/product (partial unique index) |
+| | PUT `/reviews/:id/helpful` | logged in | one vote per user (`$addToSet`) |
+| | GET `/reviews`, PATCH `/reviews/:id` | admin | list + moderation (recalculates aggregates) |
+| Donations | GET `/donations` | public | completed only + total |
+| | POST `/donations` | logged in | created `pending` |
+| | GET `/donations/all` | admin | all statuses + totals by status |
+| Certificates | GET `/certificates/:certificateNumber`, GET `/certificates/verify/:number` | public | |
+| | POST `/certificates/generate` | logged in | QR code, delivered orders only |
+| GI tags | GET `/gi-tags`, GET `/gi-tags/:id` | public | |
+| | GET `/gi-tags/admin`, PATCH `/gi-tags/:id` | admin | |
+| Stories | GET `/craft-stories`, GET `/craft-stories/:slug` | public | |
+| | POST `/craft-stories`, PUT/DELETE `/craft-stories/:id` | admin | slug CRUD |
+| Admin | GET `/admin/stats` | admin | KPIs, recent orders, top products, pending applications |
+| | GET `/admin/stats/timeseries?months=` | admin | zero-filled monthly series, revenue excl. cancelled |
+| | GET/PUT/DELETE `/admin/users[/:id]` | admin | update allowlist: `name`, `role`, `status` |
+| | GET `/admin/orders`, PUT `/admin/orders/:id/status` | admin | status transition, stock restore on cancel |
 
 ---
 
-## 4. Frontend Details
+## 4. Frontend
 
-### Pages (18)
+### Routes (role-guarded where marked)
 
-| Page | Route | Description |
+| Route | Page | Access |
 |---|---|---|
-| Home | `/` | Hero, categories, featured artisans, heritage stories, donate CTA |
-| Products | `/products` | Listing with sidebar filters, sort, pagination |
-| ProductDetail | `/product/:id` | Product view, add to cart, artisan story, GI tag |
-| Artisans | `/artisans` | Directory with state/craft filters |
-| ArtisanProfile | `/artisan/:id` | Profile, story, products, awards |
-| Workshops | `/workshops` | Workshop listing with enrollment progress |
-| Cart | `/cart` | Cart with quantity controls, order summary |
-| Wishlist | `/wishlist` | Wishlist with move-to-cart/remove |
-| Checkout | `/checkout` | Address form, payment method, order summary |
-| Orders | `/orders` | Order history with status badges |
-| GISearch | `/gi-search` | GI Tag directory |
-| About | `/about` | Heritage Stories blog |
-| Donate | `/donate` | Donation form with preset/custom amounts |
-| Auth | `/auth` | Login/Register with Google sign-in button |
-| Admin | `/admin`, `/admin/dashboard` | Admin dashboard (Protected) |
-| CustomerDashboard | `/customer/dashboard` | Customer dashboard (Protected) |
-| ArtisanDashboard | `/artisan/dashboard` | Artisan dashboard (Protected) |
-| BecomeArtisan | `/become-artisan` | Application form (Protected: CUSTOMER) |
+| `/` | Home (hero, categories, featured artisans, stories, donate CTA) | public |
+| `/products`, `/product/:id` | Listing (filters/sort/pagination), detail (add to cart, reviews) | public |
+| `/artisans`, `/artisan/:id` | Directory (state/craft filters), profile + reviews | public |
+| `/workshops`, `/workshop/:id` | Listing (filters, seatsLeft), detail + booking | public |
+| `/gi-search` | GI tag directory | public |
+| `/about`, `/stories`, `/stories/:slug` | Heritage / craft stories blog | public |
+| `/donate` | Donation form (presets ₹100–₹2500, custom, anonymous) + impact feed | public (submit needs login) |
+| `/verify`, `/verify/:certificateNumber` | Certificate verification | public |
+| `/auth` | Login / Register (tabs) | guest |
+| `/cart`, `/checkout`, `/orders`, `/order/:id`, `/my-bookings`, `/wishlist` | Shopping flow, order history/detail (cancel), bookings | CUSTOMER, ARTISAN |
+| `/become-artisan` | Artisan application form + status | CUSTOMER |
+| `/customer/dashboard` | Stats, quick actions, application status, recent orders | CUSTOMER |
+| `/artisan/dashboard`, `/artisan/products`, `/artisan/orders`, `/artisan/workshops`, `/artisan/profile` | Artisan shell: stats, product CRUD, own orders + status updates, workshop CRUD + bookings, profile edit | ARTISAN |
+| `/admin` (= `/admin/dashboard`) + `/admin/{orders,users,products,applications,workshops,donations,gi-tags,reviews}` | Admin shell: KPI cards + charts, order status management, user management, product CRUD, application approve/reject, workshop toggle, donations, GI tags, review moderation | ADMIN |
 
-### Components
-- **Header** — Sticky nav with logo, links, cart/wishlist icons, auth dropdown (Dashboard/Become Artisan/My Orders/Logout)
-- **Footer** — 4-column layout with brand, shop, discover, support links
-- **ProtectedRoute** — Auth guard with role checking, redirects to `/auth`
-
-### Routing
-- `react-router-dom` v7 with `BrowserRouter`
-- Role-based route protection via `ProtectedRoute` component
-- All routes wrapped in `AuthProvider`
-
-### Auth Flow
-1. `AuthContext` manages user state + token in localStorage
-2. On mount, if token exists → fetches profile via `/api/auth/me`
-3. Login/Register → stores token → fetches profile → sets user
-4. Axios interceptor auto-attaches Bearer token
-5. 401 response → clears token → redirects to `/auth`
-6. Role-based dashboard routing after login
-
-### API Integration
-- **Axios instance** with base URL `http://localhost:5000/api` (or `VITE_API_URL`)
-- Vite dev proxy: `/api` → `http://localhost:5000`
-- **8 service modules:** auth, product, order, artisan, artisanApplication, workshop, donation, api
-- All services use the centralized axios instance
-
-### UI Status
-- Tailwind v4 with custom earth-tone theme
-- All 18 pages have full JSX content (not stubs)
-- Responsive layout (min-h-screen flex column)
-- **No UI component library** (no shadcn, MUI, etc.) — pure Tailwind
-- **No state management library** (no Redux/Zustand) — Context API only for auth
+- **Guards:** `ProtectedRoute` (redirects to `/auth`, remembers where you were going). Header dropdown routes each role to its dashboard.
+- **State:** `AuthContext` (token + profile, 401 interceptor) and `CartContext` (server-backed cart). Toasts via `components/Toast`.
+- **Charts:** `Admin/DashboardCharts` — revenue/orders/users time series, status split, top categories, top artisans (Chart.js).
 
 ---
 
 ## 5. Database
 
-### Collections (12)
+12 collections: `users, artisans, artisanapplications, products, orders, workshops, workshopbookings, reviews, donations, certificates, gitags, craftstories`.
+(Full field-by-field tables live in the README §"Collections & fields".)
 
-| Collection | Key Fields | Relationships |
-|---|---|---|
-| **users** | name, email, password, phone, role, status, avatar, address, wishlist[], cart[], resetPasswordToken/Expire | — |
-| **products** | name, description, price, images[], category (9 enums), craftType, material, artisan→Artisan, giTag→GITag, isCustomizable, stock, isActive | Artisan, GITag |
-| **orders** | user→User, items[{product→Product, quantity, price, customization}], shippingAddress, subtotal, shippingCost, tax, total, paymentMethod, paymentStatus, orderStatus (6 states), certificate→Certificate | User, Product, Certificate |
-| **artisans** | user→User, businessName, description, story, profileImage, craftTypes[], skills[], location(GeoJSON), giTag→GITag, isVerified, rating, totalProducts, totalSales | User, GITag |
-| **artisan_applications** | user→User (unique), businessName, craftTypes[], skills[], status (PENDING/APPROVED/REJECTED), adminNotes, reviewedBy→User | User |
-| **workshops** | artisan→Artisan, title, craftType, price, maxParticipants, schedule[], materials[], level, language, location{type,url} | Artisan |
-| **workshop_bookings** | workshop→Workshop, user→User, scheduleDate, participants, amount, status, joinLink, feedback | Workshop, User |
-| **reviews** | user→User, product→Product, workshop→Workshop, artisan→Artisan, rating, title, comment, isApproved, helpful | User, Product, Workshop, Artisan |
-| **donations** | donor→User, amount, craftType, campaign, message, paymentId, isAnonymous | User |
-| **certificates** | order→Order, product→Product, artisan→Artisan, buyer→User, certificateNumber (unique), qrCode, authenticityHash, isValid | Order, Product, Artisan, User |
-| **gi_tags** | name (unique), type, description, location{state,district,region}, products[], artisans[]→Artisan, history, technique, images[] | Artisan |
-| **craft_stories** | title, slug (unique), content, excerpt, coverImage, category (6 enums), craftType, region, featured, author→User | User |
+**Indexes (verified against live DBs):**
+- Text: `products(name,description,craftType)`, `gi_tags(name,description)`
+- 2dsphere: `artisans.location`
+- Unique: `users.email`, `artisan_applications.user` (one application/user), `certificates.certificateNumber`, `craft_stories.slug`, `gitags.name`, `reviews(user,product)` partial (product only)
+- Compound: `orders(user,createdAt desc)`, `orders(orderStatus)`, `reviews(product,createdAt desc)`, `reviews(artisan)`, `reviews(rating)`, `workshops…` per model, `workshop_bookings(workshop,scheduleDate)`, `workshop_bookings(user)`, `artisans(city,state)`, `artisans(craftTypes)`, `craft_stories(category)`, `craft_stories(featured)`, `products(category/artisan/price)`, `certificates(qrCode)`, `artisan_applications(status)`
+- **Duplicate-index warnings fixed (Step 9):** redundant `schema.index()` declarations on `user`, `certificateNumber`, `slug` removed; the unique indexes they duplicated are still declared via `unique: true` and were confirmed present (exactly once) in `craftveda`, `craftveda_dev` and a throwaway probe DB. No behaviour change.
 
-### Indexes
-- **Text indexes:** products(name+description+craftType), workshops(title+description+craftType), gi_tags(name+description)
-- **Geospatial:** artisans.location (2dsphere)
-- **Compound:** orders(user+createdAt, orderStatus), reviews(product+createdAt, artisan+rating), workshops(artisan), workshop_bookings(workshop+scheduleDate, user), craft_stories(slug unique, category+featured)
-
-### Seed/Admin Data
-- `scripts/seedAdmin.js` creates default admin: `admin@craftveda.com` / `Admin@123456`
-- **Bug:** Uses `process.env.MONGODB_URI` but `.env` defines `MONGO_URI` — seed script will fail
-- **Bug:** Imports `bcrypt` but never uses it (User model handles hashing)
-
-### Relationships Diagram (simplified)
-```
-User ──1:1──> Artisan
-User ──1:N──> Orders
-User ──1:N──> Reviews
-User ──1:N──> Donations
-User ──1:1──> ArtisanApplication
-Artisan ──1:N──> Products
-Artisan ──1:N──> Workshops
-Artisan ──N:M──> GITags
-Product ──N:M──> GITags
-Order ──1:1──> Certificate
-Workshop ──1:N──> WorkshopBooking
-```
+**Seed (`npm run seed`, idempotent — find-or-create, never `deleteMany`):**
+admin + 5 customers + 3 artisans (3 profiles), 10 products, 10 base orders + 11 back-dated chart orders, 3 workshops, 4 donations, 3 GI tags, 3 craft stories, 2 certificates (`CV-SEED-0001/0002`), 3 pending artisan applications.
 
 ---
 
-## 6. Features Checklist
+## 6. Verification (Step 9 regression, 2026-11-16)
 
-| Feature | Status | Notes |
-|---|---|---|
-| User Registration/Login | ✅ | Email+password, JWT |
-| Role-based Auth (Customer/Artisan/Admin) | ✅ | 3 roles, middleware guards |
-| Product Listing + Filtering | ✅ | Category, price, craftType, search, sort, pagination |
-| Product Detail | ✅ | With artisan story, GI tag info |
-| Artisan Directory | ✅ | City/state/craft filters |
-| Artisan Profile | ✅ | Story, products, awards |
-| Become Artisan Application | ✅ | Full form with approval workflow |
-| Admin Approve/Reject Artisan | ✅ | Changes user role, creates Artisan |
-| Workshop Listing | ✅ | Filterable by craftType, level, location |
-| Workshop Booking | ✅ | Capacity check, participant tracking |
-| Shopping Cart | ✅ | Quantity controls, order summary |
-| Wishlist | ✅ | Move to cart, remove |
-| Checkout | ✅ | Address, payment method selection |
-| Order Creation | ✅ | Auto-calculates shipping + 18% GST |
-| Order History | ✅ | Status badges, pagination |
-| Order Cancellation | ✅ | With status validation |
-| Reviews (Product/Artisan/Workshop) | ✅ | Rating, helpful count |
-| Donations | ✅ | Preset/custom, craft type, anonymous option |
-| GI Tag Directory | ✅ | Searchable, state-filtered |
-| Certificate Generation | ✅ | QR code via qrcode library |
-| Certificate Verification | ✅ | Public endpoint |
-| Craft Stories (Blog) | ✅ | CRUD, categories, slug-based |
-| Admin Dashboard | ✅ | Stats, user management |
-| Customer Dashboard | ✅ | Orders, application status |
-| Artisan Dashboard | ✅ | Products, workshops, metrics |
-| Auth Context (Global State) | ✅ | Login, register, logout, profile |
-| API Interceptors (Token + 401) | ✅ | Auto-attach, auto-redirect |
-| Error Handling (Backend) | ✅ | ApiError, catchAsync, errorHandler |
-| Rate Limiting | ✅ | 100 req/15min on /api/ |
-| Security Headers | ✅ | Helmet |
-| Payment Integration | ❌ | Stub only — returns mock data |
-| Cloudinary Image Upload | ❌ | Library installed but not wired |
-| Multer File Upload | ❌ | Library installed but not wired |
-| Email (Nodemailer) | ❌ | Library installed but not wired |
-| Password Reset Flow | ❌ | Schema fields exist, no route/logic |
-| Google OAuth | ❌ | Button exists in Auth page, no backend |
-| Cart Backend Persistence | ❌ | User.cart[] schema exists, no routes |
-| Wishlist Backend Persistence | ❌ | User.wishlist[] schema exists, no routes |
-| Search (Backend full-text) | ⚠️ | Text indexes exist, routes accept `search` param, but no dedicated search endpoint |
-| Admin Product Management UI | ⚠️ | Admin page exists but no product CRUD UI |
-| Admin Order Management | ❌ | No admin order routes or UI |
-| Seed Data (Products/Artisans) | ❌ | Only admin seed exists |
-| Responsive Design | ⚠️ | Tailwind classes used, but not all pages verified for mobile |
+| Check | Result |
+|---|---|
+| `node tests/step4-reviews.e2e.mjs` | **28/28 PASS** |
+| `node tests/step5-artisan.e2e.mjs` | **22/22 PASS** |
+| `node tests/step6-workshops.e2e.mjs` | **42/42 PASS** |
+| `node tests/step8-timeseries.e2e.mjs` | **14/14 PASS** |
+| `npm run lint` (frontend, oxlint) | **PASS** — 0 errors, 48 warnings (exit 0) |
+| `npm run build` (frontend, vite) | **PASS** — built in ~2.6s (chunk-size warning only) |
+| Duplicate-index warnings | **GONE** (probe on throwaway DB: 0 warnings, unique indexes intact) |
+| Console/debugger leftovers in src | **NONE** (only intentional startup/seed logs) |
+
+E2E scripts use dedicated throwaway DBs (`craftveda_step{4,5,6,8}_test`) with hard guards against `craftveda` / `craftveda_dev`; each drops its DB on cleanup. **No step 1–3 E2E scripts exist in the repo** — steps 4, 5, 6, 8 are the complete test suite.
 
 ---
 
-## 7. Known Errors/Warnings
+## 7. Known limitations / future work
 
-### Confirmed Bugs
-1. **`seedAdmin.js` uses wrong env var:** `process.env.MONGODB_URI` but `.env` has `MONGO_URI` — seed script will fail to connect
-2. **`seedAdmin.js` unused import:** `import bcrypt from 'bcryptjs'` — never used (harmless but messy)
-3. **`.env` JWT_SECRET is placeholder:** `your-super-secret-jwt-key-change-in-production`
-
-### Potential Issues
-4. **No input validation on most routes** — only auth routes use express-validator; all other routes accept raw body → potential for invalid data/Mongo errors
-5. **Workshop booking route ordering:** `GET /my-bookings` may conflict with `GET /:id` since Express matches in order — `/my-bookings` must be defined BEFORE `/:id` (currently it's defined AFTER — **will never be reached**)
-6. **`/workshops/my-bookings` defined after `/:id`** — `my-bookings` will be treated as an `:id` parameter
-7. **No error handling on frontend service calls** — pages likely have try/catch but errors may silently fail
-8. **Cloudinary/Multer not configured** — product creation accepts `images[]` as array but no actual file upload
-9. **Payment routes are stubs** — orders can be created but payment never actually processed
-10. **No HTTPS/CORS origin restrictions** — CORS is wide open (`cors()` with no config)
-
-### Build/Runtime (Not Verified — no run attempted)
-- Tailwind v4 + PostCSS configured correctly for Vite
-- No TypeScript — runtime errors caught only by linter (Oxlint)
-- No test framework installed
+1. **Multi-artisan orders have no per-item fulfillment.** An order spans products from several artisans but carries a single `orderStatus` (no per-line artisan status, split shipments, or partial delivery).
+2. **Workshop bookings are never charged.** `workshop_bookings.paymentStatus` stays `pending`; no Razorpay flow for bookings.
+3. **Donations are record-only.** `POST /donations` creates `pending`; the public feed/total only counts `completed`, so a new donation does not appear until a payment completes — and no payment step exists for donations in the UI ("CraftVeda does not process online payments" is stated on the page). Razorpay `referenceType: 'donation'` exists in the backend but is unused by the frontend.
+4. **Razorpay test keys optional.** Without `RAZORPAY_KEY_ID/SECRET`, online payment methods return 500 "Razorpay is not configured"; **COD works fully without keys**.
+5. **No image upload UI.** `multer`/`cloudinary` are installed but not wired; product `images[]` are strings entered manually. Nodemailer (password reset e-mail) and Google OAuth are not implemented. Certificate **generation** exists only as `POST /api/certificates/generate` (no UI button) — the UI only *verifies* certificates.
+6. **Backend `npm run lint`** was `eslint src/` with eslint not installed — **fixed in Step 9** to use oxlint (same linter as the frontend).
+7. **Frontend oxlint warnings (48):** mostly `react(set-state-in-effect)` and one `Date.now()` in render — warnings only, 0 errors, exit code 0.
+8. **Single-file bundle (720 kB):** no code-splitting; Vite prints a chunk-size warning.
+9. **Rate limiting is per-IP, not per-user**; production still needs a strong `JWT_SECRET` and real Razorpay test keys.
 
 ---
 
-## 8. Most Recent Changes (Inferred from Code)
-- Full project scaffolding complete (all 12 models, 13 routes, 18 pages)
-- Tailwind v4 migration (using `@theme` directive, `@tailwindcss/postcss`)
-- React 19 + React Router v7 + Vite 8
-- Artisan application approval workflow (full create/approve/reject flow)
-- Workshop booking system
-- Certificate generation with QR codes
-- Donation system with stats aggregation
+## 8. History (commits)
 
----
-
-## 9. What Currently Works (If Run)
-Assuming MongoDB is running locally on port 27017:
-- ✅ Backend starts on port 5000
-- ✅ All API routes respond correctly
-- ✅ User registration + login + JWT auth
-- ✅ Product CRUD (admin creates, public reads)
-- ✅ Artisan listing + profiles
-- ✅ Workshop listing + booking
-- ✅ Order creation + listing + cancellation
-- ✅ Reviews, donations, GI tags, craft stories — all CRUD
-- ✅ Certificate generation + verification
-- ✅ Admin dashboard stats + user management
-- ✅ Frontend renders on port 3000 with proxy to backend
-- ✅ All 18 pages render with full UI
-
-**What WON'T work without fixes:**
-- `npm run seed-admin` — wrong env var name
-- Workshop `my-bookings` — route shadowed by `/:id`
-- File uploads (Cloudinary/Multer not wired)
-- Payments (stubs)
-- Password reset (no route)
-- Google OAuth (no backend)
-
----
-
-## 10. What's Missing for Completion
-
-### Critical (Must Fix)
-1. Fix `seedAdmin.js` env var (`MONGODB_URI` → `MONGO_URI`)
-2. Fix workshop routes ordering (`/my-bookings` before `/:id`)
-3. Add input validation to all routes (express-validator)
-4. Wire up Cloudinary + Multer for image uploads
-5. Implement payment gateway (Razorpay/Stripe)
-6. Add CORS origin configuration for production
-7. Change JWT_SECRET for production
-
-### Important
-8. Password reset flow (email + token)
-9. Cart backend persistence (save/load cart)
-10. Wishlist backend persistence
-11. Admin order management (list, update status)
-12. Admin product management UI
-13. Seed data script (sample products, artisans, workshops)
-14. Email notifications (order confirmation, application status)
-15. Google OAuth integration
-
-### Nice to Have
-16. Image upload UI component
-17. Rich text editor for craft stories
-18. Workshop video integration
-19. Real-time order tracking
-20. Analytics/reporting for admin
-21. Test suite (unit + integration)
-22. TypeScript migration
-23. Production deployment config (Docker, env vars)
-24. Rate limiting per-user (currently global)
-
----
-
-## 11. Recommended Next Steps (Priority Order)
-
-1. **Fix bugs:** `seedAdmin.js` env var, workshop route ordering, unused bcrypt import
-2. **Add validation:** express-validator to products, orders, workshops, artisan-applications routes
-3. **Wire Cloudinary + Multer:** Product image upload (backend + frontend)
-4. **Implement payments:** Razorpay/Stripe SDK integration
-5. **Add password reset:** Token-based flow with Nodemailer
-6. **Cart/Wishlist persistence:** Backend routes for User.cart and User.wishlist
-7. **Admin order management:** Routes + UI for order status updates
-8. **Seed data:** Script to populate sample products, artisans, workshops, GI tags
-9. **Security hardening:** CORS origins, rate limit per-user, helmet CSP config
-10. **CORS + production env:** `.env.production`, allowed origins, HTTPS
+| Commit | Step |
+|---|---|
+| `06c621d` | Steps 1–3A: scaffolding, auth, products, artisan pages |
+| `73cca85` | Step 3B: cart, checkout, orders, order detail |
+| `6907f78` | Fix: Razorpay retry inside modal now verifies payment |
+| `54309ce` | Step 4: reviews backend + UI, artisans pages (+ E2E) |
+| `88e438a` | Step 5: artisan dashboard, my products, my orders (+ E2E) |
+| `b084f76` | Step 6: workshops, artisan profile edit (+ E2E) |
+| `cc84a08` | Step 7: home, GI search, donate, about, verify, stories |
+| `202f267` | Step 8: admin dashboard charts (+ E2E) |
+| (Step 9) | README, `.env.example`, index-warning fix, doc merge, cleanup, full regression |

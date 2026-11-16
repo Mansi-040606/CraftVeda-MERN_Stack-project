@@ -5,7 +5,6 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import Artisan from '../models/Artisan.js';
 import ArtisanApplication from '../models/ArtisanApplication.js';
-import Workshop from '../models/Workshop.js';
 import Donation from '../models/Donation.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';

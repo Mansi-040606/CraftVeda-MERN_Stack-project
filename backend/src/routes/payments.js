@@ -71,7 +71,7 @@ router.post('/verify', protect, catchAsync(async (req, res) => {
   let razorpayOrder;
   try {
     razorpayOrder = await getRazorpay().orders.fetch(razorpay_order_id);
-  } catch (error) {
+  } catch {
     throw new ApiError(400, 'Invalid Razorpay order');
   }
 

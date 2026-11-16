@@ -31,7 +31,6 @@ const artisanApplicationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 artisanApplicationSchema.index({ status: 1 });
-artisanApplicationSchema.index({ user: 1 });
 
 const ArtisanApplication = mongoose.model('ArtisanApplication', artisanApplicationSchema);
 export default ArtisanApplication;

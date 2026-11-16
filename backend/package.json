@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "node --watch server.js",
         "start": "node server.js",
-        "lint": "eslint src/",
+        "lint": "oxlint src",
         "seed-admin": "node src/scripts/seedAdmin.js",
         "seed": "node seed.js"
     },
@@ -27,6 +27,7 @@
         "razorpay": "^2.9.8"
     },
     "devDependencies": {
-        "docx": "^9.8.1"
+        "docx": "^9.8.1",
+        "oxlint": "^1.93.0"
     }
 }
