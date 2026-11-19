@@ -96,11 +96,11 @@ function Donate() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      <div className="bg-amber-900 text-white py-20">
+    <div className="min-h-screen bg-cream">
+      <div className="bg-ink text-white py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">Preserve Heritage</h1>
-          <p className="text-amber-200 text-lg">
+          <p className="text-cream/75 text-lg">
             Your donation helps traditional artisans sustain their craft and pass it to future generations
           </p>
         </div>
@@ -108,24 +108,24 @@ function Donate() {
 
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-md p-8">
-            <h2 className="text-xl font-bold text-amber-900 mb-2">Make a Donation</h2>
+          <div className="bg-white rounded-sm border border-ink/10 p-8">
+            <h2 className="text-xl font-bold text-ink mb-2">Make a Donation</h2>
 
             {receipt ? (
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🙏</div>
-                <h3 className="text-2xl font-bold text-amber-900 mb-2">Thank you!</h3>
-                <p className="text-amber-700 mb-1">
+                <h3 className="text-2xl font-bold text-ink mb-2">Thank you!</h3>
+                <p className="text-terracotta-dark mb-1">
                   Your donation of <strong>{inr(receipt.amount)}</strong> has been recorded
                   {receipt.craftType ? ` for ${receipt.craftType} crafts` : ''}.
                 </p>
-                <p className="text-sm text-amber-600 mb-6 max-w-md mx-auto">
+                <p className="text-sm text-ink-soft mb-6 max-w-md mx-auto">
                   This is a record only — CraftVeda does not process online payments, so no money has been
                   deducted from your account.
                 </p>
                 <button
                   onClick={reset}
-                  className="bg-amber-700 text-white px-6 py-3 rounded-lg hover:bg-amber-800 transition font-semibold"
+                  className="bg-terracotta text-white px-6 py-3 rounded-sm hover:bg-terracotta-dark transition font-semibold"
                 >
                   Make another donation
                 </button>
@@ -133,31 +133,31 @@ function Donate() {
             ) : (
               <form onSubmit={submit}>
                 {!isAuthenticated ? (
-                  <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                  <div className="mb-6 bg-cream border border-ink/10 rounded-sm p-4 text-sm text-ink-soft">
                     Donations are recorded against your CraftVeda account.{' '}
-                    <Link to="/auth" className="font-semibold underline text-amber-700">
+                    <Link to="/auth" className="font-semibold underline text-terracotta-dark">
                       Sign in
                     </Link>{' '}
                     to donate.
                   </div>
                 ) : (
-                  <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                  <div className="mb-6 bg-cream border border-ink/10 rounded-sm p-4 text-sm text-ink-soft">
                     Recording this donation as <strong>{user?.name}</strong>.
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <label className="text-sm text-amber-800 font-medium mb-2 block">Select Amount</label>
+                  <label className="text-sm text-ink-soft font-medium mb-2 block">Select Amount</label>
                   <div className="flex flex-wrap gap-3">
                     {PRESETS.map((preset) => (
                       <button
                         key={preset}
                         type="button"
                         onClick={() => chooseAmount(preset)}
-                        className={`px-4 py-2 rounded-lg border-2 transition ${
+                        className={`px-4 py-2 rounded-sm border-2 transition ${
                           Number(amount) === preset
-                            ? 'border-amber-600 bg-amber-100 text-amber-900'
-                            : 'border-amber-200 text-amber-700 hover:border-amber-400'
+                            ? 'border-terracotta bg-parchment text-ink'
+                            : 'border-ink/10 text-terracotta-dark hover:border-terracotta'
                         }`}
                       >
                         {inr(preset)}
@@ -167,7 +167,7 @@ function Donate() {
                 </div>
 
                 <div className="mb-6">
-                  <label htmlFor="donation-amount" className="text-sm text-amber-800 font-medium mb-2 block">
+                  <label htmlFor="donation-amount" className="text-sm text-ink-soft font-medium mb-2 block">
                     Custom Amount
                   </label>
                   <input
@@ -177,8 +177,8 @@ function Donate() {
                     step="1"
                     value={amount}
                     onChange={(e) => chooseAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                    className={`w-full border rounded-lg px-4 py-3 text-lg ${
-                      amountError ? 'border-red-400' : 'border-amber-300'
+                    className={`w-full border rounded-sm px-4 py-3 text-lg ${
+                      amountError ? 'border-red-400' : 'border-ink/15'
                     }`}
                     placeholder="Enter amount"
                   />
@@ -186,14 +186,14 @@ function Donate() {
                 </div>
 
                 <div className="mb-6">
-                  <label htmlFor="donation-craft" className="text-sm text-amber-800 font-medium mb-2 block">
+                  <label htmlFor="donation-craft" className="text-sm text-ink-soft font-medium mb-2 block">
                     Craft Type (Optional)
                   </label>
                   <select
                     id="donation-craft"
                     value={craftType}
                     onChange={(e) => setCraftType(e.target.value)}
-                    className="w-full border border-amber-300 rounded-lg px-4 py-3"
+                    className="w-full border border-ink/15 rounded-sm px-4 py-3"
                   >
                     <option value="">Support all crafts</option>
                     {CATEGORIES.map((cat) => (
@@ -205,27 +205,27 @@ function Donate() {
                 </div>
 
                 <div className="mb-6">
-                  <label htmlFor="donation-message" className="text-sm text-amber-800 font-medium mb-2 block">
+                  <label htmlFor="donation-message" className="text-sm text-ink-soft font-medium mb-2 block">
                     Message (Optional)
                   </label>
                   <textarea
                     id="donation-message"
-                    className="w-full border border-amber-300 rounded-lg px-4 py-3"
+                    className="w-full border border-ink/15 rounded-sm px-4 py-3"
                     rows="3"
                     maxLength={500}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Leave a message of support..."
                   />
-                  <p className="text-xs text-amber-600 mt-1">{message.length}/500</p>
+                  <p className="text-xs text-ink-soft mt-1">{message.length}/500</p>
                 </div>
 
-                <label className="flex items-center gap-2 mb-6 text-sm text-amber-800">
+                <label className="flex items-center gap-2 mb-6 text-sm text-ink-soft">
                   <input
                     type="checkbox"
                     checked={isAnonymous}
                     onChange={(e) => setIsAnonymous(e.target.checked)}
-                    className="accent-amber-700"
+                    className="accent-terracotta"
                   />
                   Show my name as “Anonymous”
                 </label>
@@ -233,12 +233,12 @@ function Donate() {
                 <button
                   type="submit"
                   disabled={submitting || !isAuthenticated}
-                  className="w-full bg-amber-700 text-white py-4 rounded-lg hover:bg-amber-800 transition font-semibold text-lg disabled:opacity-50"
+                  className="w-full bg-terracotta text-white py-4 rounded-sm hover:bg-terracotta-dark transition font-semibold text-lg disabled:opacity-50"
                 >
                   {submitting ? 'Recording…' : `Donate ${inr(Number(amount) || 0)}`}
                 </button>
 
-                <p className="text-center text-sm text-amber-600 mt-4">
+                <p className="text-center text-sm text-ink-soft mt-4">
                   Donations are recorded in CraftVeda — no online payment is processed, so nothing is charged.
                 </p>
               </form>
@@ -247,15 +247,15 @@ function Donate() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold text-amber-900 mb-4">Donation impact</h3>
+          <div className="bg-white rounded-sm border border-ink/10 p-6">
+            <h3 className="font-bold text-ink mb-4">Donation impact</h3>
             {impact.loading && <Loading />}
             {!impact.loading && impact.error && (
               <div>
                 <ErrorState message={impact.error} />
                 <button
                   onClick={loadImpact}
-                  className="w-full mt-3 px-4 py-2 bg-amber-700 text-white rounded-lg text-sm"
+                  className="w-full mt-3 px-4 py-2 bg-terracotta text-white rounded-sm text-sm"
                 >
                   Retry
                 </button>
@@ -264,21 +264,21 @@ function Donate() {
             {!impact.loading && !impact.error && (
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-amber-900">
+                  <p className="text-2xl font-bold text-ink">
                     {impact.totalAmount === null ? '—' : inr(impact.totalAmount)}
                   </p>
-                  <p className="text-sm text-amber-600">Raised so far</p>
+                  <p className="text-sm text-ink-soft">Raised so far</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-amber-900">{impact.total}</p>
-                  <p className="text-sm text-amber-600">Donations</p>
+                  <p className="text-2xl font-bold text-ink">{impact.total}</p>
+                  <p className="text-sm text-ink-soft">Donations</p>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold text-amber-900 mb-4">Recent donations</h3>
+          <div className="bg-white rounded-sm border border-ink/10 p-6">
+            <h3 className="font-bold text-ink mb-4">Recent donations</h3>
             {impact.loading && <Loading />}
             {!impact.loading && impact.error && <ErrorState message={impact.error} />}
             {!impact.loading && !impact.error && impact.donations.length === 0 && (
@@ -287,19 +287,19 @@ function Donate() {
             {!impact.loading && !impact.error && impact.donations.length > 0 && (
               <ul className="space-y-4">
                 {impact.donations.map((donation) => (
-                  <li key={donation._id} className="border-b border-amber-100 pb-3 last:border-0 last:pb-0">
+                  <li key={donation._id} className="border-b border-ink/10 pb-3 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-amber-900 text-sm">
+                      <span className="font-semibold text-ink text-sm">
                         {donation.isAnonymous ? 'Anonymous' : donation.donor?.name || 'A supporter'}
                       </span>
-                      <span className="font-bold text-amber-800 text-sm">{inr(donation.amount)}</span>
+                      <span className="font-bold text-ink-soft text-sm">{inr(donation.amount)}</span>
                     </div>
-                    <p className="text-xs text-amber-600 mt-1">
+                    <p className="text-xs text-ink-soft mt-1">
                       {donation.craftType ? `${donation.craftType} · ` : ''}
                       {formatDate(donation.createdAt)}
                     </p>
                     {donation.message && (
-                      <p className="text-sm text-amber-700 mt-1 italic">“{donation.message}”</p>
+                      <p className="text-sm text-terracotta-dark mt-1 italic">“{donation.message}”</p>
                     )}
                   </li>
                 ))}

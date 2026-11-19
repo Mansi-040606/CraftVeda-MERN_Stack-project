@@ -11,6 +11,7 @@ import GITag from './src/models/GITag.js';
 import CraftStory from './src/models/CraftStory.js';
 import Certificate from './src/models/Certificate.js';
 import QRCode from 'qrcode';
+import { isCloudinaryConfigured, uploadImageBuffer } from './src/utils/images.js';
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/craftveda';
 
@@ -177,6 +178,143 @@ const craftStoriesData = [
   }
 ];
 
+// --- placeholder artwork for Cloudinary (SVG — no image dependencies) -------
+// Fixed public_ids under craftveda/seed mean a re-seed overwrites the same
+// assets instead of creating duplicates. Everything is skipped without
+// credentials, so `npm run seed` still works offline / unconfigured.
+const SEED_FOLDER = 'craftveda/seed';
+
+const SEED_PALETTES = [
+  { bg1: '#B4553C', bg2: '#E0A526', ink: '#FAF6EF', accent: '#2E3A6E' },
+  { bg1: '#2E3A6E', bg2: '#4A5AA0', ink: '#FAF6EF', accent: '#E0A526' },
+  { bg1: '#FAF6EF', bg2: '#EFE3D0', ink: '#2B1A12', accent: '#B4553C' }
+];
+
+const escapeXml = (value) =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+const productArtwork = (title, variant) => {
+  const p = SEED_PALETTES[variant % SEED_PALETTES.length];
+  const label = escapeXml(title.length > 30 ? `${title.slice(0, 29)}…` : title);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="${p.bg1}"/><stop offset="1" stop-color="${p.bg2}"/>
+</linearGradient>
+<pattern id="d" width="44" height="44" patternUnits="userSpaceOnUse">
+<circle cx="8" cy="8" r="3" fill="${p.ink}" opacity="0.16"/>
+</pattern>
+</defs>
+<rect width="800" height="1000" fill="url(#g)"/>
+<rect width="800" height="1000" fill="url(#d)"/>
+<path d="M150 780 V430 a250 250 0 0 1 500 0 V780 Z" fill="${p.ink}" opacity="0.14"/>
+<path d="M150 780 V430 a250 250 0 0 1 500 0 V780 Z" fill="none" stroke="${p.ink}" stroke-width="9" opacity="0.9"/>
+<path d="M235 780 V455 a165 165 0 0 1 330 0 V780 Z" fill="none" stroke="${p.ink}" stroke-width="4" opacity="0.6"/>
+<circle cx="400" cy="355" r="74" fill="${p.accent}" opacity="0.92"/>
+<circle cx="400" cy="355" r="74" fill="none" stroke="${p.ink}" stroke-width="6"/>
+<circle cx="400" cy="355" r="44" fill="none" stroke="${p.ink}" stroke-width="4" opacity="0.8"/>
+<rect x="150" y="780" width="500" height="6" fill="${p.ink}" opacity="0.85"/>
+<text x="400" y="866" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="42" fill="${p.ink}">${label}</text>
+<text x="400" y="924" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" letter-spacing="8" fill="${p.ink}" opacity="0.75">CRAFTVEDA</text>
+</svg>`;
+};
+
+const profileArtwork = (initials, variant) => {
+  const p = SEED_PALETTES[variant % SEED_PALETTES.length];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="${p.bg1}"/><stop offset="1" stop-color="${p.bg2}"/>
+</linearGradient></defs>
+<rect width="600" height="600" fill="url(#g)"/>
+<circle cx="300" cy="300" r="210" fill="${p.ink}" opacity="0.14"/>
+<circle cx="300" cy="300" r="210" fill="none" stroke="${p.ink}" stroke-width="8" opacity="0.9"/>
+<text x="300" y="345" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="150" fill="${p.ink}">${escapeXml(initials)}</text>
+</svg>`;
+};
+
+const coverArtwork = (label, variant) => {
+  const p = SEED_PALETTES[variant % SEED_PALETTES.length];
+  const text = escapeXml(label.length > 34 ? `${label.slice(0, 33)}…` : label);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="${p.bg1}"/><stop offset="1" stop-color="${p.bg2}"/>
+</linearGradient>
+<pattern id="d" width="50" height="50" patternUnits="userSpaceOnUse">
+<circle cx="10" cy="10" r="3.5" fill="${p.ink}" opacity="0.18"/>
+</pattern>
+</defs>
+<rect width="1200" height="500" fill="url(#g)"/>
+<rect width="1200" height="500" fill="url(#d)"/>
+<path d="M860 500 V250 a140 140 0 0 1 280 0 V500 Z" fill="${p.ink}" opacity="0.16"/>
+<path d="M860 500 V250 a140 140 0 0 1 280 0 V500 Z" fill="none" stroke="${p.ink}" stroke-width="7" opacity="0.85"/>
+<circle cx="180" cy="140" r="70" fill="none" stroke="${p.ink}" stroke-width="6" opacity="0.8"/>
+<text x="80" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="64" fill="${p.ink}">${text}</text>
+<text x="84" y="360" font-family="Helvetica, Arial, sans-serif" font-size="22" letter-spacing="9" fill="${p.ink}" opacity="0.75">HERITAGE CRAFT STUDIO</text>
+</svg>`;
+};
+
+const seedImages = async (products, artisanProfiles) => {
+  if (!isCloudinaryConfigured()) {
+    console.log('  Cloudinary not configured — seed images skipped');
+    return;
+  }
+
+  console.log('  uploading seed images to Cloudinary (folder craftveda/seed)');
+
+  // 3 images per product, fixed ids so re-seeding never duplicates assets.
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i];
+    if ((product.images || []).length >= 3) continue;
+    const urls = [];
+    for (let n = 1; n <= 3; n++) {
+      const { secure_url } = await uploadImageBuffer(
+        Buffer.from(productArtwork(product.name, i + n), 'utf8'),
+        { folder: SEED_FOLDER, publicId: `product-${i}-${n}` }
+      );
+      urls.push(secure_url);
+    }
+    product.images = urls;
+    await product.save();
+    console.log(`  seeded 3 images for ${product.name}`);
+  }
+
+  // Optional profile + cover per artisan (also fixed ids).
+  for (let i = 0; i < artisanProfiles.length; i++) {
+    const profile = artisanProfiles[i];
+    if (profile.profileImage && profile.coverImage) continue;
+
+    if (!profile.profileImage) {
+      const initials = profile.businessName
+        .split(/\s+/)
+        .map((word) => word[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+      const { secure_url } = await uploadImageBuffer(
+        Buffer.from(profileArtwork(initials, i), 'utf8'),
+        { folder: SEED_FOLDER, publicId: `artisan-${i}-profile` }
+      );
+      profile.profileImage = secure_url;
+    }
+
+    if (!profile.coverImage) {
+      const { secure_url } = await uploadImageBuffer(
+        Buffer.from(coverArtwork(profile.businessName, i + 1), 'utf8'),
+        { folder: SEED_FOLDER, publicId: `artisan-${i}-cover` }
+      );
+      profile.coverImage = secure_url;
+    }
+
+    await profile.save();
+    console.log(`  seeded profile images for ${profile.businessName}`);
+  }
+};
+
 const ensureUser = async (data) => {
   let user = await User.findOne({ email: data.email });
   if (!user) {
@@ -244,6 +382,9 @@ const seed = async () => {
     }
     products.push(product);
   }
+
+  // Images come after the product documents exist (create first, upload after).
+  await seedImages(products, artisanProfiles);
 
   if ((await Order.countDocuments()) === 0) {
     for (let i = 0; i < 10; i++) {

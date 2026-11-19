@@ -4,6 +4,7 @@ import { Loading, ErrorState } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { workshopService } from '../../services/workshopService';
 import { useAuth } from '../../context/AuthContext';
+import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
 
 const formatDate = (value) =>
@@ -129,7 +130,7 @@ function WorkshopDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
+      <div className="min-h-screen bg-cream py-8">
         <div className="max-w-5xl mx-auto px-4"><Loading /></div>
       </div>
     );
@@ -137,11 +138,11 @@ function WorkshopDetail() {
 
   if (error || !workshop) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
+      <div className="min-h-screen bg-cream py-8">
         <div className="max-w-5xl mx-auto px-4">
           <ErrorState message={error || 'Workshop not found'} />
           <div className="text-center mt-4">
-            <Link to="/workshops" className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <Link to="/workshops" className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
               Back to Workshops
             </Link>
           </div>
@@ -151,23 +152,29 @@ function WorkshopDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-5xl mx-auto px-4">
-        <Link to="/workshops" className="text-sm text-amber-700 hover:text-amber-900">← Back to Workshops</Link>
+        <Link to="/workshops" className="text-sm text-terracotta-dark hover:text-ink">← Back to Workshops</Link>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-          <div className="md:col-span-2 bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-amber-100 h-56 flex items-center justify-center text-7xl overflow-hidden">
+          <div className="md:col-span-2 bg-white rounded-sm border border-ink/10 overflow-hidden">
+            <div className="bg-parchment h-56 flex items-center justify-center text-7xl overflow-hidden">
               {workshop.images?.[0] ? (
-                <img src={workshop.images[0]} alt={workshop.title} className="w-full h-full object-cover" />
+                <ProductImage
+                  src={workshop.images?.[0]}
+                  alt={workshop.title}
+                  frame="h-full w-full"
+                  w={960}
+                  h={540}
+                />
               ) : (
                 <span>🧵</span>
               )}
             </div>
             <div className="p-6">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <h1 className="text-2xl font-bold text-amber-900">{workshop.title}</h1>
-                <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">
+                <h1 className="text-2xl font-bold text-ink">{workshop.title}</h1>
+                <span className="text-xs px-2 py-1 rounded-full bg-parchment text-ink-soft">
                   {workshop.level}
                 </span>
               </div>
@@ -175,29 +182,29 @@ function WorkshopDetail() {
               {workshop.artisan && (
                 <Link
                   to={`/artisan/${workshop.artisan._id}`}
-                  className="inline-block mt-2 text-amber-700 hover:text-amber-900 font-medium"
+                  className="inline-block mt-2 text-terracotta-dark hover:text-ink font-medium"
                 >
                   by {workshop.artisan.businessName}
                   {workshop.artisan.rating > 0 ? ` · ${Number(workshop.artisan.rating).toFixed(1)} ★` : ''}
                 </Link>
               )}
 
-              <p className="text-sm text-amber-600 mt-1">
+              <p className="text-sm text-ink-soft mt-1">
                 ⏱️ {workshop.duration} {workshop.durationUnit} · 🌐 {workshop.language || 'English'} ·
                 {' '}{workshop.location?.type || 'online'}
                 {workshop.location?.city ? ` · ${workshop.location.city}` : ''}
                 {workshop.location?.state ? `, ${workshop.location.state}` : ''}
               </p>
               {workshop.location?.address && (
-                <p className="text-sm text-amber-600 mt-1">📍 {workshop.location.address}</p>
+                <p className="text-sm text-ink-soft mt-1">📍 {workshop.location.address}</p>
               )}
 
-              <p className="text-amber-800 mt-4 whitespace-pre-line">{workshop.description}</p>
+              <p className="text-ink-soft mt-4 whitespace-pre-line">{workshop.description}</p>
 
               {workshop.materials?.length > 0 && (
                 <div className="mt-6">
-                  <h2 className="font-bold text-amber-900 mb-2">Materials</h2>
-                  <ul className="space-y-1 text-sm text-amber-700">
+                  <h2 className="font-bold text-ink mb-2">Materials</h2>
+                  <ul className="space-y-1 text-sm text-terracotta-dark">
                     {workshop.materials.map((material, i) => (
                       <li key={i}>
                         • <span className="font-medium">{material.name}</span>
@@ -210,8 +217,8 @@ function WorkshopDetail() {
 
               {upcomingSlots.length > 0 && (
                 <div className="mt-6">
-                  <h2 className="font-bold text-amber-900 mb-2">Upcoming Sessions</h2>
-                  <ul className="space-y-1 text-sm text-amber-700">
+                  <h2 className="font-bold text-ink mb-2">Upcoming Sessions</h2>
+                  <ul className="space-y-1 text-sm text-terracotta-dark">
                     {upcomingSlots.map((slot) => (
                       <li key={slot.index}>
                         📅 {formatDate(slot.date)} · {slot.startTime} – {slot.endTime}
@@ -223,23 +230,23 @@ function WorkshopDetail() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 h-fit">
-            <p className="text-3xl font-bold text-amber-900">{inr(workshop.price)}</p>
-            <p className="text-sm text-amber-600 mt-1">per participant · pay at the venue</p>
+          <div className="bg-white rounded-sm border border-ink/10 p-6 h-fit">
+            <p className="text-3xl font-bold text-ink">{inr(workshop.price)}</p>
+            <p className="text-sm text-ink-soft mt-1">per participant · pay at the venue</p>
 
-            <div className="mt-4 text-sm text-amber-800">
+            <div className="mt-4 text-sm text-ink-soft">
               {seatsLeft > 0 ? (
                 <span className="text-green-700 font-medium">{seatsLeft} seat{seatsLeft === 1 ? '' : 's'} left</span>
               ) : (
                 <span className="text-red-600 font-medium">Sold out</span>
               )}
-              <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+              <div className="w-full bg-linen rounded-full h-2 mt-2">
                 <div
-                  className="bg-amber-600 h-2 rounded-full"
+                  className="bg-terracotta h-2 rounded-full"
                   style={{ width: `${Math.min(100, ((workshop.currentParticipants || 0) / (workshop.maxParticipants || 1)) * 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-amber-500 mt-1">
+              <p className="text-xs text-ink-faint mt-1">
                 {workshop.currentParticipants || 0} / {workshop.maxParticipants} enrolled
               </p>
             </div>
@@ -250,8 +257,8 @@ function WorkshopDetail() {
 
             {isOwnWorkshop && (
               <div className="mt-4">
-                <p className="text-sm text-amber-700">This is your workshop.</p>
-                <Link to="/artisan/workshops" className="inline-block mt-2 text-sm text-amber-700 hover:underline">
+                <p className="text-sm text-terracotta-dark">This is your workshop.</p>
+                <Link to="/artisan/workshops" className="inline-block mt-2 text-sm text-terracotta-dark hover:underline">
                   Manage it in My Workshops →
                 </Link>
               </div>
@@ -260,12 +267,12 @@ function WorkshopDetail() {
             {canBook && (
               <form onSubmit={book} className="mt-4 space-y-3">
                 {upcomingSlots.length > 0 ? (
-                  <label className="block text-sm text-amber-800">
+                  <label className="block text-sm text-ink-soft">
                     Session
                     <select
                       value={slotIndex}
                       onChange={(e) => setSlotIndex(e.target.value)}
-                      className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                      className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
                     >
                       {upcomingSlots.map((slot) => (
                         <option key={slot.index} value={slot.index}>
@@ -276,7 +283,7 @@ function WorkshopDetail() {
                   </label>
                 ) : (
                   <>
-                    <label className="block text-sm text-amber-800">
+                    <label className="block text-sm text-ink-soft">
                       Date *
                       <input
                         type="date"
@@ -284,40 +291,40 @@ function WorkshopDetail() {
                         min={tomorrow}
                         value={customDate}
                         onChange={(e) => setCustomDate(e.target.value)}
-                        className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                        className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
                       />
                     </label>
                     <div className="grid grid-cols-2 gap-3">
-                      <label className="block text-sm text-amber-800">
+                      <label className="block text-sm text-ink-soft">
                         Start *
                         <input
                           type="time"
                           required
                           value={startTime}
                           onChange={(e) => setStartTime(e.target.value)}
-                          className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                          className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
                         />
                       </label>
-                      <label className="block text-sm text-amber-800">
+                      <label className="block text-sm text-ink-soft">
                         End *
                         <input
                           type="time"
                           required
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
-                          className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                          className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
                         />
                       </label>
                     </div>
                   </>
                 )}
 
-                <label className="block text-sm text-amber-800">
+                <label className="block text-sm text-ink-soft">
                   Participants
                   <select
                     value={participants}
                     onChange={(e) => setParticipants(Number(e.target.value))}
-                    className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                    className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
                   >
                     {Array.from({ length: seatsLeft }, (_, i) => i + 1).map((n) => (
                       <option key={n} value={n}>{n}</option>
@@ -325,14 +332,14 @@ function WorkshopDetail() {
                   </select>
                 </label>
 
-                <p className="text-sm text-amber-700">
+                <p className="text-sm text-terracotta-dark">
                   Total: <span className="font-bold">{inr(workshop.price * Number(participants || 0))}</span>
                 </p>
 
                 <button
                   type="submit"
                   disabled={booking}
-                  className="w-full px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition disabled:opacity-50"
+                  className="w-full px-4 py-2 bg-terracotta text-white rounded-sm text-sm hover:bg-terracotta-dark transition disabled:opacity-50"
                 >
                   {booking ? 'Booking...' : isAuthenticated ? 'Book Now' : 'Sign in to Book'}
                 </button>

@@ -40,11 +40,11 @@ function ReviewForm({ productId, onSubmitted }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border border-amber-200 rounded-lg p-5 space-y-4">
-      <h3 className="font-bold text-amber-900">Write a Review</h3>
+    <form onSubmit={handleSubmit} className="border border-ink/10 rounded-sm p-5 space-y-4">
+      <h3 className="font-bold text-ink">Write a Review</h3>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm text-amber-800 font-medium">Your rating:</span>
+        <span className="text-sm text-ink-soft font-medium">Your rating:</span>
         <StarRating value={rating} onChange={setRating} size="text-2xl" />
       </div>
 
@@ -54,7 +54,7 @@ function ReviewForm({ productId, onSubmitted }) {
         onChange={(e) => setTitle(e.target.value)}
         maxLength={100}
         placeholder="Title (optional)"
-        className="w-full border border-amber-300 rounded-lg px-3 py-2 text-amber-900 placeholder-amber-400 focus:outline-none focus:border-amber-600"
+        className="w-full border border-ink/15 rounded-sm px-3 py-2 text-ink placeholder-ink-faint focus:outline-none focus:border-terracotta"
       />
 
       <div>
@@ -64,8 +64,8 @@ function ReviewForm({ productId, onSubmitted }) {
           maxLength={1000}
           rows={4}
           placeholder="Share your experience with this product (5–1000 characters)"
-          className={`w-full border rounded-lg px-3 py-2 text-amber-900 placeholder-amber-400 focus:outline-none focus:border-amber-600 ${
-            commentTooShort ? 'border-red-400' : 'border-amber-300'
+          className={`w-full border rounded-sm px-3 py-2 text-ink placeholder-ink-faint focus:outline-none focus:border-terracotta ${
+            commentTooShort ? 'border-red-400' : 'border-ink/15'
           }`}
         />
         {commentTooShort && (
@@ -76,7 +76,7 @@ function ReviewForm({ productId, onSubmitted }) {
       <button
         type="submit"
         disabled={submitting || rating < 1 || comment.trim().length < 5}
-        className="bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition font-semibold disabled:bg-amber-300 disabled:cursor-not-allowed"
+        className="bg-terracotta text-white px-6 py-2 rounded-sm hover:bg-terracotta-dark transition font-semibold disabled:bg-linen disabled:cursor-not-allowed"
       >
         {submitting ? 'Posting...' : 'Post Review'}
       </button>

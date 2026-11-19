@@ -53,7 +53,7 @@ function AdminWorkshops() {
 
   return (
     <AdminShell title="Workshops">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input
           value={search}
           onChange={(e) => {
@@ -62,12 +62,12 @@ function AdminWorkshops() {
           }}
           onKeyDown={(e) => e.key === 'Enter' && load()}
           placeholder="Search workshops"
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-48"
         />
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Search
         </button>
-        <span className="text-sm text-amber-600">{total} workshops</span>
+        <span className="text-sm text-ink-soft">{total} workshops</span>
       </div>
 
       {loading && <Loading />}
@@ -75,10 +75,10 @@ function AdminWorkshops() {
       {!loading && !error && workshops.length === 0 && <EmptyState message="No workshops found" />}
 
       {!loading && !error && workshops.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Workshop</th>
                 <th className="p-3">Artisan</th>
                 <th className="p-3">Level</th>
@@ -89,15 +89,15 @@ function AdminWorkshops() {
             </thead>
             <tbody>
               {workshops.map((workshop) => (
-                <tr key={workshop._id} className="border-b border-amber-50">
-                  <td className="p-3 font-medium text-amber-900">
+                <tr key={workshop._id} className="border-b border-ink/5">
+                  <td className="p-3 font-medium text-ink">
                     {workshop.title}
-                    <span className="block text-xs text-amber-500">{workshop.craftType}</span>
+                    <span className="block text-xs text-ink-faint">{workshop.craftType}</span>
                   </td>
-                  <td className="p-3 text-amber-700">{workshop.artisan?.businessName || '—'}</td>
-                  <td className="p-3 text-amber-700">{workshop.level}</td>
-                  <td className="p-3 text-amber-900">{inr(workshop.price)}</td>
-                  <td className="p-3 text-amber-700">{workshop.currentParticipants}/{workshop.maxParticipants}</td>
+                  <td className="p-3 text-terracotta-dark">{workshop.artisan?.businessName || '—'}</td>
+                  <td className="p-3 text-terracotta-dark">{workshop.level}</td>
+                  <td className="p-3 text-ink">{inr(workshop.price)}</td>
+                  <td className="p-3 text-terracotta-dark">{workshop.currentParticipants}/{workshop.maxParticipants}</td>
                   <td className="p-3">
                     <button
                       onClick={() => toggle(workshop)}

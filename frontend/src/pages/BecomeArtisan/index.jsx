@@ -79,23 +79,23 @@ const BecomeArtisan = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-amber-900 text-lg">Loading...</div>
+        <div className="text-ink text-lg">Loading...</div>
       </div>
     );
   }
 
   if (existingApplication) {
     return (
-      <div className="min-h-screen bg-amber-50 py-12 px-4">
+      <div className="min-h-screen bg-cream py-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-xl shadow-md p-8">
+          <div className="bg-white rounded-sm border border-ink/10 p-8">
             <div className="text-center mb-6">
               <span className="text-5xl">🏺</span>
-              <h1 className="text-2xl font-bold text-amber-900 mt-4">Artisan Application</h1>
+              <h1 className="text-2xl font-bold text-ink mt-4">Artisan Application</h1>
             </div>
 
-            <div className="bg-amber-50 rounded-lg p-6 mb-6">
-              <h3 className="font-semibold text-amber-900 mb-2">Your Application Status</h3>
+            <div className="bg-cream rounded-sm p-6 mb-6">
+              <h3 className="font-semibold text-ink mb-2">Your Application Status</h3>
               <p className="text-lg">
                 Status: <span className={`font-bold ${
                   existingApplication.status === 'PENDING' ? 'text-yellow-600' :
@@ -104,13 +104,13 @@ const BecomeArtisan = () => {
                 }`}>{existingApplication.status}</span>
               </p>
               {existingApplication.adminNotes && (
-                <p className="mt-2 text-amber-800">Notes: {existingApplication.adminNotes}</p>
+                <p className="mt-2 text-ink-soft">Notes: {existingApplication.adminNotes}</p>
               )}
             </div>
 
             <button
               onClick={() => navigate('/customer/dashboard')}
-              className="w-full bg-amber-700 text-white py-3 rounded-lg hover:bg-amber-800 transition font-semibold"
+              className="w-full bg-terracotta text-white py-3 rounded-sm hover:bg-terracotta-dark transition font-semibold"
             >
               Back to Dashboard
             </button>
@@ -121,75 +121,75 @@ const BecomeArtisan = () => {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 py-12 px-4">
+    <div className="min-h-screen bg-cream py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-md p-8">
+        <div className="bg-white rounded-sm border border-ink/10 p-8">
           <div className="text-center mb-8">
             <span className="text-5xl">🏺</span>
-            <h1 className="text-2xl font-bold text-amber-900 mt-4">Become an Artisan</h1>
-            <p className="text-amber-700 mt-2">Share your craft with the world</p>
+            <h1 className="text-2xl font-bold text-ink mt-4">Become an Artisan</h1>
+            <p className="text-terracotta-dark mt-2">Share your craft with the world</p>
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm mb-6">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-sm text-amber-800 font-medium">Business Name *</label>
+              <label className="text-sm text-ink-soft font-medium">Business Name *</label>
               <input
                 type="text"
                 name="businessName"
                 value={formData.businessName}
                 onChange={handleChange}
                 required
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="Your craft business name"
               />
             </div>
 
             <div>
-              <label className="text-sm text-amber-800 font-medium">Description *</label>
+              <label className="text-sm text-ink-soft font-medium">Description *</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 required
                 rows={4}
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="Tell us about your craft and business"
               />
             </div>
 
             <div>
-              <label className="text-sm text-amber-800 font-medium">Craft Types * (comma-separated)</label>
+              <label className="text-sm text-ink-soft font-medium">Craft Types * (comma-separated)</label>
               <input
                 type="text"
                 name="craftTypes"
                 value={formData.craftTypes}
                 onChange={handleChange}
                 required
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="e.g., Pottery, Handloom, Woodwork"
               />
             </div>
 
             <div>
-              <label className="text-sm text-amber-800 font-medium">Skills (comma-separated)</label>
+              <label className="text-sm text-ink-soft font-medium">Skills (comma-separated)</label>
               <input
                 type="text"
                 name="skills"
                 value={formData.skills}
                 onChange={handleChange}
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="e.g., Wheel throwing, Natural dyes"
               />
             </div>
 
             <div>
-              <label className="text-sm text-amber-800 font-medium">Years of Experience *</label>
+              <label className="text-sm text-ink-soft font-medium">Years of Experience *</label>
               <input
                 type="number"
                 name="yearsOfExperience"
@@ -197,70 +197,70 @@ const BecomeArtisan = () => {
                 onChange={handleChange}
                 required
                 min="0"
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="How many years have you been crafting?"
               />
             </div>
 
-            <div className="border-t border-amber-200 pt-6">
-              <h3 className="font-semibold text-amber-900 mb-4">Location</h3>
+            <div className="border-t border-ink/10 pt-6">
+              <h3 className="font-semibold text-ink mb-4">Location</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-amber-800 font-medium">Address</label>
+                  <label className="text-sm text-ink-soft font-medium">Address</label>
                   <input
                     type="text"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                    className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-amber-800 font-medium">City</label>
+                    <label className="text-sm text-ink-soft font-medium">City</label>
                     <input
                       type="text"
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
-                      className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                      className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-amber-800 font-medium">State</label>
+                    <label className="text-sm text-ink-soft font-medium">State</label>
                     <input
                       type="text"
                       name="state"
                       value={formData.state}
                       onChange={handleChange}
-                      className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                      className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm text-amber-800 font-medium">Pincode</label>
+                  <label className="text-sm text-ink-soft font-medium">Pincode</label>
                   <input
                     type="text"
                     name="pincode"
                     value={formData.pincode}
                     onChange={handleChange}
-                    className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                    className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="text-sm text-amber-800 font-medium">Portfolio URL</label>
+              <label className="text-sm text-ink-soft font-medium">Portfolio URL</label>
               <input
                 type="url"
                 name="portfolio"
                 value={formData.portfolio}
                 onChange={handleChange}
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="Link to your website or social media"
               />
             </div>
@@ -268,7 +268,7 @@ const BecomeArtisan = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-amber-700 text-white py-3 rounded-lg hover:bg-amber-800 transition font-semibold disabled:opacity-50"
+              className="w-full bg-terracotta text-white py-3 rounded-sm hover:bg-terracotta-dark transition font-semibold disabled:opacity-50"
             >
               {submitting ? 'Submitting...' : 'Submit Application'}
             </button>

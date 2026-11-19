@@ -95,6 +95,8 @@ CraftVeda/
 - **MongoDB** Community running locally on port `27017` (default install)
 - Two terminals (backend + frontend), ports **5000** and **3000** free
 - *(Optional)* Razorpay **test** keys — only if you want to demo online payments
+- *(Optional)* **Cloudinary** credentials — only if you want real image hosting
+  (without them every image upload returns a clear `503 Image upload is not configured`)
 
 ---
 
@@ -161,6 +163,9 @@ Seeded certificates for the `/verify` page: **`CV-SEED-0001`**, **`CV-SEED-0002`
 | `CLIENT_URL` | yes | `http://localhost:3000` | CORS allow-list (comma-separated for several origins) |
 | `RAZORPAY_KEY_ID` | **no** | *(empty)* | Razorpay test key id |
 | `RAZORPAY_KEY_SECRET` | **no** | *(empty)* | Razorpay test key secret |
+| `CLOUDINARY_CLOUD_NAME` | **no** | *(empty)* | Cloudinary cloud name — product/profile image hosting |
+| `CLOUDINARY_API_KEY` | **no** | *(empty)* | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | **no** | *(empty)* | Cloudinary API secret (server-side only, never logged) |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | no | `admin@craftveda.com` / `Admin@123456` / `Admin` | Overrides for `npm run seed-admin` only |
 
 `frontend/.env` (optional):
@@ -189,10 +194,14 @@ node tests/step4-reviews.e2e.mjs        # reviews, aggregates, moderation   → 
 node tests/step5-artisan.e2e.mjs        # artisan stats + own orders        → 22 tests
 node tests/step6-workshops.e2e.mjs      # workshop CRUD/booking/cancel      → 42 tests
 node tests/step8-timeseries.e2e.mjs     # admin dashboard time-series       → 14 tests
+node tests/step10-images.e2e.mjs        # image uploads (Cloudinary mocked) → 25 tests
 ```
 
-Latest results: **28/28 · 22/22 · 42/42 · 14/14 — all passing.**
-Free ports `5096–5099` before running. There are no step 1–3 test scripts; the four above are the full suite.
+Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 — all passing.**
+Free ports `5095–5099` before running. There are no step 1–3 test scripts; the five above are the full suite.
+
+> `step10` runs with `CLOUDINARY_MOCK=1` and fake credentials — **no real Cloudinary
+> upload ever happens** — and it uses its own throwaway database.
 
 Lint & build:
 

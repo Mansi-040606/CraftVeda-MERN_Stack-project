@@ -11,20 +11,22 @@ const links = [
 // Shared layout for the artisan pages (mirrors AdminShell).
 export function ArtisanShell({ title, children, actions }) {
   return (
-    <div className="min-h-screen bg-amber-50 py-6">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h1 className="text-2xl font-bold text-amber-900">{title}</h1>
+    <div className="min-h-screen bg-cream py-6">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="font-display text-2xl font-semibold text-ink">{title}</h1>
           {actions}
         </div>
-        <nav className="flex flex-wrap gap-2 mb-6">
+        <nav className="mb-6 flex flex-wrap gap-2">
           {links.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
-                `px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  isActive ? 'bg-amber-700 text-white' : 'bg-white text-amber-800 hover:bg-amber-100'
+                `rounded-sm px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-terracotta text-white'
+                    : 'border border-ink/10 bg-white text-ink-soft hover:bg-parchment'
                 }`
               }
             >

@@ -61,15 +61,15 @@ function ReviewsSection({ productId }) {
   };
 
   return (
-    <div className="mt-8 bg-white rounded-xl shadow-md p-6">
+    <div className="mt-8 bg-white rounded-sm border border-ink/10 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-xl font-bold text-amber-900">Customer Reviews</h2>
+        <h2 className="text-xl font-bold text-ink">Customer Reviews</h2>
         <div className="flex items-center gap-3">
           <StarRating value={summary.averageRating} size="text-xl" />
-          <span className="text-amber-800 font-medium">
+          <span className="text-ink-soft font-medium">
             {summary.averageRating > 0 ? summary.averageRating.toFixed(1) : 'No ratings'}
           </span>
-          <span className="text-sm text-amber-600">({summary.total} review{summary.total === 1 ? '' : 's'})</span>
+          <span className="text-sm text-ink-soft">({summary.total} review{summary.total === 1 ? '' : 's'})</span>
         </div>
       </div>
 
@@ -86,24 +86,24 @@ function ReviewsSection({ productId }) {
       )}
 
       {isAuthenticated && canReview && !canReview.allowed && canReview.reason && (
-        <p className="text-sm text-amber-600 mb-6 italic">{canReview.reason}</p>
+        <p className="text-sm text-ink-soft mb-6 italic">{canReview.reason}</p>
       )}
 
       {!isAuthenticated && (
-        <p className="text-sm text-amber-600 mb-6 italic">
+        <p className="text-sm text-ink-soft mb-6 italic">
           Purchased this product?{' '}
-          <button onClick={() => navigate('/auth')} className="underline text-amber-800 font-medium">
+          <button onClick={() => navigate('/auth')} className="underline text-ink-soft font-medium">
             Sign in
           </button>{' '}
           to review it.
         </p>
       )}
 
-      {loading && <p className="text-amber-600">Loading reviews...</p>}
+      {loading && <p className="text-ink-soft">Loading reviews...</p>}
       {error && <p className="text-red-600">{error}</p>}
 
       {!loading && !error && reviews.length === 0 && (
-        <p className="text-amber-600">No reviews yet. Be the first to review this product!</p>
+        <p className="text-ink-soft">No reviews yet. Be the first to review this product!</p>
       )}
 
       <div className="space-y-4">

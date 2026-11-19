@@ -14,17 +14,17 @@ const links = [
 
 export function AdminShell({ title, children }) {
   return (
-    <div className="min-h-screen bg-amber-50 py-6">
+    <div className="min-h-screen bg-cream py-6">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-amber-900 mb-4">{title}</h1>
+        <h1 className="text-2xl font-bold text-ink mb-4">{title}</h1>
         <nav className="flex flex-wrap gap-2 mb-6">
           {links.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
-                `px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  isActive ? 'bg-amber-700 text-white' : 'bg-white text-amber-800 hover:bg-amber-100'
+                `px-3 py-2 rounded-sm text-sm font-medium transition ${
+                  isActive ? 'bg-terracotta text-white' : 'bg-white text-ink-soft hover:bg-linen'
                 }`
               }
             >
@@ -40,7 +40,7 @@ export function AdminShell({ title, children }) {
 
 export function Loading() {
   return (
-    <div className="bg-white rounded-xl shadow-md p-10 text-center text-amber-700">
+    <div className="bg-white rounded-sm border border-ink/10 p-10 text-center text-terracotta-dark">
       Loading...
     </div>
   );
@@ -48,7 +48,7 @@ export function Loading() {
 
 export function ErrorState({ message }) {
   return (
-    <div className="bg-white rounded-xl shadow-md p-10 text-center">
+    <div className="bg-white rounded-sm border border-ink/10 p-10 text-center">
       <p className="text-red-600 font-medium mb-4">{message || 'Failed to load data'}</p>
     </div>
   );
@@ -56,7 +56,7 @@ export function ErrorState({ message }) {
 
 export function EmptyState({ message = 'No records found' }) {
   return (
-    <div className="bg-white rounded-xl shadow-md p-10 text-center text-amber-600">
+    <div className="bg-white rounded-sm border border-ink/10 p-10 text-center text-ink-soft">
       {message}
     </div>
   );
@@ -69,17 +69,17 @@ export function Pager({ page, pages, onChange }) {
       <button
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
-        className="px-3 py-1 rounded bg-white shadow disabled:opacity-40 text-amber-800"
+        className="px-3 py-1 rounded bg-white shadow disabled:opacity-40 text-ink-soft"
       >
         Prev
       </button>
-      <span className="text-amber-700">
+      <span className="text-terracotta-dark">
         Page {page} of {pages}
       </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= pages}
-        className="px-3 py-1 rounded bg-white shadow disabled:opacity-40 text-amber-800"
+        className="px-3 py-1 rounded bg-white shadow disabled:opacity-40 text-ink-soft"
       >
         Next
       </button>

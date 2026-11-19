@@ -1,55 +1,67 @@
 import { Link } from 'react-router-dom';
 
+const colLink =
+  'text-sm text-cream/70 transition hover:text-saffron';
+
 function Footer() {
   return (
-    <footer className="bg-amber-900 text-amber-100 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="mt-auto bg-ink text-cream">
+      <div className="mx-auto max-w-7xl px-4 py-12">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🏺</span>
-              <span className="text-xl font-bold text-white">CraftVeda</span>
+            <div className="mb-4 flex items-center gap-2">
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-terracotta text-lg text-white"
+                aria-hidden="true"
+              >
+                🏺
+              </span>
+              <span className="font-display text-xl font-bold text-cream">CraftVeda</span>
             </div>
-            <p className="text-sm text-amber-200">
-              Connecting traditional artisans with the world. Preserving Indian heritage, one craft at a time.
+            <p className="max-w-xs text-sm leading-relaxed text-cream/70">
+              Connecting traditional artisans with the world. Preserving Indian heritage, one craft
+              at a time.
             </p>
+            <div className="rule-ornament mt-5 max-w-xs" aria-hidden="true" />
           </div>
 
           <div>
-            <h3 className="text-white font-semibold mb-4">Shop</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/products" className="hover:text-white transition">All Products</Link></li>
-              <li><Link to="/products?category=textiles" className="hover:text-white transition">Textiles</Link></li>
-              <li><Link to="/products?category=pottery" className="hover:text-white transition">Pottery</Link></li>
-              <li><Link to="/products?category=jewelry" className="hover:text-white transition">Jewelry</Link></li>
+            <h3 className="mb-4 font-display text-base font-semibold text-saffron">Shop</h3>
+            <ul className="space-y-2">
+              <li><Link to="/products" className={colLink}>All Products</Link></li>
+              <li><Link to="/products?category=textiles" className={colLink}>Textiles</Link></li>
+              <li><Link to="/products?category=pottery" className={colLink}>Pottery</Link></li>
+              <li><Link to="/products?category=jewelry" className={colLink}>Jewelry</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-white font-semibold mb-4">Discover</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/artisans" className="hover:text-white transition">Our Artisans</Link></li>
-              <li><Link to="/workshops" className="hover:text-white transition">Workshops</Link></li>
-              <li><Link to="/gi-search" className="hover:text-white transition">GI Tags</Link></li>
-              <li><Link to="/stories" className="hover:text-white transition">Craft Stories</Link></li>
-              <li><Link to="/about" className="hover:text-white transition">About Us</Link></li>
+            <h3 className="mb-4 font-display text-base font-semibold text-saffron">Discover</h3>
+            <ul className="space-y-2">
+              <li><Link to="/artisans" className={colLink}>Our Artisans</Link></li>
+              <li><Link to="/workshops" className={colLink}>Workshops</Link></li>
+              <li><Link to="/gi-search" className={colLink}>GI Tags</Link></li>
+              <li><Link to="/stories" className={colLink}>Craft Stories</Link></li>
+              <li><Link to="/about" className={colLink}>About Us</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/donate" className="hover:text-white transition">Donate</Link></li>
-              <li><Link to="/verify" className="hover:text-white transition">Verify Certificate</Link></li>
-              <li><Link to="/orders" className="hover:text-white transition">Track Order</Link></li>
-              <li><Link to="/auth" className="hover:text-white transition">Seller Registration</Link></li>
-              <li><Link to="/admin" className="hover:text-white transition">Admin</Link></li>
+            <h3 className="mb-4 font-display text-base font-semibold text-saffron">Support</h3>
+            <ul className="space-y-2">
+              <li><Link to="/donate" className={colLink}>Donate</Link></li>
+              <li><Link to="/verify" className={colLink}>Verify Certificate</Link></li>
+              <li><Link to="/orders" className={colLink}>Track Order</Link></li>
+              <li><Link to="/auth" className={colLink}>Seller Registration</Link></li>
+              <li><Link to="/admin" className={colLink}>Admin</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-amber-800 mt-8 pt-8 text-center text-sm text-amber-300">
-          <p>© {new Date().getFullYear()} CraftVeda. Preserving India&apos;s artistic heritage.</p>
+        <div className="mt-8 border-t border-cream/15 pt-8 text-center text-sm text-cream/60">
+          <p>
+            © {new Date().getFullYear()} CraftVeda. Preserving India&apos;s artistic heritage.
+          </p>
         </div>
       </div>
     </footer>

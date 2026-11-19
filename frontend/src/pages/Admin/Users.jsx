@@ -71,7 +71,7 @@ function AdminUsers() {
 
   return (
     <AdminShell title="Users">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input
           value={search}
           onChange={(e) => {
@@ -80,7 +80,7 @@ function AdminUsers() {
           }}
           onKeyDown={(e) => e.key === 'Enter' && load()}
           placeholder="Search name or email"
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-48"
         />
         <select
           value={role}
@@ -88,17 +88,17 @@ function AdminUsers() {
             setRole(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           <option value="">All roles</option>
           {ROLES.map((r) => (
             <option key={r} value={r}>{r}</option>
           ))}
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Search
         </button>
-        <span className="text-sm text-amber-600">{total} users</span>
+        <span className="text-sm text-ink-soft">{total} users</span>
       </div>
 
       {loading && <Loading />}
@@ -106,10 +106,10 @@ function AdminUsers() {
       {!loading && !error && users.length === 0 && <EmptyState message="No users found" />}
 
       {!loading && !error && users.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Name</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Role</th>
@@ -119,15 +119,15 @@ function AdminUsers() {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user._id} className="border-b border-amber-50">
-                  <td className="p-3 font-medium text-amber-900">{user.name}</td>
-                  <td className="p-3 text-amber-700">{user.email}</td>
+                <tr key={user._id} className="border-b border-ink/5">
+                  <td className="p-3 font-medium text-ink">{user.name}</td>
+                  <td className="p-3 text-terracotta-dark">{user.email}</td>
                   <td className="p-3">
                     <select
                       value={user.role}
                       disabled={busyId === user._id}
                       onChange={(e) => update(user._id, { role: e.target.value })}
-                      className="border border-amber-200 rounded px-2 py-1"
+                      className="border border-ink/10 rounded px-2 py-1"
                     >
                       {ROLES.map((r) => (
                         <option key={r} value={r}>{r}</option>
@@ -139,7 +139,7 @@ function AdminUsers() {
                       value={user.status}
                       disabled={busyId === user._id}
                       onChange={(e) => update(user._id, { status: e.target.value })}
-                      className="border border-amber-200 rounded px-2 py-1"
+                      className="border border-ink/10 rounded px-2 py-1"
                     >
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>{s}</option>

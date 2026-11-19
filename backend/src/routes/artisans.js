@@ -9,6 +9,14 @@ import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
 import { getMyStats, getMyOrders } from '../controllers/artisanController.js';
 import { myOrdersQueryValidators } from '../validators/artisanValidators.js';
+import {
+  requireCloudinary,
+  handleUpload,
+  validateImageFiles,
+  uploadImageBuffers,
+  destroyImageByUrl,
+  PROFILE_FOLDER
+} from '../utils/images.js';
 
 const router = express.Router();
 
@@ -75,6 +83,38 @@ router.get('/me', protect, artisanOnly, catchAsync(async (req, res) => {
 }));
 router.get('/me/stats', protect, artisanOnly, getMyStats);
 router.get('/me/orders', protect, artisanOnly, myOrdersQueryValidators, validate, getMyOrders);
+
+// --- optional profile / cover images (Cloudinary) ---
+// Owner-only: the artisan profile is always looked up from the logged-in user.
+const ownArtisanOr403 = async (req) => {
+  const artisan = await Artisan.findOne({ user: req.user._id });
+  if (!artisan) throw new ApiError(403, 'You need an artisan profile to manage images');
+  return artisan;
+};
+
+const saveProfileImage = (field) => async (req, res) => {
+  const artisan = await ownArtisanOr403(req);
+  const files = validateImageFiles(req.files);
+  if (files.length !== 1) throw new ApiError(400, 'Upload exactly one image');
+
+  const [uploaded] = await uploadImageBuffers(files, { folder: PROFILE_FOLDER });
+  const previous = artisan[field];
+  artisan[field] = uploaded.secure_url;
+  await artisan.save();
+
+  // Replace: drop the old remote copy only when it is a different asset.
+  if (previous && previous !== uploaded.secure_url) {
+    await destroyImageByUrl(previous);
+  }
+
+  res.json({ success: true, artisan });
+};
+
+router.post('/me/profile-image', protect, artisanOnly, requireCloudinary,
+  handleUpload('image', 1), catchAsync(saveProfileImage('profileImage')));
+
+router.post('/me/cover-image', protect, artisanOnly, requireCloudinary,
+  handleUpload('image', 1), catchAsync(saveProfileImage('coverImage')));
 
 router.get('/:id', catchAsync(async (req, res) => {
   const artisan = await Artisan.findById(req.params.id)

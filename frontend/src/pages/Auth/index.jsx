@@ -62,15 +62,15 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-md">
+    <div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
+      <div className="bg-white rounded-sm border border-ink/10 p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-4xl">🏺</span>
-          <h1 className="text-2xl font-bold text-amber-900 mt-2">CraftVeda</h1>
+          <h1 className="text-2xl font-bold text-ink mt-2">CraftVeda</h1>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm mb-6">
             {error}
           </div>
         )}
@@ -79,7 +79,7 @@ const Auth = () => {
           <button
             onClick={() => { setIsLogin(true); setError(''); }}
             className={`flex-1 py-2 text-center font-medium transition ${
-              isLogin ? 'text-amber-900 border-b-2 border-amber-700' : 'text-amber-600'
+              isLogin ? 'text-ink border-b-2 border-terracotta' : 'text-ink-soft'
             }`}
           >
             Sign In
@@ -87,7 +87,7 @@ const Auth = () => {
           <button
             onClick={() => { setIsLogin(false); setError(''); }}
             className={`flex-1 py-2 text-center font-medium transition ${
-              !isLogin ? 'text-amber-900 border-b-2 border-amber-700' : 'text-amber-600'
+              !isLogin ? 'text-ink border-b-2 border-terracotta' : 'text-ink-soft'
             }`}
           >
             Register
@@ -97,34 +97,34 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="text-sm text-amber-800 font-medium">Full Name</label>
+              <label className="text-sm text-ink-soft font-medium">Full Name</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required={!isLogin}
-                className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+                className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
                 placeholder="Enter your name"
               />
             </div>
           )}
 
           <div>
-            <label className="text-sm text-amber-800 font-medium">Email</label>
+            <label className="text-sm text-ink-soft font-medium">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+              className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
               placeholder="Enter your email"
             />
           </div>
 
           <div>
-            <label className="text-sm text-amber-800 font-medium">Password</label>
+            <label className="text-sm text-ink-soft font-medium">Password</label>
             <input
               type="password"
               name="password"
@@ -132,14 +132,14 @@ const Auth = () => {
               onChange={handleChange}
               required
               minLength={6}
-              className="w-full border border-amber-300 rounded-lg px-4 py-2 mt-1"
+              className="w-full border border-ink/15 rounded-sm px-4 py-2 mt-1"
               placeholder="Enter your password"
             />
           </div>
 
           {isLogin && (
             <div className="flex justify-end">
-              <Link to="/auth/forgot" className="text-sm text-amber-700 hover:underline">
+              <Link to="/auth/forgot" className="text-sm text-terracotta-dark hover:underline">
                 Forgot Password?
               </Link>
             </div>
@@ -148,28 +148,28 @@ const Auth = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-amber-700 text-white py-3 rounded-lg hover:bg-amber-800 transition font-semibold disabled:opacity-50"
+            className="w-full bg-terracotta text-white py-3 rounded-sm hover:bg-terracotta-dark transition font-semibold disabled:opacity-50"
           >
             {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
         </form>
 
         <div className="my-6 flex items-center gap-4">
-          <div className="flex-1 border-t border-amber-200"></div>
-          <span className="text-amber-600 text-sm">or</span>
-          <div className="flex-1 border-t border-amber-200"></div>
+          <div className="flex-1 border-t border-ink/10"></div>
+          <span className="text-ink-soft text-sm">or</span>
+          <div className="flex-1 border-t border-ink/10"></div>
         </div>
 
-        <button className="w-full border border-amber-300 py-3 rounded-lg hover:bg-amber-50 transition flex items-center justify-center gap-3" disabled>
+        <button className="w-full border border-ink/15 py-3 rounded-sm hover:bg-parchment transition flex items-center justify-center gap-3" disabled>
           <span>G</span>
-          <span className="text-amber-800">Continue with Google</span>
+          <span className="text-ink-soft">Continue with Google</span>
         </button>
 
-        <p className="text-center text-sm text-amber-600 mt-6">
+        <p className="text-center text-sm text-ink-soft mt-6">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
-            className="text-amber-700 font-medium hover:underline"
+            className="text-terracotta-dark font-medium hover:underline"
           >
             {isLogin ? 'Register' : 'Sign In'}
           </button>

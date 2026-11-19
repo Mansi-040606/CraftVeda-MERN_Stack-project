@@ -49,7 +49,7 @@ function Admin() {
         <div>
           <ErrorState message={error} />
           <div className="text-center mt-4">
-            <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
               Retry
             </button>
           </div>
@@ -59,9 +59,9 @@ function Admin() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             {cards.map((stat) => (
-              <div key={stat.label} className="bg-white rounded-xl shadow-md p-4 text-center">
-                <p className="text-xl font-bold text-amber-900 mt-2 break-words">{stat.value}</p>
-                <p className="text-sm text-amber-600">{stat.label}</p>
+              <div key={stat.label} className="bg-white rounded-sm border border-ink/10 p-4 text-center">
+                <p className="text-xl font-bold text-ink mt-2 break-words">{stat.value}</p>
+                <p className="text-sm text-ink-soft">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -69,44 +69,44 @@ function Admin() {
           <DashboardCharts />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="font-bold text-amber-900 mb-4">Quick Actions</h2>
+            <div className="bg-white rounded-sm border border-ink/10 p-6">
+              <h2 className="font-bold text-ink mb-4">Quick Actions</h2>
               <div className="grid grid-cols-2 gap-4">
-                <Link to="/admin/products" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
+                <Link to="/admin/products" className="bg-parchment text-ink-soft p-4 rounded-sm hover:bg-linen transition text-center">
                   Manage Products
                 </Link>
-                <Link to="/admin/applications" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
+                <Link to="/admin/applications" className="bg-parchment text-ink-soft p-4 rounded-sm hover:bg-linen transition text-center">
                   Artisan Applications ({stats.pendingApplications || 0} pending)
                 </Link>
-                <Link to="/admin/orders" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
+                <Link to="/admin/orders" className="bg-parchment text-ink-soft p-4 rounded-sm hover:bg-linen transition text-center">
                   Manage Orders
                 </Link>
-                <Link to="/admin/users" className="bg-amber-100 text-amber-800 p-4 rounded-lg hover:bg-amber-200 transition text-center">
+                <Link to="/admin/users" className="bg-parchment text-ink-soft p-4 rounded-sm hover:bg-linen transition text-center">
                   Manage Users
                 </Link>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-sm border border-ink/10 p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="font-bold text-amber-900">Recent Orders</h2>
-                <button onClick={load} className="text-sm text-amber-700 hover:text-amber-900">
+                <h2 className="font-bold text-ink">Recent Orders</h2>
+                <button onClick={load} className="text-sm text-terracotta-dark hover:text-ink">
                   Refresh
                 </button>
               </div>
               <div className="space-y-3">
                 {(stats.recentOrders || []).length === 0 && (
-                  <p className="text-sm text-amber-600">No orders yet</p>
+                  <p className="text-sm text-ink-soft">No orders yet</p>
                 )}
                 {(stats.recentOrders || []).map((order) => (
-                  <div key={order._id} className="flex justify-between items-center border-b border-amber-100 pb-2">
+                  <div key={order._id} className="flex justify-between items-center border-b border-ink/10 pb-2">
                     <div>
-                      <p className="font-medium text-amber-900">#{String(order._id).slice(-6).toUpperCase()}</p>
-                      <p className="text-sm text-amber-600">{order.user?.name || 'Unknown'} · {order.user?.email}</p>
+                      <p className="font-medium text-ink">#{String(order._id).slice(-6).toUpperCase()}</p>
+                      <p className="text-sm text-ink-soft">{order.user?.name || 'Unknown'} · {order.user?.email}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-amber-900">{inr(order.total)}</p>
-                      <p className="text-xs text-amber-600">{order.orderStatus}</p>
+                      <p className="font-medium text-ink">{inr(order.total)}</p>
+                      <p className="text-xs text-ink-soft">{order.orderStatus}</p>
                     </div>
                   </div>
                 ))}
@@ -114,17 +114,17 @@ function Admin() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="font-bold text-amber-900 mb-4">Latest Products</h2>
+          <div className="bg-white rounded-sm border border-ink/10 p-6">
+            <h2 className="font-bold text-ink mb-4">Latest Products</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {(stats.topProducts || []).map((product) => (
-                <div key={product._id} className="bg-amber-50 rounded-lg p-3 text-center">
-                  <p className="text-sm font-medium text-amber-900 line-clamp-2">{product.name}</p>
-                  <p className="text-xs text-amber-600 mt-1">{inr(product.price)} · stock {product.stock}</p>
+                <div key={product._id} className="bg-cream rounded-sm p-3 text-center">
+                  <p className="text-sm font-medium text-ink line-clamp-2">{product.name}</p>
+                  <p className="text-xs text-ink-soft mt-1">{inr(product.price)} · stock {product.stock}</p>
                 </div>
               ))}
               {(stats.topProducts || []).length === 0 && (
-                <p className="text-sm text-amber-600">No products yet</p>
+                <p className="text-sm text-ink-soft">No products yet</p>
               )}
             </div>
           </div>

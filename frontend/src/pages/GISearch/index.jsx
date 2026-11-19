@@ -123,36 +123,36 @@ function GISearch() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-amber-900 mb-4">GI Tag Products</h1>
-          <p className="text-amber-700 max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold text-ink mb-4">GI Tag Products</h1>
+          <p className="text-terracotta-dark max-w-2xl mx-auto">
             Geographical Indication (GI) tags certify the authenticity and origin of traditional
             Indian crafts. Explore the GI tags registered on CraftVeda.
           </p>
         </div>
 
-        <form onSubmit={applyFilters} className="bg-white rounded-xl shadow-md p-4 mb-8 flex flex-wrap gap-3 items-center">
+        <form onSubmit={applyFilters} className="bg-white rounded-sm border border-ink/10 p-4 mb-8 flex flex-wrap gap-3 items-center">
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search by name..."
             aria-label="Search GI tags by name"
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-40"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-40"
           />
           <input
             value={stateInput}
             onChange={(e) => setStateInput(e.target.value)}
             placeholder="State (e.g. Rajasthan)"
             aria-label="Filter GI tags by state"
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm min-w-40"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm min-w-40"
           />
           <select
             value={typeInput}
             onChange={(e) => setTypeInput(e.target.value)}
             aria-label="Filter GI tags by craft type"
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
           >
             <option value="">All crafts</option>
             {GI_TYPES.map((type) => (
@@ -161,18 +161,18 @@ function GISearch() {
               </option>
             ))}
           </select>
-          <button type="submit" className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+          <button type="submit" className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
             Search
           </button>
           <button
             type="button"
             onClick={clearFilters}
-            className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm"
+            className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm"
           >
             Clear
           </button>
           {!loading && !error && (
-            <span className="text-sm text-amber-600 ml-auto">{total} GI tag{total === 1 ? '' : 's'}</span>
+            <span className="text-sm text-ink-soft ml-auto">{total} GI tag{total === 1 ? '' : 's'}</span>
           )}
         </form>
 
@@ -181,7 +181,7 @@ function GISearch() {
           <div>
             <ErrorState message={error} />
             <div className="text-center mt-4">
-              <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+              <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
                 Retry
               </button>
             </div>
@@ -198,22 +198,22 @@ function GISearch() {
                 key={giTag._id}
                 type="button"
                 onClick={() => openDetail(giTag)}
-                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition text-left cursor-pointer"
+                className="bg-white rounded-sm border border-ink/10 p-6 hover:shadow-lg transition text-left cursor-pointer"
               >
-                <div className="bg-amber-100 rounded-lg h-24 flex items-center justify-center text-4xl mb-4">
+                <div className="bg-parchment rounded-sm h-24 flex items-center justify-center text-4xl mb-4">
                   {typeEmoji(giTag.type)}
                 </div>
-                <h3 className="font-bold text-amber-900">{giTag.name}</h3>
-                <p className="text-sm text-amber-600 mt-1">📍 {giTag.location?.state}</p>
-                <p className="text-sm text-amber-800 mt-2">
+                <h3 className="font-bold text-ink">{giTag.name}</h3>
+                <p className="text-sm text-ink-soft mt-1">📍 {giTag.location?.state}</p>
+                <p className="text-sm text-ink-soft mt-2">
                   <strong>Type:</strong> {giTag.type}
                 </p>
                 {giTag.products?.length > 0 && (
-                  <p className="text-sm text-amber-800">
+                  <p className="text-sm text-ink-soft">
                     <strong>Products:</strong> {giTag.products.join(', ')}
                   </p>
                 )}
-                <span className="inline-block mt-4 text-amber-700 hover:text-amber-900 font-medium text-sm">
+                <span className="inline-block mt-4 text-terracotta-dark hover:text-ink font-medium text-sm">
                   View details →
                 </span>
               </button>
@@ -231,7 +231,7 @@ function GISearch() {
           role="presentation"
         >
           <div
-            className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative"
+            className="bg-white rounded-sm max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -240,19 +240,19 @@ function GISearch() {
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="absolute top-3 right-4 text-2xl text-amber-600 hover:text-amber-900"
+              className="absolute top-3 right-4 text-2xl text-ink-soft hover:text-ink"
               aria-label="Close"
             >
               ×
             </button>
 
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-amber-100 rounded-lg w-16 h-16 flex items-center justify-center text-3xl shrink-0">
+              <div className="bg-parchment rounded-sm w-16 h-16 flex items-center justify-center text-3xl shrink-0">
                 {typeEmoji(selected.type)}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-amber-900">{selected.name}</h2>
-                <p className="text-sm text-amber-600">
+                <h2 className="text-2xl font-bold text-ink">{selected.name}</h2>
+                <p className="text-sm text-ink-soft">
                   📍 {[selected.location?.district, selected.location?.state].filter(Boolean).join(', ')}
                 </p>
               </div>
@@ -266,16 +266,16 @@ function GISearch() {
 
             {!selected.detailLoading && !selected.detailError && (
               <div className="space-y-5">
-                <p className="text-amber-800">{selected.description}</p>
+                <p className="text-ink-soft">{selected.description}</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div className="bg-amber-50 rounded-lg p-4">
-                    <p className="font-semibold text-amber-900 mb-1">Craft type</p>
-                    <p className="text-amber-700">{selected.type}</p>
+                  <div className="bg-cream rounded-sm p-4">
+                    <p className="font-semibold text-ink mb-1">Craft type</p>
+                    <p className="text-terracotta-dark">{selected.type}</p>
                   </div>
-                  <div className="bg-amber-50 rounded-lg p-4">
-                    <p className="font-semibold text-amber-900 mb-1">Region</p>
-                    <p className="text-amber-700">
+                  <div className="bg-cream rounded-sm p-4">
+                    <p className="font-semibold text-ink mb-1">Region</p>
+                    <p className="text-terracotta-dark">
                       {[selected.location?.region, selected.location?.district, selected.location?.state]
                         .filter(Boolean)
                         .join(', ') || 'India'}
@@ -285,10 +285,10 @@ function GISearch() {
 
                 {selected.products?.length > 0 && (
                   <div>
-                    <p className="font-semibold text-amber-900 mb-2 text-sm">Known products</p>
+                    <p className="font-semibold text-ink mb-2 text-sm">Known products</p>
                     <div className="flex flex-wrap gap-2">
                       {selected.products.map((name) => (
-                        <span key={name} className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">
+                        <span key={name} className="bg-parchment text-ink-soft text-xs px-2 py-1 rounded-full">
                           {name}
                         </span>
                       ))}
@@ -298,27 +298,27 @@ function GISearch() {
 
                 {selected.technique && (
                   <div>
-                    <p className="font-semibold text-amber-900 mb-1 text-sm">Technique</p>
-                    <p className="text-sm text-amber-700">{selected.technique}</p>
+                    <p className="font-semibold text-ink mb-1 text-sm">Technique</p>
+                    <p className="text-sm text-terracotta-dark">{selected.technique}</p>
                   </div>
                 )}
                 {selected.history && (
                   <div>
-                    <p className="font-semibold text-amber-900 mb-1 text-sm">History</p>
-                    <p className="text-sm text-amber-700">{selected.history}</p>
+                    <p className="font-semibold text-ink mb-1 text-sm">History</p>
+                    <p className="text-sm text-terracotta-dark">{selected.history}</p>
                   </div>
                 )}
                 {selected.significance && (
                   <div>
-                    <p className="font-semibold text-amber-900 mb-1 text-sm">Why it matters</p>
-                    <p className="text-sm text-amber-700">{selected.significance}</p>
+                    <p className="font-semibold text-ink mb-1 text-sm">Why it matters</p>
+                    <p className="text-sm text-terracotta-dark">{selected.significance}</p>
                   </div>
                 )}
 
                 <div>
-                  <p className="font-semibold text-amber-900 mb-2 text-sm">Artisans with this GI tag</p>
+                  <p className="font-semibold text-ink mb-2 text-sm">Artisans with this GI tag</p>
                   {selected.artisans.length === 0 ? (
-                    <p className="text-sm text-amber-600">No linked artisans yet.</p>
+                    <p className="text-sm text-ink-soft">No linked artisans yet.</p>
                   ) : (
                     <div className="flex flex-wrap gap-3">
                       {selected.artisans.map((artisan) => (
@@ -326,7 +326,7 @@ function GISearch() {
                           key={artisan._id}
                           to={`/artisan/${artisan._id}`}
                           onClick={() => setSelected(null)}
-                          className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-800 hover:bg-amber-100"
+                          className="bg-cream border border-ink/10 rounded-sm px-3 py-2 text-sm text-ink-soft hover:bg-linen"
                         >
                           {artisan.businessName} →
                         </Link>
@@ -336,11 +336,11 @@ function GISearch() {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-amber-900 mb-2 text-sm">Related products</p>
+                  <p className="font-semibold text-ink mb-2 text-sm">Related products</p>
                   {selected.products.length === 0 ? (
-                    <p className="text-sm text-amber-600">
+                    <p className="text-sm text-ink-soft">
                       No products linked yet.{' '}
-                      <Link to="/products" onClick={() => setSelected(null)} className="text-amber-700 underline">
+                      <Link to="/products" onClick={() => setSelected(null)} className="text-terracotta-dark underline">
                         Browse all products
                       </Link>
                     </p>
@@ -351,10 +351,10 @@ function GISearch() {
                           key={product._id}
                           to={`/product/${product._id}`}
                           onClick={() => setSelected(null)}
-                          className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm hover:bg-amber-100"
+                          className="flex items-center justify-between bg-cream border border-ink/10 rounded-sm px-3 py-2 text-sm hover:bg-linen"
                         >
-                          <span className="text-amber-900 font-medium truncate">{product.name}</span>
-                          <span className="text-amber-700 shrink-0 ml-2">{inr(product.price)}</span>
+                          <span className="text-ink font-medium truncate">{product.name}</span>
+                          <span className="text-terracotta-dark shrink-0 ml-2">{inr(product.price)}</span>
                         </Link>
                       ))}
                     </div>

@@ -45,38 +45,38 @@ function AdminDonations() {
   return (
     <AdminShell title="Donations">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-        <div className="bg-white rounded-xl shadow-md p-4 text-center">
-          <p className="text-xl font-bold text-amber-900">{inr(sumFor('completed'))}</p>
-          <p className="text-sm text-amber-600">Completed</p>
+        <div className="bg-white rounded-sm border border-ink/10 p-4 text-center">
+          <p className="text-xl font-bold text-ink">{inr(sumFor('completed'))}</p>
+          <p className="text-sm text-ink-soft">Completed</p>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-4 text-center">
-          <p className="text-xl font-bold text-amber-900">{inr(sumFor('pending'))}</p>
-          <p className="text-sm text-amber-600">Pending</p>
+        <div className="bg-white rounded-sm border border-ink/10 p-4 text-center">
+          <p className="text-xl font-bold text-ink">{inr(sumFor('pending'))}</p>
+          <p className="text-sm text-ink-soft">Pending</p>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-4 text-center">
-          <p className="text-xl font-bold text-amber-900">{inr(sumFor('failed'))}</p>
-          <p className="text-sm text-amber-600">Failed</p>
+        <div className="bg-white rounded-sm border border-ink/10 p-4 text-center">
+          <p className="text-xl font-bold text-ink">{inr(sumFor('failed'))}</p>
+          <p className="text-sm text-ink-soft">Failed</p>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-4 text-center">
-          <p className="text-xl font-bold text-amber-900">{total}</p>
-          <p className="text-sm text-amber-600">Total records</p>
+        <div className="bg-white rounded-sm border border-ink/10 p-4 text-center">
+          <p className="text-xl font-bold text-ink">{total}</p>
+          <p className="text-sm text-ink-soft">Total records</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <select
           value={paymentStatus}
           onChange={(e) => {
             setPaymentStatus(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>{s || 'All statuses'}</option>
           ))}
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Refresh
         </button>
       </div>
@@ -86,10 +86,10 @@ function AdminDonations() {
       {!loading && !error && donations.length === 0 && <EmptyState message="No donations found" />}
 
       {!loading && !error && donations.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Date</th>
                 <th className="p-3">Donor</th>
                 <th className="p-3">Amount</th>
@@ -99,21 +99,21 @@ function AdminDonations() {
             </thead>
             <tbody>
               {donations.map((donation) => (
-                <tr key={donation._id} className="border-b border-amber-50">
-                  <td className="p-3 text-amber-700">{new Date(donation.createdAt).toLocaleDateString()}</td>
-                  <td className="p-3 text-amber-900">
+                <tr key={donation._id} className="border-b border-ink/5">
+                  <td className="p-3 text-terracotta-dark">{new Date(donation.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3 text-ink">
                     {donation.isAnonymous ? 'Anonymous' : donation.donor?.name || 'Unknown'}
-                    <span className="block text-xs text-amber-500">{donation.isAnonymous ? '' : donation.donor?.email}</span>
+                    <span className="block text-xs text-ink-faint">{donation.isAnonymous ? '' : donation.donor?.email}</span>
                   </td>
-                  <td className="p-3 font-medium text-amber-900">{inr(donation.amount)}</td>
-                  <td className="p-3 text-amber-700">{donation.craftType || '—'}</td>
+                  <td className="p-3 font-medium text-ink">{inr(donation.amount)}</td>
+                  <td className="p-3 text-terracotta-dark">{donation.craftType || '—'}</td>
                   <td className="p-3">
                     <span className={`px-2 py-1 rounded text-xs ${
                       donation.paymentStatus === 'completed'
                         ? 'bg-green-100 text-green-800'
                         : donation.paymentStatus === 'failed'
                           ? 'bg-red-100 text-red-700'
-                          : 'bg-amber-100 text-amber-800'
+                          : 'bg-parchment text-ink-soft'
                     }`}>
                       {donation.paymentStatus}
                     </span>

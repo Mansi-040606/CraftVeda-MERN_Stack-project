@@ -29,7 +29,7 @@ export default function ToastHost() {
       {items.map((item) => (
         <div
           key={item.id}
-          className={`px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-white animate-pulse ${
+          className={`px-4 py-3 rounded-sm shadow-lg text-sm font-medium text-white animate-pulse ${
             item.type === 'error' ? 'bg-red-600' : 'bg-green-600'
           }`}
         >

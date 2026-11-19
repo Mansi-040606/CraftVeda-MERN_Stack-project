@@ -6,6 +6,16 @@ import { protect, adminOnly, artisanOnly } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import {
+  requireCloudinary,
+  handleUpload,
+  validateImageFiles,
+  uploadImageBuffers,
+  destroyImageByUrl,
+  destroyImageUrls,
+  PRODUCT_FOLDER,
+  MAX_IMAGES_PER_PRODUCT
+} from '../utils/images.js';
 
 const router = express.Router();
 
@@ -87,7 +97,7 @@ router.get('/', catchAsync(async (req, res) => {
 
   const total = await Product.countDocuments(query);
   const products = await Product.find(query)
-    .populate('artisan', 'businessName')
+    .populate('artisan', 'businessName profileImage')
     .sort(sort)
     .skip((page - 1) * limit)
     .limit(Number(limit));
@@ -113,7 +123,7 @@ router.get('/admin', protect, adminOnly, catchAsync(async (req, res) => {
 
   const total = await Product.countDocuments(query);
   const products = await Product.find(query)
-    .populate('artisan', 'businessName')
+    .populate('artisan', 'businessName profileImage')
     .sort('-createdAt')
     .skip((page - 1) * limit)
     .limit(Number(limit));
@@ -158,8 +168,11 @@ router.get('/mine', protect, artisanOnly, catchAsync(async (req, res) => {
 
 router.get('/:id', catchAsync(async (req, res) => {
   // `user` lets the frontend detect "this is my own product" (artisan ownership).
+  // giTag powers the "Craft heritage" block; the extra artisan fields power
+  // the "Meet the maker" section — both are additive, nothing else changes.
   const product = await Product.findById(req.params.id)
-    .populate('artisan', 'businessName story profileImage location user');
+    .populate('artisan', 'businessName story profileImage coverImage location user craftTypes isVerified rating reviewCount yearsOfExperience')
+    .populate('giTag', 'name type description location history significance technique products');
   
   if (!product) throw new ApiError(404, 'Product not found');
   
@@ -210,9 +223,90 @@ router.patch('/:id', protect, artisanOnly, [
   res.json({ success: true, product: updated });
 }));
 
+// ----- product images (Cloudinary) -----
+// The product is always created first (POST /), then its images are uploaded
+// here — a product document therefore never has to wait on a file upload.
+
+// Append 1-6 images; the array stays plain secure_url strings.
+router.post(
+  '/:id/images',
+  protect,
+  artisanOnly,
+  requireCloudinary,
+  handleUpload('images', MAX_IMAGES_PER_PRODUCT),
+  catchAsync(async (req, res) => {
+    const product = await findOwnedProduct(req, req.params.id);
+    const files = validateImageFiles(req.files);
+
+    const used = (product.images || []).length;
+    const room = MAX_IMAGES_PER_PRODUCT - used;
+    if (room <= 0) {
+      throw new ApiError(400, `A product can have at most ${MAX_IMAGES_PER_PRODUCT} images`);
+    }
+    if (files.length > room) {
+      throw new ApiError(
+        400,
+        `A product can have at most ${MAX_IMAGES_PER_PRODUCT} images — ${room} more allowed`
+      );
+    }
+
+    // All files are validated before anything reaches Cloudinary, so a bad file
+    // in a multi-file request never leaves half-uploaded assets behind.
+    const uploaded = await uploadImageBuffers(files, { folder: PRODUCT_FOLDER });
+    product.images = [...(product.images || []), ...uploaded.map((item) => item.secure_url)];
+    await product.save();
+
+    res.status(201).json({ success: true, product });
+  })
+);
+
+// Remove one image by URL (body: { url }) and delete it from Cloudinary.
+router.delete('/:id/images', protect, artisanOnly, catchAsync(async (req, res) => {
+  const product = await findOwnedProduct(req, req.params.id);
+  const url = typeof req.body?.url === 'string' ? req.body.url.trim() : '';
+  if (!url) throw new ApiError(400, 'Image url is required');
+
+  const images = product.images || [];
+  if (!images.includes(url)) throw new ApiError(404, 'Image not found on this product');
+
+  product.images = images.filter((image) => image !== url);
+  await product.save();
+
+  // Best-effort remote delete — the local removal must never fail because of it.
+  await destroyImageByUrl(url);
+
+  res.json({ success: true, product });
+}));
+
+// Reorder; the first entry becomes the cover image.
+router.put('/:id/images/order', protect, artisanOnly, [
+  body('images').isArray({ min: 1 }).withMessage('images must be a non-empty array'),
+  body('images.*').isString().withMessage('images must contain only URLs')
+], validate, catchAsync(async (req, res) => {
+  const product = await findOwnedProduct(req, req.params.id);
+  const current = product.images || [];
+  const next = req.body.images;
+
+  const sameSet =
+    next.length === current.length &&
+    [...next].sort().join('\n') === [...current].sort().join('\n');
+  if (!sameSet) {
+    throw new ApiError(400, 'The new order must contain exactly the current images');
+  }
+
+  product.images = next;
+  await product.save();
+
+  res.json({ success: true, product });
+}));
+
 router.delete('/:id', protect, artisanOnly, catchAsync(async (req, res) => {
   const product = await findOwnedProduct(req, req.params.id);
   await Product.findByIdAndDelete(product._id);
+
+  // Cloudinary failures never fail the product delete (never throws).
+  await destroyImageUrls(product.images || []);
+
   res.json({ success: true, message: 'Product deleted' });
 }));
 

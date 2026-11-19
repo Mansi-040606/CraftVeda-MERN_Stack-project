@@ -145,7 +145,7 @@ function AdminProducts() {
 
   return (
     <AdminShell title="Products">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input
           value={search}
           onChange={(e) => {
@@ -154,41 +154,41 @@ function AdminProducts() {
           }}
           onKeyDown={(e) => e.key === 'Enter' && load()}
           placeholder="Search products"
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-48"
         />
-        <button onClick={load} className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm">
           Search
         </button>
-        <button onClick={openAdd} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={openAdd} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Add Product
         </button>
-        <span className="text-sm text-amber-600">{total} products</span>
+        <span className="text-sm text-ink-soft">{total} products</span>
       </div>
 
       {showForm && (
-        <form onSubmit={save} className="bg-white rounded-xl shadow-md p-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <h2 className="font-bold text-amber-900 md:col-span-2">{editing ? 'Edit Product' : 'Add Product'}</h2>
-          <input required minLength={2} placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm" />
-          <input required type="number" min="1" step="0.01" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm" />
-          <textarea required placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm md:col-span-2" rows={3} />
-          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm">
+        <form onSubmit={save} className="bg-white rounded-sm border border-ink/10 p-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 className="font-bold text-ink md:col-span-2">{editing ? 'Edit Product' : 'Add Product'}</h2>
+          <input required minLength={2} placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm" />
+          <input required type="number" min="1" step="0.01" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm" />
+          <textarea required placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm md:col-span-2" rows={3} />
+          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm">
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <input required placeholder="Craft type (e.g. Block Printing)" value={form.craftType} onChange={(e) => setForm({ ...form, craftType: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm" />
-          <input required type="number" min="0" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm" />
-          <select required value={form.artisan} onChange={(e) => setForm({ ...form, artisan: e.target.value })} className="border border-amber-200 rounded-lg px-3 py-2 text-sm">
+          <input required placeholder="Craft type (e.g. Block Printing)" value={form.craftType} onChange={(e) => setForm({ ...form, craftType: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm" />
+          <input required type="number" min="0" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm" />
+          <select required value={form.artisan} onChange={(e) => setForm({ ...form, artisan: e.target.value })} className="border border-ink/10 rounded-sm px-3 py-2 text-sm">
             <option value="">Select artisan</option>
             {artisans.map((a) => <option key={a._id} value={a._id}>{a.businessName}</option>)}
           </select>
-          <label className="flex items-center gap-2 text-sm text-amber-800">
+          <label className="flex items-center gap-2 text-sm text-ink-soft">
             <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
             Active
           </label>
           <div className="flex gap-3 md:col-span-2">
-            <button type="submit" disabled={saving} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm disabled:opacity-50">
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm disabled:opacity-50">
               {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Product'}
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm">
               Cancel
             </button>
           </div>
@@ -200,10 +200,10 @@ function AdminProducts() {
       {!loading && !error && products.length === 0 && <EmptyState message="No products found" />}
 
       {!loading && !error && products.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Product</th>
                 <th className="p-3">Category</th>
                 <th className="p-3">Price</th>
@@ -214,13 +214,13 @@ function AdminProducts() {
             </thead>
             <tbody>
               {products.map((product) => (
-                <tr key={product._id} className="border-b border-amber-50">
-                  <td className="p-3 font-medium text-amber-900">
+                <tr key={product._id} className="border-b border-ink/5">
+                  <td className="p-3 font-medium text-ink">
                     {product.name}
-                    <span className="block text-xs text-amber-500">{product.artisan?.businessName}</span>
+                    <span className="block text-xs text-ink-faint">{product.artisan?.businessName}</span>
                   </td>
-                  <td className="p-3 text-amber-700">{product.category}</td>
-                  <td className="p-3 text-amber-900">{inr(product.price)}</td>
+                  <td className="p-3 text-terracotta-dark">{product.category}</td>
+                  <td className="p-3 text-ink">{inr(product.price)}</td>
                   <td className="p-3">
                     <div className="flex gap-1">
                       <input
@@ -228,12 +228,12 @@ function AdminProducts() {
                         min="0"
                         value={stockDraft[product._id] ?? product.stock}
                         onChange={(e) => setStockDraft({ ...stockDraft, [product._id]: e.target.value })}
-                        className="w-20 border border-amber-200 rounded px-2 py-1"
+                        className="w-20 border border-ink/10 rounded px-2 py-1"
                       />
                       <button
                         onClick={() => saveStock(product)}
                         disabled={busyId === product._id}
-                        className="text-amber-700 hover:text-amber-900 disabled:opacity-40 text-xs"
+                        className="text-terracotta-dark hover:text-ink disabled:opacity-40 text-xs"
                       >
                         Save
                       </button>
@@ -250,7 +250,7 @@ function AdminProducts() {
                   </td>
                   <td className="p-3">
                     <div className="flex gap-3">
-                      <button onClick={() => openEdit(product)} className="text-amber-700 hover:text-amber-900">Edit</button>
+                      <button onClick={() => openEdit(product)} className="text-terracotta-dark hover:text-ink">Edit</button>
                       <button onClick={() => remove(product)} className="text-red-600 hover:text-red-800">Delete</button>
                     </div>
                   </td>

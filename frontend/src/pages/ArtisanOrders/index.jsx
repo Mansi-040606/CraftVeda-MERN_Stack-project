@@ -4,6 +4,7 @@ import { Loading, ErrorState, EmptyState, Pager } from '../../components/admin/A
 import { toast, errMsg } from '../../components/Toast';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/order/OrderStatus';
 import { artisanService } from '../../services/artisanService';
+import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
 
 const ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
@@ -46,26 +47,26 @@ function ArtisanOrders() {
   return (
     <ArtisanShell
       title="My Orders"
-      actions={<span className="text-sm text-amber-600">{total} orders</span>}
+      actions={<span className="text-sm text-ink-soft">{total} orders</span>}
     >
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <select
           value={orderStatus}
           onChange={(e) => {
             setOrderStatus(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           <option value="">All order statuses</option>
           {ORDER_STATUSES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm">
           Refresh
         </button>
-        <p className="text-xs text-amber-600 flex-1 min-w-64">
+        <p className="text-xs text-ink-soft flex-1 min-w-64">
           These are orders that contain your products. Order status is managed by the customer and
           CraftVeda support — only your own line items are shown.
         </p>
@@ -76,7 +77,7 @@ function ArtisanOrders() {
         <div>
           <ErrorState message={error} />
           <div className="text-center mt-4">
-            <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
               Retry
             </button>
           </div>
@@ -91,21 +92,21 @@ function ArtisanOrders() {
       {!loading && !error && orders.length > 0 && (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order._id} className="bg-white rounded-xl shadow-md p-6">
+            <div key={order._id} className="bg-white rounded-sm border border-ink/10 p-6">
               <div className="flex flex-col md:flex-row justify-between gap-4">
                 <div>
-                  <p className="text-sm text-amber-600">
+                  <p className="text-sm text-ink-soft">
                     Order #{String(order._id).slice(-6).toUpperCase()}
                   </p>
-                  <p className="text-sm text-amber-600 mt-1">
+                  <p className="text-sm text-ink-soft mt-1">
                     {order.customer?.name || 'Customer'}
                     {order.customer?.email ? ` · ${order.customer.email}` : ''}
                   </p>
-                  <p className="text-sm text-amber-600 mt-1">{formatDate(order.createdAt)}</p>
+                  <p className="text-sm text-ink-soft mt-1">{formatDate(order.createdAt)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-amber-500">Your items</p>
-                  <p className="font-bold text-amber-900">{inr(order.itemsTotal)}</p>
+                  <p className="text-xs text-ink-faint">Your items</p>
+                  <p className="font-bold text-ink">{inr(order.itemsTotal)}</p>
                   <div className="flex flex-wrap gap-2 justify-end mt-2">
                     <OrderStatusBadge status={order.orderStatus} />
                     <PaymentStatusBadge status={order.paymentStatus} />
@@ -113,29 +114,31 @@ function ArtisanOrders() {
                 </div>
               </div>
 
-              <ul className="mt-4 divide-y divide-amber-50">
+              <ul className="mt-4 divide-y divide-ink/5">
                 {(order.items || []).map((item) => (
                   <li key={item._id} className="py-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded bg-amber-100 overflow-hidden flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded bg-parchment overflow-hidden flex items-center justify-center shrink-0">
                       {item.product?.images?.[0] ? (
-                        <img
-                          src={item.product.images[0]}
-                          alt={item.product?.name || 'product'}
-                          className="w-full h-full object-cover"
+                        <ProductImage
+                          src={item.product?.images?.[0]}
+                          alt={item.product?.name || 'Product'}
+                          frame="h-full w-full"
+                          w={96}
+                          h={96}
                         />
                       ) : (
                         <span>🏺</span>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-amber-900 truncate">
+                      <p className="text-sm font-medium text-ink truncate">
                         {item.product?.name || 'Product'}
                       </p>
-                      <p className="text-xs text-amber-600">
+                      <p className="text-xs text-ink-soft">
                         {item.quantity} × {inr(item.price)}
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-amber-900">
+                    <p className="text-sm font-medium text-ink">
                       {inr(item.price * item.quantity)}
                     </p>
                   </li>

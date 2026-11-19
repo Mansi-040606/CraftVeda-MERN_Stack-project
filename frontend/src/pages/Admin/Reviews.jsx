@@ -54,23 +54,23 @@ function AdminReviews() {
 
   return (
     <AdminShell title="Reviews">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <select
           value={isApproved}
           onChange={(e) => {
             setIsApproved(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           <option value="">All reviews</option>
           <option value="true">Approved</option>
           <option value="false">Pending</option>
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Refresh
         </button>
-        <span className="text-sm text-amber-600">{total} reviews</span>
+        <span className="text-sm text-ink-soft">{total} reviews</span>
       </div>
 
       {loading && <Loading />}
@@ -80,26 +80,26 @@ function AdminReviews() {
       {!loading && !error && reviews.length > 0 && (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-white rounded-xl shadow-md p-5 flex justify-between gap-4">
+            <div key={review._id} className="bg-white rounded-sm border border-ink/10 p-5 flex justify-between gap-4">
               <div>
-                <p className="font-medium text-amber-900">
+                <p className="font-medium text-ink">
                   {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)} {review.title}
                 </p>
-                <p className="text-sm text-amber-700 mt-1">{review.comment}</p>
-                <p className="text-xs text-amber-500 mt-2">
+                <p className="text-sm text-terracotta-dark mt-1">{review.comment}</p>
+                <p className="text-xs text-ink-faint mt-2">
                   by {review.user?.name || 'Unknown'} on {target(review)} ·{' '}
                   {new Date(review.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <span className={`px-2 py-1 rounded text-xs ${review.isApproved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                <span className={`px-2 py-1 rounded text-xs ${review.isApproved ? 'bg-green-100 text-green-800' : 'bg-parchment text-ink-soft'}`}>
                   {review.isApproved ? 'Approved' : 'Pending'}
                 </span>
                 <div className="mt-3">
                   <button
                     onClick={() => toggle(review)}
                     disabled={busyId === review._id}
-                    className="px-3 py-1 bg-amber-700 text-white rounded text-sm disabled:opacity-40"
+                    className="px-3 py-1 bg-terracotta text-white rounded text-sm disabled:opacity-40"
                   >
                     {review.isApproved ? 'Hide' : 'Approve'}
                   </button>

@@ -8,6 +8,9 @@ import { inr } from '../../utils/format';
 import { categoryLabel } from '../../constants/categories';
 import StarRating from '../../components/review/StarRating';
 import ReviewsSection from '../../components/review/ReviewsSection';
+import ProductGallery from '../../components/product/ProductGallery';
+import MakerSection from '../../components/product/MakerSection';
+import CraftHeritage from '../../components/product/CraftHeritage';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -47,16 +50,17 @@ function ProductDetail() {
   // ----- states: loading / error -----
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
-          <div className="flex flex-col md:flex-row">
-            <div className="md:w-1/2 bg-amber-100 h-96" />
-            <div className="md:w-1/2 p-8 space-y-4">
-              <div className="h-4 bg-amber-100 rounded w-1/4" />
-              <div className="h-8 bg-amber-100 rounded w-3/4" />
-              <div className="h-6 bg-amber-100 rounded w-1/3" />
-              <div className="h-10 bg-amber-100 rounded w-1/2" />
-              <div className="h-24 bg-amber-100 rounded" />
+      <div className="min-h-screen bg-cream py-8">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid gap-8 rounded-sm border border-ink/10 bg-white p-5 md:grid-cols-2 md:p-8">
+            <div className="shimmer aspect-square w-full rounded-sm" />
+            <div className="space-y-4">
+              <div className="shimmer h-3 w-24 rounded-sm" />
+              <div className="shimmer h-9 w-3/4 rounded-sm" />
+              <div className="shimmer h-5 w-40 rounded-sm" />
+              <div className="shimmer h-8 w-32 rounded-sm" />
+              <div className="shimmer h-28 w-full rounded-sm" />
+              <div className="shimmer h-12 w-2/3 rounded-sm" />
             </div>
           </div>
         </div>
@@ -66,16 +70,16 @@ function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
-        <div className="max-w-3xl mx-auto px-4 bg-white rounded-xl shadow-md p-12 text-center">
-          <span className="text-5xl">⚠️</span>
-          <h2 className="text-xl font-semibold text-amber-900 mt-4">
+      <div className="min-h-screen bg-cream py-8">
+        <div className="mx-auto max-w-3xl rounded-sm border border-ink/10 bg-white px-6 py-16 text-center">
+          <span className="text-5xl" role="img" aria-hidden="true">⚠️</span>
+          <h2 className="mt-4 font-display text-2xl font-semibold text-ink">
             {error?.includes('not found') ? 'Product not found' : 'Something went wrong'}
           </h2>
-          <p className="text-amber-600 mt-2">{error || 'This product does not exist.'}</p>
+          <p className="mt-2 text-ink-soft">{error || 'This product does not exist.'}</p>
           <Link
             to="/products"
-            className="inline-block mt-4 bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition"
+            className="mt-6 inline-block rounded-sm bg-terracotta px-6 py-3 font-semibold text-white transition hover:bg-terracotta-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
           >
             Back to Products
           </Link>
@@ -116,89 +120,113 @@ function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="min-h-screen bg-cream py-8">
+      <div className="mx-auto max-w-7xl px-4">
+        {/* ----- hero: gallery + buy box ----- */}
+        <div className="overflow-hidden rounded-sm border border-ink/10 bg-white">
           <div className="flex flex-col md:flex-row">
-            {/* ----- images ----- */}
-            <div className="md:w-1/2 bg-amber-100 flex items-center justify-center h-96">
-              {images.length > 0 ? (
-                <img src={images[0]} alt={product.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-9xl">🏺</span>
-              )}
+            <div className="bg-parchment p-4 md:w-1/2 md:p-6">
+              <ProductGallery images={images} alt={product.name} priority />
             </div>
 
             {/* ----- buy box ----- */}
-            <div className="md:w-1/2 p-8">
-              <span className="text-sm text-amber-600 font-medium uppercase">
+            <div className="p-5 md:w-1/2 md:p-8">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-saffron-dark">
                 {categoryLabel(product.category)}
               </span>
-              <h1 className="text-2xl font-bold text-amber-900 mt-2">{product.name}</h1>
-              <div className="flex items-center gap-2 mt-2">
+              <h1 className="mt-2 font-display text-3xl font-semibold leading-tight text-ink">
+                {product.name}
+              </h1>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <StarRating value={product.averageRating || 0} size="text-base" />
-                <span className="text-sm text-amber-600">
+                <span className="text-sm text-ink-soft">
                   {product.averageRating > 0
                     ? `${product.averageRating.toFixed(1)} (${product.reviewCount || 0} review${product.reviewCount === 1 ? '' : 's'})`
                     : 'No reviews yet'}
                 </span>
               </div>
-              <p className="text-amber-600 mt-2">
+
+              <p className="mt-2 text-sm text-ink-soft">
                 by{' '}
                 {product.artisan ? (
-                  <span className="text-amber-700">{product.artisan.businessName}</span>
+                  <span className="font-medium text-terracotta-dark">
+                    {product.artisan.businessName}
+                  </span>
                 ) : (
-                  <span className="text-amber-700">CraftVeda Artisan</span>
+                  <span className="font-medium text-terracotta-dark">CraftVeda Artisan</span>
                 )}
               </p>
 
-              <p className="text-3xl font-bold text-amber-900 mt-6">{inr(product.price)}</p>
+              <p className="mt-6 font-display text-4xl font-semibold text-ink">
+                {inr(product.price)}
+              </p>
 
-              <p className="text-sm text-amber-700 mt-1">
+              <p className="mt-2 text-sm font-medium">
                 {outOfStock ? (
-                  <span className="text-red-600 font-medium">Out of stock</span>
+                  <span className="text-clay-red">Out of stock</span>
                 ) : (
-                  <span className="text-green-700 font-medium">In stock: {stock}</span>
+                  <span className="text-moss">In stock: {stock}</span>
                 )}
               </p>
 
-              <p className="text-amber-700 mt-4 leading-relaxed">{product.description}</p>
+              <p className="mt-4 leading-relaxed text-ink-soft">{product.description}</p>
 
-              <div className="mt-6 space-y-2 text-sm text-amber-800">
-                {product.craftType && <p><strong>Craft Type:</strong> {product.craftType}</p>}
-                {product.material && <p><strong>Material:</strong> {product.material}</p>}
-                {product.color?.length > 0 && <p><strong>Color:</strong> {product.color.join(', ')}</p>}
-                <p><strong>Category:</strong> {categoryLabel(product.category)}</p>
-              </div>
+              <dl className="mt-5 space-y-2 rounded-sm border border-ink/10 bg-parchment p-4 text-sm">
+                {product.craftType && (
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-ink-faint">Craft type</dt>
+                    <dd className="text-ink-soft">{product.craftType}</dd>
+                  </div>
+                )}
+                {product.material && (
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-ink-faint">Material</dt>
+                    <dd className="text-ink-soft">{product.material}</dd>
+                  </div>
+                )}
+                {product.color?.length > 0 && (
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-ink-faint">Colour</dt>
+                    <dd className="text-ink-soft">{product.color.join(', ')}</dd>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <dt className="w-28 shrink-0 text-ink-faint">Category</dt>
+                  <dd className="text-ink-soft">{categoryLabel(product.category)}</dd>
+                </div>
+              </dl>
 
               {/* ----- quantity + actions ----- */}
-              <div className="flex items-center gap-4 mt-6">
-                <div className="flex items-center border border-amber-300 rounded-lg">
+              <div className="mt-6 flex items-center gap-4">
+                <div className="flex items-center overflow-hidden rounded-sm border border-ink/20">
                   <button
                     onClick={() => changeQuantity(-1)}
                     disabled={outOfStock || quantity <= 1}
-                    className="w-10 h-10 text-amber-800 hover:bg-amber-50 transition disabled:opacity-40"
+                    aria-label="Decrease quantity"
+                    className="h-11 w-11 text-ink transition hover:bg-parchment disabled:opacity-40"
                   >
                     −
                   </button>
-                  <span className="w-10 text-center text-amber-900 font-medium">{quantity}</span>
+                  <span className="w-10 text-center font-medium text-ink">{quantity}</span>
                   <button
                     onClick={() => changeQuantity(1)}
                     disabled={outOfStock || quantity >= stock}
-                    className="w-10 h-10 text-amber-800 hover:bg-amber-50 transition disabled:opacity-40"
+                    aria-label="Increase quantity"
+                    className="h-11 w-11 text-ink transition hover:bg-parchment disabled:opacity-40"
                   >
                     +
                   </button>
                 </div>
-                <span className="text-sm text-amber-600">Max {stock}</span>
+                <span className="text-sm text-ink-faint">Max {stock}</span>
               </div>
 
-              <div className="flex gap-4 mt-6">
+              <div className="mt-6 flex gap-3">
                 {isOwner ? (
                   // The artisan who owns this product cannot buy it.
                   <button
                     disabled
-                    className="flex-1 bg-amber-200 text-amber-700 py-3 rounded-lg font-semibold cursor-not-allowed"
+                    className="flex-1 cursor-not-allowed rounded-sm bg-linen px-6 py-3.5 font-semibold text-ink-soft"
                   >
                     This is your product
                   </button>
@@ -206,7 +234,7 @@ function ProductDetail() {
                   <button
                     onClick={handleAddToCart}
                     disabled={outOfStock || adding}
-                    className="flex-1 bg-amber-700 text-white py-3 rounded-lg hover:bg-amber-800 transition font-semibold disabled:bg-amber-300 disabled:cursor-not-allowed"
+                    className="flex-1 rounded-sm bg-terracotta px-6 py-3.5 font-semibold text-white transition hover:bg-terracotta-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta disabled:cursor-not-allowed disabled:bg-linen disabled:text-ink-faint"
                   >
                     {outOfStock
                       ? 'Out of Stock'
@@ -221,20 +249,21 @@ function ProductDetail() {
                 {!isOwner && (
                   <button
                     onClick={handleWishlist}
-                    aria-label="Toggle wishlist"
-                    className={`px-6 py-3 border-2 rounded-lg transition ${
+                    aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-pressed={wishlisted}
+                    className={`rounded-sm border-2 px-6 py-3.5 transition ${
                       wishlisted
-                        ? 'border-red-400 text-red-500 bg-red-50'
-                        : 'border-amber-700 text-amber-700 hover:bg-amber-50'
+                        ? 'border-clay-red bg-clay-red-soft text-clay-red'
+                        : 'border-ink/25 text-ink hover:border-terracotta hover:text-terracotta-dark'
                     }`}
                   >
-                    {wishlisted ? '♥' : '♡'}
+                    {wishlisted ? '♥ Saved' : '♡ Save'}
                   </button>
                 )}
               </div>
 
               {product.isActive === false && (
-                <div className="mt-4 p-4 bg-red-50 rounded-lg text-sm text-red-700">
+                <div className="mt-4 rounded-sm border border-clay-red/25 bg-clay-red-soft p-4 text-sm text-clay-red">
                   This product is currently unavailable.
                 </div>
               )}
@@ -242,28 +271,16 @@ function ProductDetail() {
           </div>
         </div>
 
+        {/* ----- craft heritage ----- */}
+        <CraftHeritage
+          giTag={product.giTag}
+          craftType={product.craftType}
+          material={product.material}
+        />
+
         {/* ----- artisan story ----- */}
-        {product.artisan && (
-          <div className="mt-8 bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-bold text-amber-900 mb-4">Artisan Story</h2>
-            <div className="flex items-start gap-4">
-              <div className="text-4xl">👩‍🎨</div>
-              <div>
-                <h3 className="font-semibold text-amber-800">{product.artisan.businessName}</h3>
-                <p className="text-sm text-amber-600">
-                  {[product.artisan.location?.city, product.artisan.location?.state]
-                    .filter(Boolean)
-                    .join(', ')}
-                </p>
-                {product.artisan.story && (
-                  <p className="text-amber-700 mt-2 text-sm leading-relaxed">
-                    {product.artisan.story}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <MakerSection artisan={product.artisan} />
+
         {/* ----- reviews ----- */}
         <ReviewsSection productId={product._id} />
       </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { artisanService } from '../../services/artisanService';
 import { errMsg } from '../../components/Toast';
 import StarRating from '../../components/review/StarRating';
+import ProductImage from '../../components/product/ProductImage';
 
 const CRAFT_TYPES = ['textiles', 'pottery', 'jewelry', 'woodwork', 'metalwork', 'painting', 'sculpture', 'embroidery'];
 
@@ -63,49 +64,49 @@ function Artisans() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-amber-900 mb-4">Our Artisans</h1>
-          <p className="text-amber-700 max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold text-ink mb-4">Our Artisans</h1>
+          <p className="text-terracotta-dark max-w-2xl mx-auto">
             Meet the master craftspeople who preserve India&apos;s rich artistic heritage.
             Each artisan brings generations of expertise and passion to their craft.
           </p>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 mb-8">
-          <div className="md:w-64 bg-white rounded-xl shadow-md p-6 h-fit">
-            <h3 className="font-semibold text-amber-900 mb-4">Filter Artisans</h3>
+          <div className="md:w-64 bg-white rounded-sm border border-ink/10 p-6 h-fit">
+            <h3 className="font-semibold text-ink mb-4">Filter Artisans</h3>
             <form onSubmit={applyFilters}>
               <div className="mb-4">
-                <label htmlFor="artisan-search" className="text-sm text-amber-800 font-medium">Search</label>
+                <label htmlFor="artisan-search" className="text-sm text-ink-soft font-medium">Search</label>
                 <input
                   id="artisan-search"
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Name or craft..."
-                  className="w-full mt-1 border border-amber-300 rounded-lg px-3 py-2 text-amber-800"
+                  className="w-full mt-1 border border-ink/15 rounded-sm px-3 py-2 text-ink-soft"
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="artisan-state" className="text-sm text-amber-800 font-medium">State</label>
+                <label htmlFor="artisan-state" className="text-sm text-ink-soft font-medium">State</label>
                 <input
                   id="artisan-state"
                   type="text"
                   value={stateInput}
                   onChange={(e) => setStateInput(e.target.value)}
                   placeholder="e.g. Rajasthan"
-                  className="w-full mt-1 border border-amber-300 rounded-lg px-3 py-2 text-amber-800"
+                  className="w-full mt-1 border border-ink/15 rounded-sm px-3 py-2 text-ink-soft"
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="artisan-craft" className="text-sm text-amber-800 font-medium">Craft Type</label>
+                <label htmlFor="artisan-craft" className="text-sm text-ink-soft font-medium">Craft Type</label>
                 <select
                   id="artisan-craft"
                   value={craftInput}
                   onChange={(e) => setCraftInput(e.target.value)}
-                  className="w-full mt-1 border border-amber-300 rounded-lg px-3 py-2 text-amber-800"
+                  className="w-full mt-1 border border-ink/15 rounded-sm px-3 py-2 text-ink-soft"
                 >
                   <option value="">All Crafts</option>
                   {CRAFT_TYPES.map((craft) => (
@@ -117,14 +118,14 @@ function Artisans() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-amber-700 text-white py-2 rounded-lg hover:bg-amber-800 transition"
+                className="w-full bg-terracotta text-white py-2 rounded-sm hover:bg-terracotta-dark transition"
               >
                 Apply Filters
               </button>
               <button
                 type="button"
                 onClick={clearFilters}
-                className="w-full mt-2 border border-amber-300 text-amber-800 py-2 rounded-lg hover:bg-amber-50 transition"
+                className="w-full mt-2 border border-ink/15 text-ink-soft py-2 rounded-sm hover:bg-parchment transition"
               >
                 Clear
               </button>
@@ -135,11 +136,11 @@ function Artisans() {
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
-                    <div className="bg-amber-100 h-40" />
+                  <div key={i} className="bg-white rounded-sm border border-ink/10 overflow-hidden animate-pulse">
+                    <div className="bg-parchment h-40" />
                     <div className="p-6 space-y-3">
-                      <div className="h-4 bg-amber-100 rounded w-2/3" />
-                      <div className="h-3 bg-amber-100 rounded w-1/2" />
+                      <div className="h-4 bg-parchment rounded w-2/3" />
+                      <div className="h-3 bg-parchment rounded w-1/2" />
                     </div>
                   </div>
                 ))}
@@ -147,34 +148,37 @@ function Artisans() {
             )}
 
             {error && (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <div className="bg-white rounded-sm border border-ink/10 p-12 text-center">
                 <span className="text-4xl">⚠️</span>
                 <p className="text-red-600 mt-4">{error}</p>
               </div>
             )}
 
             {!loading && !error && artisans.length === 0 && (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <p className="text-amber-700">No artisans match your filters.</p>
+              <div className="bg-white rounded-sm border border-ink/10 p-12 text-center">
+                <p className="text-terracotta-dark">No artisans match your filters.</p>
               </div>
             )}
 
             {!loading && !error && (
               <>
-                <p className="text-sm text-amber-600 mb-4">{total} artisan{total === 1 ? '' : 's'} found</p>
+                <p className="text-sm text-ink-soft mb-4">{total} artisan{total === 1 ? '' : 's'} found</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {artisans.map((artisan) => (
                     <Link
                       key={artisan._id}
                       to={`/artisan/${artisan._id}`}
-                      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition group"
+                      className="bg-white rounded-sm border border-ink/10 overflow-hidden hover:shadow-lg transition group"
                     >
-                      <div className="bg-amber-100 h-40 flex items-center justify-center overflow-hidden">
+                      <div className="bg-parchment h-40 flex items-center justify-center overflow-hidden">
                         {artisan.profileImage ? (
-                          <img
+                          <ProductImage
                             src={artisan.profileImage}
                             alt={artisan.businessName}
-                            className="w-full h-full object-cover group-hover:scale-105 transition"
+                            frame="h-full w-full"
+                            w={640}
+                            h={400}
+                            imgClassName="transition-transform duration-700 group-hover:scale-105"
                           />
                         ) : (
                           <span className="text-7xl">👩‍🎨</span>
@@ -183,10 +187,10 @@ function Artisans() {
                       <div className="p-6">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-semibold text-amber-900 group-hover:text-amber-700 transition">
+                            <h3 className="font-semibold text-ink group-hover:text-terracotta-dark transition">
                               {artisan.businessName}
                             </h3>
-                            <p className="text-sm text-amber-600 mt-1">
+                            <p className="text-sm text-ink-soft mt-1">
                               {[artisan.location?.city, artisan.location?.state].filter(Boolean).join(', ') || 'India'}
                             </p>
                           </div>
@@ -196,11 +200,11 @@ function Artisans() {
                         </div>
                         <div className="flex items-center gap-2 mt-3">
                           <StarRating value={artisan.rating || 0} size="text-sm" />
-                          <span className="text-sm text-amber-600">
+                          <span className="text-sm text-ink-soft">
                             {artisan.reviewCount ? `(${artisan.reviewCount})` : ''}
                           </span>
                         </div>
-                        <p className="text-amber-800 mt-2 font-medium text-sm">
+                        <p className="text-ink-soft mt-2 font-medium text-sm">
                           {(artisan.craftTypes || []).join(', ')}
                         </p>
                       </div>
@@ -213,15 +217,15 @@ function Artisans() {
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page <= 1}
-                      className="px-4 py-2 border border-amber-300 rounded-lg text-amber-800 hover:bg-amber-50 disabled:opacity-40"
+                      className="px-4 py-2 border border-ink/15 rounded-sm text-ink-soft hover:bg-parchment disabled:opacity-40"
                     >
                       Previous
                     </button>
-                    <span className="text-amber-800">Page {page} of {pages}</span>
+                    <span className="text-ink-soft">Page {page} of {pages}</span>
                     <button
                       onClick={() => setPage((p) => Math.min(pages, p + 1))}
                       disabled={page >= pages}
-                      className="px-4 py-2 border border-amber-300 rounded-lg text-amber-800 hover:bg-amber-50 disabled:opacity-40"
+                      className="px-4 py-2 border border-ink/15 rounded-sm text-ink-soft hover:bg-parchment disabled:opacity-40"
                     >
                       Next
                     </button>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loading, ErrorState, EmptyState, Pager } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { workshopService } from '../../services/workshopService';
+import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
 
 const LEVELS = ['beginner', 'intermediate', 'advanced', 'all'];
@@ -72,27 +73,27 @@ function Workshops() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-amber-900 mb-4">Live Workshops</h1>
-          <p className="text-amber-700 max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold text-ink mb-4">Live Workshops</h1>
+          <p className="text-terracotta-dark max-w-2xl mx-auto">
             Learn traditional crafts directly from master artisans. Interactive sessions and
             hands-on learning — pay at the venue.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-4 mb-6 flex flex-wrap gap-3 items-center">
+        <div className="bg-white rounded-sm border border-ink/10 p-4 mb-6 flex flex-wrap gap-3 items-center">
           <input
             value={filters.craftType}
             onChange={(e) => setFilter('craftType', e.target.value)}
             placeholder="Craft type (e.g. textiles)"
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-40"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-40"
           />
           <select
             value={filters.level}
             onChange={(e) => setFilter('level', e.target.value)}
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
           >
             <option value="">All levels</option>
             {LEVELS.map((level) => (
@@ -102,7 +103,7 @@ function Workshops() {
           <select
             value={filters.location}
             onChange={(e) => setFilter('location', e.target.value)}
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
           >
             <option value="">Any mode</option>
             {LOCATION_TYPES.map((type) => (
@@ -113,21 +114,21 @@ function Workshops() {
             value={filters.city}
             onChange={(e) => setFilter('city', e.target.value)}
             placeholder="City"
-            className="border border-amber-200 rounded-lg px-3 py-2 text-sm min-w-32"
+            className="border border-ink/10 rounded-sm px-3 py-2 text-sm min-w-32"
           />
-          <label className="text-sm text-amber-700 flex items-center gap-2">
+          <label className="text-sm text-terracotta-dark flex items-center gap-2">
             From
             <input
               type="date"
               value={filters.from}
               onChange={(e) => setFilter('from', e.target.value)}
-              className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
-          <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+          <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
             Apply
           </button>
-          <button onClick={clearFilters} className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+          <button onClick={clearFilters} className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm">
             Clear
           </button>
         </div>
@@ -137,7 +138,7 @@ function Workshops() {
           <div>
             <ErrorState message={error} />
             <div className="text-center mt-4">
-              <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+              <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
                 Retry
               </button>
             </div>
@@ -149,44 +150,50 @@ function Workshops() {
 
         {!loading && !error && workshops.length > 0 && (
           <>
-            <p className="text-sm text-amber-600 mb-4">{total} workshop{total === 1 ? '' : 's'}</p>
+            <p className="text-sm text-ink-soft mb-4">{total} workshop{total === 1 ? '' : 's'}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {workshops.map((workshop) => {
                 const slot = firstUpcoming(workshop);
                 const seatsLeft = workshop.seatsLeft ?? Math.max(0, workshop.maxParticipants - workshop.currentParticipants);
                 return (
-                  <div key={workshop._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
-                    <div className="bg-amber-100 h-40 flex items-center justify-center text-6xl overflow-hidden">
+                  <div key={workshop._id} className="bg-white rounded-sm border border-ink/10 overflow-hidden hover:shadow-lg transition flex flex-col">
+                    <div className="bg-parchment h-40 flex items-center justify-center text-6xl overflow-hidden">
                       {workshop.images?.[0] ? (
-                        <img src={workshop.images[0]} alt={workshop.title} className="w-full h-full object-cover" />
+                        <ProductImage
+                          src={workshop.images?.[0]}
+                          alt={workshop.title}
+                          frame="h-full w-full"
+                          w={640}
+                          h={400}
+                        />
                       ) : (
                         <span>🧵</span>
                       )}
                     </div>
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-amber-900">{workshop.title}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 shrink-0">
+                        <h3 className="font-semibold text-ink">{workshop.title}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-parchment text-ink-soft shrink-0">
                           {workshop.level}
                         </span>
                       </div>
-                      <p className="text-sm text-amber-600 mt-1">
+                      <p className="text-sm text-ink-soft mt-1">
                         by {workshop.artisan?.businessName || 'Artisan'}
                       </p>
-                      <p className="text-sm text-amber-600 mt-2">
+                      <p className="text-sm text-ink-soft mt-2">
                         📅 {slot ? formatDate(slot.date) : 'Date TBA'}
                       </p>
-                      <p className="text-sm text-amber-600">
+                      <p className="text-sm text-ink-soft">
                         ⏱️ {workshop.duration} {workshop.durationUnit} · {workshop.location?.type || 'online'}
                         {workshop.location?.city ? ` · ${workshop.location.city}` : ''}
                       </p>
                       <div className="mt-3">
-                        <div className="text-xs text-amber-600 mb-1">
+                        <div className="text-xs text-ink-soft mb-1">
                           {seatsLeft > 0 ? `${seatsLeft} seat${seatsLeft === 1 ? '' : 's'} left` : 'Sold out'}
                         </div>
-                        <div className="w-full bg-amber-200 rounded-full h-2">
+                        <div className="w-full bg-linen rounded-full h-2">
                           <div
-                            className="bg-amber-600 h-2 rounded-full"
+                            className="bg-terracotta h-2 rounded-full"
                             style={{
                               width: `${Math.min(100, ((workshop.currentParticipants || 0) / (workshop.maxParticipants || 1)) * 100)}%`,
                             }}
@@ -194,10 +201,10 @@ function Workshops() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-4 pt-2">
-                        <span className="text-lg font-bold text-amber-900">{inr(workshop.price)}</span>
+                        <span className="text-lg font-bold text-ink">{inr(workshop.price)}</span>
                         <Link
                           to={`/workshop/${workshop._id}`}
-                          className="bg-amber-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-800 transition"
+                          className="bg-terracotta text-white px-4 py-2 rounded-sm text-sm hover:bg-terracotta-dark transition"
                         >
                           View Details
                         </Link>

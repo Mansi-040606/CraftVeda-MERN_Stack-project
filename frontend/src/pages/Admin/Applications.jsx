@@ -54,20 +54,20 @@ function AdminApplications() {
 
   return (
     <AdminShell title="Artisan Applications">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>{s || 'All'}</option>
           ))}
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Refresh
         </button>
-        <span className="text-sm text-amber-600">{applications.length} applications</span>
+        <span className="text-sm text-ink-soft">{applications.length} applications</span>
       </div>
 
       {loading && <Loading />}
@@ -77,20 +77,20 @@ function AdminApplications() {
       {!loading && !error && applications.length > 0 && (
         <div className="space-y-4">
           {applications.map((application) => (
-            <div key={application._id} className="bg-white rounded-xl shadow-md p-5">
+            <div key={application._id} className="bg-white rounded-sm border border-ink/10 p-5">
               <div className="flex flex-wrap justify-between gap-4">
                 <div>
-                  <p className="font-bold text-amber-900">{application.businessName}</p>
-                  <p className="text-sm text-amber-600">
+                  <p className="font-bold text-ink">{application.businessName}</p>
+                  <p className="text-sm text-ink-soft">
                     {application.user?.name} · {application.user?.email}
                   </p>
-                  <p className="text-sm text-amber-700 mt-2">{application.description}</p>
-                  <p className="text-xs text-amber-600 mt-2">
+                  <p className="text-sm text-terracotta-dark mt-2">{application.description}</p>
+                  <p className="text-xs text-ink-soft mt-2">
                     Crafts: {(application.craftTypes || []).join(', ')} · Experience: {application.yearsOfExperience} yrs
                     {application.location?.city ? ` · ${application.location.city}` : ''}
                   </p>
                   {application.adminNotes && (
-                    <p className="text-xs text-amber-500 mt-1">Notes: {application.adminNotes}</p>
+                    <p className="text-xs text-ink-faint mt-1">Notes: {application.adminNotes}</p>
                   )}
                 </div>
                 <div className="text-right">
@@ -99,7 +99,7 @@ function AdminApplications() {
                       ? 'bg-green-100 text-green-800'
                       : application.status === 'REJECTED'
                         ? 'bg-red-100 text-red-700'
-                        : 'bg-amber-100 text-amber-800'
+                        : 'bg-parchment text-ink-soft'
                   }`}>
                     {application.status}
                   </span>

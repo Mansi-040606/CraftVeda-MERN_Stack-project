@@ -1,4 +1,10 @@
-import api from './api';
+import api, { multipart } from './api';
+
+const uploadField = (url, field, file) => {
+  const fd = new FormData();
+  fd.append(field, file);
+  return api.post(url, fd, multipart);
+};
 
 export const artisanService = {
   getAll: (params) => api.get('/artisans', { params }),
@@ -11,6 +17,10 @@ export const artisanService = {
   getMy: () => api.get('/artisans/me'),
   myStats: () => api.get('/artisans/me/stats'),
   myOrders: (params) => api.get('/artisans/me/orders', { params }),
+
+  // --- images (Cloudinary) ---
+  uploadProfileImage: (file) => uploadField('/artisans/me/profile-image', 'image', file),
+  uploadCoverImage: (file) => uploadField('/artisans/me/cover-image', 'image', file),
 };
 
 export default artisanService;

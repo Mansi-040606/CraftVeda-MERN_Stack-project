@@ -4,6 +4,7 @@ import { orderService } from '../../services/orderService';
 import { useCart } from '../../context/CartContext';
 import { toast, errMsg } from '../../components/Toast';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/order/OrderStatus';
+import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
 
 const ORDER_STATUS_FLOW = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
@@ -76,11 +77,11 @@ function OrderDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
+      <div className="min-h-screen bg-cream py-8">
         <div className="max-w-4xl mx-auto px-4 space-y-6">
-          <div className="bg-white rounded-xl shadow-md p-6 h-32 animate-pulse" />
-          <div className="bg-white rounded-xl shadow-md p-6 h-64 animate-pulse" />
-          <div className="bg-white rounded-xl shadow-md p-6 h-48 animate-pulse" />
+          <div className="bg-white rounded-sm border border-ink/10 p-6 h-32 animate-pulse" />
+          <div className="bg-white rounded-sm border border-ink/10 p-6 h-64 animate-pulse" />
+          <div className="bg-white rounded-sm border border-ink/10 p-6 h-48 animate-pulse" />
         </div>
       </div>
     );
@@ -88,24 +89,24 @@ function OrderDetail() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
+      <div className="min-h-screen bg-cream py-8">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+          <div className="bg-white rounded-sm border border-ink/10 p-12 text-center">
             <span className="text-6xl">⚠️</span>
-            <h2 className="text-xl font-semibold text-amber-900 mt-4">
+            <h2 className="text-xl font-semibold text-ink mt-4">
               {error?.includes('not found') ? 'Order not found' : 'Could not load this order'}
             </h2>
-            <p className="text-amber-600 mt-2">{error || 'This order does not exist.'}</p>
+            <p className="text-ink-soft mt-2">{error || 'This order does not exist.'}</p>
             <div className="flex flex-wrap gap-4 justify-center mt-4">
               <button
                 onClick={retry}
-                className="bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition"
+                className="bg-terracotta text-white px-6 py-2 rounded-sm hover:bg-terracotta-dark transition"
               >
                 Try Again
               </button>
               <Link
                 to="/orders"
-                className="bg-white border border-amber-300 text-amber-800 px-6 py-2 rounded-lg hover:bg-amber-50 transition"
+                className="bg-white border border-ink/15 text-ink-soft px-6 py-2 rounded-sm hover:bg-parchment transition"
               >
                 Back to My Orders
               </Link>
@@ -120,14 +121,14 @@ function OrderDetail() {
   const isCancelled = order.orderStatus === 'cancelled';
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-amber-900">
+            <h1 className="text-2xl font-bold text-ink">
               Order #{String(order._id).slice(-6).toUpperCase()}
             </h1>
-            <p className="text-sm text-amber-600 mt-1">Placed on {formatDate(order.createdAt)}</p>
+            <p className="text-sm text-ink-soft mt-1">Placed on {formatDate(order.createdAt)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <OrderStatusBadge status={order.orderStatus} />
@@ -136,11 +137,11 @@ function OrderDetail() {
         </div>
 
         {/* ----- status timeline ----- */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="font-bold text-amber-900 mb-4">Order Status</h2>
+        <div className="bg-white rounded-sm border border-ink/10 p-6 mb-6">
+          <h2 className="font-bold text-ink mb-4">Order Status</h2>
 
           {isCancelled ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+            <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-sm text-red-700">
               This order was cancelled on {formatDate(order.updatedAt || order.createdAt)}.
             </div>
           ) : (
@@ -153,8 +154,8 @@ function OrderDetail() {
                     <span
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
                         done || current
-                          ? 'bg-amber-700 text-white'
-                          : 'bg-amber-100 text-amber-500'
+                          ? 'bg-terracotta text-white'
+                          : 'bg-parchment text-ink-faint'
                       }`}
                     >
                       {done ? '✓' : index + 1}
@@ -162,12 +163,12 @@ function OrderDetail() {
                     <div>
                       <p
                         className={`text-sm font-medium ${
-                          done || current ? 'text-amber-900' : 'text-amber-500'
+                          done || current ? 'text-ink' : 'text-ink-faint'
                         }`}
                       >
                         {step.charAt(0).toUpperCase() + step.slice(1)}
                       </p>
-                      {current && <p className="text-xs text-amber-600">Current status</p>}
+                      {current && <p className="text-xs text-ink-soft">Current status</p>}
                     </div>
                   </li>
                 );
@@ -176,14 +177,14 @@ function OrderDetail() {
           )}
 
           {canCancel && (
-            <div className="border-t border-amber-100 mt-5 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-sm text-amber-600">
+            <div className="border-t border-ink/10 mt-5 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-sm text-ink-soft">
                 Changed your mind? You can cancel while the order is being prepared.
               </p>
               <button
                 onClick={handleCancel}
                 disabled={cancelling}
-                className="px-4 py-2 border border-red-400 text-red-600 rounded-lg text-sm hover:bg-red-50 transition disabled:opacity-50"
+                className="px-4 py-2 border border-red-400 text-red-600 rounded-sm text-sm hover:bg-red-50 transition disabled:opacity-50"
               >
                 {cancelling ? 'Cancelling…' : 'Cancel Order'}
               </button>
@@ -192,73 +193,71 @@ function OrderDetail() {
         </div>
 
         {/* ----- items ----- */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="font-bold text-amber-900 mb-4">Items</h2>
-          <div className="divide-y divide-amber-100">
+        <div className="bg-white rounded-sm border border-ink/10 p-6 mb-6">
+          <h2 className="font-bold text-ink mb-4">Items</h2>
+          <div className="divide-y divide-ink/10">
             {(order.items || []).map((item, index) => (
               <div key={item.product?._id || index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                <div className="bg-amber-100 rounded-lg w-16 h-16 flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">
-                  {item.product?.images?.[0] ? (
-                    <img
-                      src={item.product.images[0]}
-                      alt={item.product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span>🏺</span>
-                  )}
+                <div className="bg-parchment rounded-sm w-16 h-16 flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">
+                  <ProductImage
+                    src={item.product?.images?.[0]}
+                    alt={item.product?.name || 'Product'}
+                    frame="h-full w-full"
+                    w={128}
+                    h={128}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-amber-900 truncate">
+                  <p className="font-medium text-ink truncate">
                     {item.product ? (
-                      <Link to={`/product/${item.product._id}`} className="hover:text-amber-700">
+                      <Link to={`/product/${item.product._id}`} className="hover:text-terracotta-dark">
                         {item.product.name}
                       </Link>
                     ) : (
                       'Product unavailable'
                     )}
                   </p>
-                  <p className="text-sm text-amber-600">
+                  <p className="text-sm text-ink-soft">
                     {inr(item.price)} × {item.quantity}
                   </p>
                   {item.customization?.value && (
-                    <p className="text-xs text-amber-600 mt-1">
+                    <p className="text-xs text-ink-soft mt-1">
                       {item.customization.option}: {item.customization.value}
                     </p>
                   )}
                 </div>
-                <p className="font-semibold text-amber-900">{inr(item.price * item.quantity)}</p>
+                <p className="font-semibold text-ink">{inr(item.price * item.quantity)}</p>
               </div>
             ))}
           </div>
 
-          <div className="border-t border-amber-200 mt-4 pt-4 space-y-2 text-sm">
+          <div className="border-t border-ink/10 mt-4 pt-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-amber-700">Subtotal</span>
-              <span className="text-amber-900">{inr(order.subtotal)}</span>
+              <span className="text-terracotta-dark">Subtotal</span>
+              <span className="text-ink">{inr(order.subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-amber-700">Shipping</span>
-              <span className="text-amber-900">
+              <span className="text-terracotta-dark">Shipping</span>
+              <span className="text-ink">
                 {order.shippingCost === 0 ? 'FREE' : inr(order.shippingCost)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-amber-700">Tax (GST)</span>
-              <span className="text-amber-900">{inr(order.tax)}</span>
+              <span className="text-terracotta-dark">Tax (GST)</span>
+              <span className="text-ink">{inr(order.tax)}</span>
             </div>
-            <div className="border-t border-amber-200 pt-2 flex justify-between font-bold text-base">
-              <span className="text-amber-900">Total</span>
-              <span className="text-amber-900">{inr(order.total)}</span>
+            <div className="border-t border-ink/10 pt-2 flex justify-between font-bold text-base">
+              <span className="text-ink">Total</span>
+              <span className="text-ink">{inr(order.total)}</span>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ----- shipping address ----- */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="font-bold text-amber-900 mb-4">Shipping Address</h2>
-            <p className="text-sm text-amber-700 leading-relaxed">
+          <div className="bg-white rounded-sm border border-ink/10 p-6">
+            <h2 className="font-bold text-ink mb-4">Shipping Address</h2>
+            <p className="text-sm text-terracotta-dark leading-relaxed">
               {order.shippingAddress?.street}
               <br />
               {order.shippingAddress?.city}, {order.shippingAddress?.state}{' '}
@@ -267,39 +266,39 @@ function OrderDetail() {
               {order.shippingAddress?.country}
             </p>
             {order.trackingNumber && (
-              <p className="text-sm text-amber-700 mt-4">
+              <p className="text-sm text-terracotta-dark mt-4">
                 <span className="font-semibold">Tracking:</span> {order.trackingNumber}
               </p>
             )}
             {order.notes && (
-              <p className="text-sm text-amber-700 mt-4">
+              <p className="text-sm text-terracotta-dark mt-4">
                 <span className="font-semibold">Notes:</span> {order.notes}
               </p>
             )}
           </div>
 
           {/* ----- payment ----- */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="font-bold text-amber-900 mb-4">Payment</h2>
+          <div className="bg-white rounded-sm border border-ink/10 p-6">
+            <h2 className="font-bold text-ink mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-amber-700">Method</span>
-                <span className="text-amber-900">
+                <span className="text-terracotta-dark">Method</span>
+                <span className="text-ink">
                   {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-amber-700">Status</span>
+                <span className="text-terracotta-dark">Status</span>
                 <PaymentStatusBadge status={order.paymentStatus} />
               </div>
               {order.paymentId && (
                 <div className="flex justify-between">
-                  <span className="text-amber-700">Payment ID</span>
-                  <span className="text-amber-900">{order.paymentId}</span>
+                  <span className="text-terracotta-dark">Payment ID</span>
+                  <span className="text-ink">{order.paymentId}</span>
                 </div>
               )}
               {order.paymentStatus === 'pending' && (
-                <p className="text-xs text-amber-600 bg-amber-50 rounded-lg p-3 mt-2">
+                <p className="text-xs text-ink-soft bg-cream rounded-sm p-3 mt-2">
                   Payment for this order has not been completed yet.
                 </p>
               )}
@@ -309,7 +308,7 @@ function OrderDetail() {
 
         <Link
           to="/orders"
-          className="inline-block mt-6 text-amber-700 hover:text-amber-900 font-medium text-sm"
+          className="inline-block mt-6 text-terracotta-dark hover:text-ink font-medium text-sm"
         >
           ← Back to My Orders
         </Link>

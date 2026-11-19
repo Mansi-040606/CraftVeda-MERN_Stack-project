@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Loading, ErrorState } from '../../components/admin/AdminShell';
 import { errMsg } from '../../components/Toast';
 import { craftStoryService } from '../../services/craftStoryService';
+import ProductImage from '../../components/product/ProductImage';
 
 const formatDate = (value) =>
   new Date(value).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -32,7 +33,7 @@ function StoryDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 py-12">
+      <div className="min-h-screen bg-cream py-12">
         <div className="max-w-3xl mx-auto px-4">
           <Loading />
         </div>
@@ -42,14 +43,14 @@ function StoryDetail() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-amber-50 py-12">
+      <div className="min-h-screen bg-cream py-12">
         <div className="max-w-3xl mx-auto px-4">
           <ErrorState message={error} />
           <div className="text-center mt-4">
-            <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
               Retry
             </button>
-            <Link to="/stories" className="block mt-3 text-amber-700 hover:text-amber-900 text-sm">
+            <Link to="/stories" className="block mt-3 text-terracotta-dark hover:text-ink text-sm">
               ← All stories
             </Link>
           </div>
@@ -63,16 +64,22 @@ function StoryDetail() {
   const paragraphs = (story.content || '').split(/\n\s*\n/).filter(Boolean);
 
   return (
-    <article className="min-h-screen bg-amber-50 py-12">
+    <article className="min-h-screen bg-cream py-12">
       <div className="max-w-3xl mx-auto px-4">
-        <Link to="/stories" className="text-amber-700 hover:text-amber-900 text-sm">
+        <Link to="/stories" className="text-terracotta-dark hover:text-ink text-sm">
           ← All stories
         </Link>
 
-        <div className="bg-white rounded-xl shadow-md overflow-hidden mt-4">
-          <div className="bg-amber-100 h-56 flex items-center justify-center text-7xl overflow-hidden">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-hidden mt-4">
+          <div className="bg-parchment h-56 flex items-center justify-center text-7xl overflow-hidden">
             {story.coverImage ? (
-              <img src={story.coverImage} alt={story.title} className="w-full h-full object-cover" />
+              <ProductImage
+              src={story.coverImage}
+              alt={story.title}
+              frame="h-full w-full"
+              w={960}
+              h={540}
+            />
             ) : (
               <span>📜</span>
             )}
@@ -80,47 +87,47 @@ function StoryDetail() {
 
           <div className="p-8">
             <div className="flex flex-wrap items-center gap-3 mb-4">
-              <span className="text-xs text-amber-600 font-medium uppercase bg-amber-100 px-2 py-1 rounded">
+              <span className="text-xs text-ink-soft font-medium uppercase bg-parchment px-2 py-1 rounded">
                 {story.category}
               </span>
               {story.craftType && (
-                <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                <span className="text-xs text-terracotta-dark bg-cream px-2 py-1 rounded border border-ink/10">
                   {story.craftType}
                 </span>
               )}
               {story.region && (
-                <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                <span className="text-xs text-terracotta-dark bg-cream px-2 py-1 rounded border border-ink/10">
                   📍 {story.region}
                 </span>
               )}
               {story.readTime && (
-                <span className="text-xs text-amber-500">{story.readTime} min read</span>
+                <span className="text-xs text-ink-faint">{story.readTime} min read</span>
               )}
               {(story.publishedAt || story.createdAt) && (
-                <span className="text-xs text-amber-500">
+                <span className="text-xs text-ink-faint">
                   {formatDate(story.publishedAt || story.createdAt)}
                 </span>
               )}
             </div>
 
-            <h1 className="text-3xl font-bold text-amber-900 mb-6">{story.title}</h1>
+            <h1 className="text-3xl font-bold text-ink mb-6">{story.title}</h1>
 
             {story.excerpt && (
-              <p className="text-lg text-amber-700 mb-6 border-l-4 border-amber-300 pl-4">
+              <p className="text-lg text-terracotta-dark mb-6 border-l-4 border-ink/15 pl-4">
                 {story.excerpt}
               </p>
             )}
 
-            <div className="space-y-5 text-amber-800 leading-relaxed">
+            <div className="space-y-5 text-ink-soft leading-relaxed">
               {paragraphs.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
             </div>
 
             {story.tags?.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-amber-100">
+              <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-ink/10">
                 {story.tags.map((tag) => (
-                  <span key={tag} className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                  <span key={tag} className="text-xs bg-parchment text-ink-soft px-2 py-1 rounded-full">
                     #{tag}
                   </span>
                 ))}
@@ -132,7 +139,7 @@ function StoryDetail() {
         <div className="text-center mt-8">
           <Link
             to="/stories"
-            className="inline-block bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-800 transition"
+            className="inline-block bg-terracotta text-white px-6 py-3 rounded-sm font-semibold hover:bg-terracotta-dark transition"
           >
             More Craft Stories
           </Link>

@@ -58,8 +58,8 @@ const baseOptions = {
 };
 
 const ChartCard = ({ title, children }) => (
-  <div className="bg-white rounded-xl shadow-md p-6">
-    <h2 className="font-bold text-amber-900 mb-4">{title}</h2>
+  <div className="bg-white rounded-sm border border-ink/10 p-6">
+    <h2 className="font-bold text-ink mb-4">{title}</h2>
     <div className="relative h-64" role="img" aria-label={title}>{children}</div>
   </div>
 );
@@ -67,9 +67,9 @@ const ChartCard = ({ title, children }) => (
 const ChartSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-hidden="true">
     {[0, 1].map((i) => (
-      <div key={i} className="bg-white rounded-xl shadow-md p-6">
-        <div className="h-4 w-40 bg-amber-100 rounded animate-pulse mb-4" />
-        <div className="h-56 bg-amber-50 rounded-lg animate-pulse" />
+      <div key={i} className="bg-white rounded-sm border border-ink/10 p-6">
+        <div className="h-4 w-40 bg-parchment rounded animate-pulse mb-4" />
+        <div className="h-56 bg-cream rounded-sm animate-pulse" />
       </div>
     ))}
   </div>
@@ -247,17 +247,17 @@ function DashboardCharts() {
   return (
     <section className="mb-8">
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-        <h2 className="font-bold text-amber-900">Analytics</h2>
+        <h2 className="font-bold text-ink">Analytics</h2>
         <div className="flex gap-2">
           {[3, 6, 12].map((option) => (
             <button
               key={option}
               onClick={() => setMonths(option)}
               aria-pressed={months === option}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+              className={`px-3 py-1 rounded-sm text-sm font-medium transition ${
                 months === option
-                  ? 'bg-amber-700 text-white'
-                  : 'bg-white text-amber-800 hover:bg-amber-100'
+                  ? 'bg-terracotta text-white'
+                  : 'bg-white text-ink-soft hover:bg-linen'
               }`}
             >
               {option} months
@@ -269,12 +269,12 @@ function DashboardCharts() {
       {loading && <ChartSkeleton />}
 
       {!loading && error && (
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="bg-white rounded-sm border border-ink/10 p-6">
           <ErrorState message={error} />
           <div className="text-center mt-4">
             <button
               onClick={load}
-              className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm"
+              className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm"
             >
               Retry
             </button>

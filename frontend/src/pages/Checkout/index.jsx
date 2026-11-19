@@ -205,7 +205,7 @@ function Checkout() {
 
   const renderField = (name, label, placeholder) => (
     <div>
-      <label htmlFor={name} className="text-sm text-amber-800 font-medium">
+      <label htmlFor={name} className="text-sm text-ink-soft font-medium">
         {label}
       </label>
       <input
@@ -215,8 +215,8 @@ function Checkout() {
         onChange={(e) => setField(name, e.target.value)}
         placeholder={placeholder}
         disabled={locked || submitting}
-        className={`w-full border rounded-lg px-4 py-2 mt-1 disabled:bg-amber-50 ${
-          errors[name] ? 'border-red-400' : 'border-amber-300'
+        className={`w-full border rounded-sm px-4 py-2 mt-1 disabled:bg-cream ${
+          errors[name] ? 'border-red-400' : 'border-ink/15'
         }`}
       />
       {errors[name] && <p className="text-red-600 text-xs mt-1">{errors[name]}</p>}
@@ -226,15 +226,15 @@ function Checkout() {
   // ----- states before the form -----
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 py-8">
+      <div className="min-h-screen bg-cream py-8">
         <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-2xl font-bold text-amber-900 mb-8">Checkout</h1>
+          <h1 className="text-2xl font-bold text-ink mb-8">Checkout</h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl shadow-md p-6 h-64 animate-pulse" />
-              <div className="bg-white rounded-xl shadow-md p-6 h-48 animate-pulse" />
+              <div className="bg-white rounded-sm border border-ink/10 p-6 h-64 animate-pulse" />
+              <div className="bg-white rounded-sm border border-ink/10 p-6 h-48 animate-pulse" />
             </div>
-            <div className="bg-white rounded-xl shadow-md p-6 h-64 animate-pulse" />
+            <div className="bg-white rounded-sm border border-ink/10 p-6 h-64 animate-pulse" />
           </div>
         </div>
       </div>
@@ -242,16 +242,16 @@ function Checkout() {
   }
 
   const blocked = (title, message, to, linkLabel) => (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-amber-900 mb-8">Checkout</h1>
-        <div className="bg-white rounded-xl shadow-md p-12 text-center">
+        <h1 className="text-2xl font-bold text-ink mb-8">Checkout</h1>
+        <div className="bg-white rounded-sm border border-ink/10 p-12 text-center">
           <span className="text-6xl">🛒</span>
-          <h2 className="text-xl font-semibold text-amber-900 mt-4">{title}</h2>
-          <p className="text-amber-600 mt-2">{message}</p>
+          <h2 className="text-xl font-semibold text-ink mt-4">{title}</h2>
+          <p className="text-ink-soft mt-2">{message}</p>
           <Link
             to={to}
-            className="inline-block mt-4 bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition"
+            className="inline-block mt-4 bg-terracotta text-white px-6 py-2 rounded-sm hover:bg-terracotta-dark transition"
           >
             {linkLabel}
           </Link>
@@ -276,12 +276,12 @@ function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 py-8">
+    <div className="min-h-screen bg-cream py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-amber-900 mb-8">Checkout</h1>
+        <h1 className="text-2xl font-bold text-ink mb-8">Checkout</h1>
 
         {failure && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-sm p-4 mb-6">
             <p className="font-semibold text-red-700">
               {isOnline ? 'Payment problem' : 'Order problem'}
             </p>
@@ -299,8 +299,8 @@ function Checkout() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="font-bold text-amber-900 mb-4">Shipping Address</h2>
+            <div className="bg-white rounded-sm border border-ink/10 p-6">
+              <h2 className="font-bold text-ink mb-4">Shipping Address</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   {renderField('street', 'Street Address', 'House No., Street, Area')}
@@ -312,10 +312,10 @@ function Checkout() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="font-bold text-amber-900 mb-4">Payment Method</h2>
+            <div className="bg-white rounded-sm border border-ink/10 p-6">
+              <h2 className="font-bold text-ink mb-4">Payment Method</h2>
               {locked && (
-                <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 mb-4">
+                <p className="text-sm bg-cream border border-ink/10 text-ink-soft rounded-sm p-3 mb-4">
                   Order #{String(orderId).slice(-6).toUpperCase()} was created and is waiting for
                   payment. Retry below — you will not be charged twice.
                 </p>
@@ -324,10 +324,10 @@ function Checkout() {
                 {PAYMENT_OPTIONS.map((option) => (
                   <label
                     key={option.value}
-                    className={`flex items-center gap-3 p-3 border rounded-lg transition ${
+                    className={`flex items-center gap-3 p-3 border rounded-sm transition ${
                       paymentMethod === option.value
-                        ? 'border-amber-600 bg-amber-50'
-                        : 'border-amber-200 hover:bg-amber-50'
+                        ? 'border-terracotta bg-cream'
+                        : 'border-ink/10 hover:bg-parchment'
                     } ${locked || submitting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <input
@@ -337,14 +337,14 @@ function Checkout() {
                       checked={paymentMethod === option.value}
                       disabled={locked || submitting}
                       onChange={() => setPaymentMethod(option.value)}
-                      className="text-amber-600"
+                      className="text-ink-soft"
                     />
                     <span className="flex-1">
-                      <span className="block text-amber-800 font-medium">{option.label}</span>
-                      <span className="block text-xs text-amber-600">{option.hint}</span>
+                      <span className="block text-ink-soft font-medium">{option.label}</span>
+                      <span className="block text-xs text-ink-soft">{option.hint}</span>
                     </span>
                     {option.online && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-parchment text-terracotta-dark px-2 py-1 rounded">
                         Razorpay
                       </span>
                     )}
@@ -355,37 +355,37 @@ function Checkout() {
           </div>
 
           <div>
-            <div className="bg-white rounded-xl shadow-md p-6 sticky top-24">
-              <h2 className="font-bold text-amber-900 mb-4">Order Summary</h2>
+            <div className="bg-white rounded-sm border border-ink/10 p-6 sticky top-24">
+              <h2 className="font-bold text-ink mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 {availableItems.map((item) => (
                   <div key={item.product._id} className="flex justify-between gap-2">
-                    <span className="text-amber-700 truncate">
+                    <span className="text-terracotta-dark truncate">
                       {item.product.name} × {item.quantity}
                     </span>
-                    <span className="text-amber-900 flex-shrink-0">{inr(item.lineTotal)}</span>
+                    <span className="text-ink flex-shrink-0">{inr(item.lineTotal)}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-amber-200 pt-3 space-y-2 text-sm">
+              <div className="border-t border-ink/10 pt-3 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-amber-700">Subtotal</span>
-                  <span className="text-amber-900">{inr(subtotal)}</span>
+                  <span className="text-terracotta-dark">Subtotal</span>
+                  <span className="text-ink">{inr(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-amber-700">Shipping (est.)</span>
-                  <span className="text-amber-900">{shipping === 0 ? 'FREE' : inr(shipping)}</span>
+                  <span className="text-terracotta-dark">Shipping (est.)</span>
+                  <span className="text-ink">{shipping === 0 ? 'FREE' : inr(shipping)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-amber-700">Tax (est. 18% GST)</span>
-                  <span className="text-amber-900">{inr(tax)}</span>
+                  <span className="text-terracotta-dark">Tax (est. 18% GST)</span>
+                  <span className="text-ink">{inr(tax)}</span>
                 </div>
-                <div className="border-t border-amber-200 pt-2 flex justify-between font-bold">
-                  <span className="text-amber-900">Total (est.)</span>
-                  <span className="text-amber-900">{inr(estimatedTotal)}</span>
+                <div className="border-t border-ink/10 pt-2 flex justify-between font-bold">
+                  <span className="text-ink">Total (est.)</span>
+                  <span className="text-ink">{inr(estimatedTotal)}</span>
                 </div>
               </div>
-              <p className="text-xs text-amber-600 mt-2">
+              <p className="text-xs text-ink-soft mt-2">
                 Final pricing (shipping, GST, total) is calculated by the server when the order is
                 placed.
               </p>
@@ -393,7 +393,7 @@ function Checkout() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={submitting}
-                className="w-full bg-amber-700 text-white py-3 rounded-lg mt-6 hover:bg-amber-800 transition font-semibold disabled:bg-amber-300 disabled:cursor-not-allowed"
+                className="w-full bg-terracotta text-white py-3 rounded-sm mt-6 hover:bg-terracotta-dark transition font-semibold disabled:bg-linen disabled:cursor-not-allowed"
               >
                 {submitting
                   ? isOnline
@@ -406,7 +406,7 @@ function Checkout() {
 
               <Link
                 to="/cart"
-                className="block w-full text-amber-700 text-center py-2 mt-3 hover:underline text-sm"
+                className="block w-full text-terracotta-dark text-center py-2 mt-3 hover:underline text-sm"
               >
                 ← Back to Cart
               </Link>

@@ -220,10 +220,10 @@ function ArtisanWorkshops() {
       title="My Workshops"
       actions={
         <div className="flex items-center gap-3">
-          <span className="text-sm text-amber-600">{workshops.length} workshops</span>
+          <span className="text-sm text-ink-soft">{workshops.length} workshops</span>
           <button
             onClick={openAdd}
-            className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition"
+            className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm hover:bg-terracotta-dark transition"
           >
             Add Workshop
           </button>
@@ -231,45 +231,45 @@ function ArtisanWorkshops() {
       }
     >
       {showForm && (
-        <form onSubmit={save} className="bg-white rounded-xl shadow-md p-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <h2 className="font-bold text-amber-900 md:col-span-2">
+        <form onSubmit={save} className="bg-white rounded-sm border border-ink/10 p-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 className="font-bold text-ink md:col-span-2">
             {editing ? 'Edit Workshop' : 'Add Workshop'}
           </h2>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Title *
             <input
               required
               minLength={3}
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Craft type *
             <input
               required
               placeholder="e.g. Block Printing"
               value={form.craftType}
               onChange={(e) => setForm({ ...form, craftType: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800 md:col-span-2">
+          <label className="text-sm text-ink-soft md:col-span-2">
             Description *
             <textarea
               required
               rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Duration *
             <div className="flex gap-2 mt-1">
               <input
@@ -279,12 +279,12 @@ function ArtisanWorkshops() {
                 step="1"
                 value={form.duration}
                 onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                className="w-24 border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                className="w-24 border border-ink/10 rounded-sm px-3 py-2 text-sm"
               />
               <select
                 value={form.durationUnit}
                 onChange={(e) => setForm({ ...form, durationUnit: e.target.value })}
-                className="flex-1 border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 border border-ink/10 rounded-sm px-3 py-2 text-sm"
               >
                 {DURATION_UNITS.map((unit) => (
                   <option key={unit} value={unit}>{unit}</option>
@@ -293,7 +293,7 @@ function ArtisanWorkshops() {
             </div>
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Price (₹) *
             <input
               required
@@ -302,11 +302,11 @@ function ArtisanWorkshops() {
               step="1"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Max participants *
             <input
               required
@@ -315,16 +315,16 @@ function ArtisanWorkshops() {
               step="1"
               value={form.maxParticipants}
               onChange={(e) => setForm({ ...form, maxParticipants: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Level
             <select
               value={form.level}
               onChange={(e) => setForm({ ...form, level: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             >
               {LEVELS.map((level) => (
                 <option key={level} value={level}>{level}</option>
@@ -332,21 +332,21 @@ function ArtisanWorkshops() {
             </select>
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Language
             <input
               value={form.language}
               onChange={(e) => setForm({ ...form, language: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Mode
             <select
               value={form.locationType}
               onChange={(e) => setForm({ ...form, locationType: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             >
               {LOCATION_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
@@ -354,56 +354,56 @@ function ArtisanWorkshops() {
             </select>
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             City
             <input
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             State
             <input
               value={form.state}
               onChange={(e) => setForm({ ...form, state: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800 md:col-span-2">
+          <label className="text-sm text-ink-soft md:col-span-2">
             Address
             <input
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
-          <label className="text-sm text-amber-800 md:col-span-2">
+          <label className="text-sm text-ink-soft md:col-span-2">
             Image URLs
             <input
               placeholder="https://... (comma-separate for several)"
               value={form.images}
               onChange={(e) => setForm({ ...form, images: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
             />
           </label>
 
           <div className="md:col-span-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-amber-800 font-medium">Sessions</span>
+              <span className="text-sm text-ink-soft font-medium">Sessions</span>
               <button
                 type="button"
                 onClick={addSlot}
-                className="text-sm text-amber-700 hover:text-amber-900"
+                className="text-sm text-terracotta-dark hover:text-ink"
               >
                 + Add session
               </button>
             </div>
             {form.schedule.length === 0 && (
-              <p className="text-xs text-amber-500">
+              <p className="text-xs text-ink-faint">
                 No sessions yet — customers will pick their own date when booking.
               </p>
             )}
@@ -414,19 +414,19 @@ function ArtisanWorkshops() {
                     type="date"
                     value={slot.date}
                     onChange={(e) => updateSlot(index, 'date', e.target.value)}
-                    className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                    className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
                   />
                   <input
                     type="time"
                     value={slot.startTime}
                     onChange={(e) => updateSlot(index, 'startTime', e.target.value)}
-                    className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                    className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
                   />
                   <input
                     type="time"
                     value={slot.endTime}
                     onChange={(e) => updateSlot(index, 'endTime', e.target.value)}
-                    className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+                    className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
                   />
                   <button
                     type="button"
@@ -440,7 +440,7 @@ function ArtisanWorkshops() {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-amber-800">
+          <label className="flex items-center gap-2 text-sm text-ink-soft">
             <input
               type="checkbox"
               checked={form.isActive}
@@ -453,14 +453,14 @@ function ArtisanWorkshops() {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm disabled:opacity-50"
+              className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm disabled:opacity-50"
             >
               {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Workshop'}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm"
+              className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm"
             >
               Cancel
             </button>
@@ -473,7 +473,7 @@ function ArtisanWorkshops() {
         <div>
           <ErrorState message={error} />
           <div className="text-center mt-4">
-            <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
               Retry
             </button>
           </div>
@@ -486,11 +486,11 @@ function ArtisanWorkshops() {
       {!loading && !error && workshops.length > 0 && (
         <div className="space-y-4">
           {workshops.map((workshop) => (
-            <div key={workshop._id} className="bg-white rounded-xl shadow-md p-4">
+            <div key={workshop._id} className="bg-white rounded-sm border border-ink/10 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-amber-900">{workshop.title}</h3>
+                    <h3 className="font-semibold text-ink">{workshop.title}</h3>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs ${
                         workshop.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'
@@ -499,12 +499,12 @@ function ArtisanWorkshops() {
                       {workshop.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <p className="text-sm text-amber-600 mt-1">
+                  <p className="text-sm text-ink-soft mt-1">
                     {workshop.craftType} · {workshop.duration} {workshop.durationUnit} ·{' '}
                     {workshop.location?.type || 'online'}
                     {workshop.location?.city ? ` · ${workshop.location.city}` : ''}
                   </p>
-                  <p className="text-sm text-amber-600">
+                  <p className="text-sm text-ink-soft">
                     {inr(workshop.price)} · {workshop.seatsLeft} of {workshop.maxParticipants} seats left ·{' '}
                     {workshop.bookingCount || 0} booking{(workshop.bookingCount || 0) === 1 ? '' : 's'}
                   </p>
@@ -513,13 +513,13 @@ function ArtisanWorkshops() {
                 <div className="flex gap-3 text-sm shrink-0">
                   <button
                     onClick={() => toggleBookings(workshop)}
-                    className="text-amber-700 hover:text-amber-900"
+                    className="text-terracotta-dark hover:text-ink"
                   >
                     {bookingsFor === workshop._id ? 'Hide Bookings' : 'Bookings'}
                   </button>
                   <button
                     onClick={() => openEdit(workshop)}
-                    className="text-amber-700 hover:text-amber-900"
+                    className="text-terracotta-dark hover:text-ink"
                   >
                     Edit
                   </button>
@@ -534,25 +534,25 @@ function ArtisanWorkshops() {
               </div>
 
               {workshop.schedule?.length > 0 && (
-                <p className="text-xs text-amber-500 mt-2">
+                <p className="text-xs text-ink-faint mt-2">
                   Sessions: {workshop.schedule.map((slot) => formatDate(slot.date)).join(', ')}
                 </p>
               )}
 
               {bookingsFor === workshop._id && (
-                <div className="mt-4 border-t border-amber-100 pt-4">
-                  <h4 className="text-sm font-bold text-amber-900 mb-2">
+                <div className="mt-4 border-t border-ink/10 pt-4">
+                  <h4 className="text-sm font-bold text-ink mb-2">
                     Bookings for “{workshop.title}”
                   </h4>
                   {bookingsLoading && <Loading />}
                   {!bookingsLoading && bookings.length === 0 && (
-                    <p className="text-sm text-amber-600">No bookings yet.</p>
+                    <p className="text-sm text-ink-soft">No bookings yet.</p>
                   )}
                   {!bookingsLoading && bookings.length > 0 && (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="text-left text-amber-600 border-b border-amber-100">
+                          <tr className="text-left text-ink-soft border-b border-ink/10">
                             <th className="p-2">Customer</th>
                             <th className="p-2">Seats</th>
                             <th className="p-2">Date</th>
@@ -562,16 +562,16 @@ function ArtisanWorkshops() {
                         </thead>
                         <tbody>
                           {bookings.map((booking) => (
-                            <tr key={booking._id} className="border-b border-amber-50">
+                            <tr key={booking._id} className="border-b border-ink/5">
                               <td className="p-2">
-                                <div className="font-medium text-amber-900">{booking.name}</div>
+                                <div className="font-medium text-ink">{booking.name}</div>
                                 {booking.email && (
-                                  <div className="text-xs text-amber-500">{booking.email}</div>
+                                  <div className="text-xs text-ink-faint">{booking.email}</div>
                                 )}
                               </td>
-                              <td className="p-2 text-amber-800">{booking.seats}</td>
-                              <td className="p-2 text-amber-800">{formatDate(booking.date)}</td>
-                              <td className="p-2 text-amber-800">
+                              <td className="p-2 text-ink-soft">{booking.seats}</td>
+                              <td className="p-2 text-ink-soft">{formatDate(booking.date)}</td>
+                              <td className="p-2 text-ink-soft">
                                 {booking.startTime} – {booking.endTime}
                               </td>
                               <td className="p-2">

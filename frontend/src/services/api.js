@@ -29,4 +29,9 @@ api.interceptors.response.use(
   }
 );
 
+// Multipart uploads: the instance default is `Content-Type: application/json`,
+// which would make axios JSON-encode a FormData body. `false` removes the
+// header for this request only, so the browser can set the multipart boundary.
+export const multipart = { headers: { 'Content-Type': false } };
+
 export default api;

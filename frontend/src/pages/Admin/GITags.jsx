@@ -51,7 +51,7 @@ function AdminGITags() {
 
   return (
     <AdminShell title="GI Tags">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input
           value={search}
           onChange={(e) => {
@@ -60,12 +60,12 @@ function AdminGITags() {
           }}
           onKeyDown={(e) => e.key === 'Enter' && load()}
           placeholder="Search name, type or state"
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm flex-1 min-w-48"
         />
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Search
         </button>
-        <span className="text-sm text-amber-600">{total} GI tags</span>
+        <span className="text-sm text-ink-soft">{total} GI tags</span>
       </div>
 
       {loading && <Loading />}
@@ -73,10 +73,10 @@ function AdminGITags() {
       {!loading && !error && giTags.length === 0 && <EmptyState message="No GI tags found" />}
 
       {!loading && !error && giTags.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Name</th>
                 <th className="p-3">Type</th>
                 <th className="p-3">State</th>
@@ -86,11 +86,11 @@ function AdminGITags() {
             </thead>
             <tbody>
               {giTags.map((giTag) => (
-                <tr key={giTag._id} className="border-b border-amber-50">
-                  <td className="p-3 font-medium text-amber-900">{giTag.name}</td>
-                  <td className="p-3 text-amber-700">{giTag.type}</td>
-                  <td className="p-3 text-amber-700">{giTag.location?.state}</td>
-                  <td className="p-3 text-amber-700">{(giTag.products || []).length}</td>
+                <tr key={giTag._id} className="border-b border-ink/5">
+                  <td className="p-3 font-medium text-ink">{giTag.name}</td>
+                  <td className="p-3 text-terracotta-dark">{giTag.type}</td>
+                  <td className="p-3 text-terracotta-dark">{giTag.location?.state}</td>
+                  <td className="p-3 text-terracotta-dark">{(giTag.products || []).length}</td>
                   <td className="p-3">
                     <button
                       onClick={() => toggle(giTag)}

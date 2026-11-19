@@ -1,17 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Heritage craft gallery — design tokens
+   Warm earthy palette: cream paper, deep brown ink, terracotta brand,
+   indigo depth, saffron accent. All text/background pairs are WCAG AA.
+--------------------------------------------------------------------------- */
 @theme {
-  --color-primary: #8B4513;
-  --color-primary-dark: #5D2E0C;
-  --color-secondary: #D4A574;
-  --color-accent: #AA3BFF;
-  --color-earth: #8B7355;
-  --color-cream: #F5F0E8;
-  --color-sage: #9CAF88;
-  --color-terracotta: #C67B4E;
-  
-  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: Georgia, 'Times New Roman', serif;
+  /* surfaces */
+  --color-cream: #FAF6EF;
+  --color-parchment: #F2EADC;
+  --color-linen: #E9DFCD;
+
+  /* ink (deep brown) */
+  --color-ink: #2B1A12;
+  --color-ink-soft: #5B4636;
+  --color-ink-faint: #7A6553;
+
+  /* brand */
+  --color-terracotta: #B4553C;
+  --color-terracotta-dark: #93402A;
+  --color-terracotta-soft: #F3E2D8;
+
+  /* depth */
+  --color-indigo: #2E3A6E;
+  --color-indigo-dark: #232C55;
+  --color-indigo-soft: #E4E6F0;
+
+  /* accent */
+  --color-saffron: #E0A526;
+  --color-saffron-dark: #8A6206;
+  --color-saffron-soft: #FBF0D8;
+
+  /* status */
+  --color-moss: #3D6B3C;
+  --color-moss-soft: #E3EFE2;
+  --color-clay-red: #A63A32;
+  --color-clay-red-soft: #F7E4E2;
+
+  /* legacy aliases kept so older screens stay in the new palette */
+  --color-primary: #B4553C;
+  --color-primary-dark: #93402A;
+  --color-secondary: #E0A526;
+  --color-accent: #2E3A6E;
+  --color-earth: #5B4636;
+  --color-sage: #4B7A4A;
+
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, Consolas, monospace;
 }
 
@@ -23,7 +60,8 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background-color: var(--color-cream);
-  color: #333;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
@@ -33,6 +71,82 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  color: #2C1810;
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--color-saffron);
+  color: var(--color-ink);
+}
+
+/* --- loading skeletons --------------------------------------------------- */
+@keyframes cv-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-linen);
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: cv-shimmer 1.5s infinite;
+}
+
+/* Existing `animate-pulse` placeholder blocks share the shimmer treatment. */
+.animate-pulse {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: cv-shimmer 1.5s infinite;
+}
+
+/* --- small helpers ------------------------------------------------------- */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thin heritage rule used under section headings. */
+.rule-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.rule-ornament::before,
+.rule-ornament::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--color-ink-faint), transparent);
+  opacity: 0.5;
+}
+
+/* --- reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -66,6 +66,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Merge fields into the current user (e.g. after an avatar upload) without
+  // refetching the whole profile.
+  const updateUser = (patch) => {
+    setUser((current) => (current ? { ...current, ...patch } : current));
+  };
+
   const value = {
     user,
     token,
@@ -74,7 +80,8 @@ export const AuthProvider = ({ children }) => {
     role: user?.role || null,
     login,
     register,
-    logout
+    logout,
+    updateUser
   };
 
   return (

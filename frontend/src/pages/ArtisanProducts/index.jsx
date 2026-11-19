@@ -5,6 +5,8 @@ import { Loading, ErrorState, EmptyState, Pager } from '../../components/admin/A
 import { toast, errMsg } from '../../components/Toast';
 import { productService } from '../../services/productService';
 import { inr } from '../../utils/format';
+import ProductImage from '../../components/product/ProductImage';
+import ImageManager from '../../components/product/ImageManager';
 
 const CATEGORIES = ['textiles', 'pottery', 'jewelry', 'woodwork', 'metalwork', 'painting', 'sculpture', 'embroidery', 'other'];
 
@@ -15,7 +17,7 @@ const emptyForm = {
   category: 'textiles',
   craftType: '',
   stock: 1,
-  image: '',
+  images: [],
   isActive: true,
 };
 
@@ -40,7 +42,7 @@ const buildPayload = (form) => ({
   craftType: form.craftType.trim(),
   stock: Number(form.stock),
   isActive: form.isActive,
-  images: form.image.split(',').map((url) => url.trim()).filter(Boolean),
+  images: form.images,
 });
 
 function ArtisanProducts() {
@@ -56,6 +58,7 @@ function ArtisanProducts() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [pendingFiles, setPendingFiles] = useState([]);
   const [saving, setSaving] = useState(false);
 
   const [stockDraft, setStockDraft] = useState({});
@@ -89,6 +92,7 @@ function ArtisanProducts() {
   const openAdd = () => {
     setEditing(null);
     setForm(emptyForm);
+    setPendingFiles([]);
     setShowForm(true);
   };
 
@@ -101,10 +105,16 @@ function ArtisanProducts() {
       category: product.category,
       craftType: product.craftType,
       stock: product.stock,
-      image: (product.images || []).join(', '),
+      images: [...(product.images || [])],
       isActive: product.isActive,
     });
+    setPendingFiles([]);
     setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setPendingFiles([]);
   };
 
   const save = async (e) => {
@@ -118,14 +128,28 @@ function ArtisanProducts() {
     setSaving(true);
     try {
       const payload = buildPayload(form);
+      let id = editing?._id;
+
       if (editing) {
         await productService.update(editing._id, payload);
-        toast.success('Product updated');
       } else {
-        await productService.create(payload);
-        toast.success('Product created');
+        const res = await productService.create(payload);
+        id = res.data.product?._id;
       }
-      setShowForm(false);
+
+      if (pendingFiles.length && id) {
+        try {
+          await productService.uploadImages(id, pendingFiles);
+        } catch (err) {
+          toast.error(errMsg(err, 'Saved, but some images failed to upload'));
+          closeForm();
+          load();
+          return;
+        }
+      }
+
+      toast.success(editing ? 'Product updated' : 'Product created');
+      closeForm();
       load();
     } catch (err) {
       toast.error(errMsg(err, 'Failed to save product'));
@@ -184,17 +208,17 @@ function ArtisanProducts() {
       title="My Products"
       actions={
         <div className="flex items-center gap-3">
-          <span className="text-sm text-amber-600">{total} products</span>
+          <span className="text-sm text-ink-soft">{total} products</span>
           <button
             onClick={openAdd}
-            className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition"
+            className="rounded-sm bg-terracotta px-4 py-2 text-sm font-semibold text-white transition hover:bg-terracotta-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
           >
             Add Product
           </button>
         </div>
       }
     >
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-sm border border-ink/10 bg-white p-4">
         <input
           value={search}
           onChange={(e) => {
@@ -203,34 +227,34 @@ function ArtisanProducts() {
           }}
           onKeyDown={(e) => e.key === 'Enter' && load()}
           placeholder="Search your products"
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+          className="min-w-48 flex-1 rounded-sm border border-ink/15 px-3 py-2 text-sm focus:border-terracotta focus:outline-none"
         />
-        <button onClick={load} className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+        <button onClick={load} className="rounded-sm bg-parchment px-4 py-2 text-sm text-ink transition hover:bg-linen">
           Search
         </button>
-        <Link to="/artisan/dashboard" className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm">
+        <Link to="/artisan/dashboard" className="rounded-sm bg-parchment px-4 py-2 text-sm text-ink transition hover:bg-linen">
           Back to Dashboard
         </Link>
       </div>
 
       {showForm && (
-        <form onSubmit={save} className="bg-white rounded-xl shadow-md p-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <h2 className="font-bold text-amber-900 md:col-span-2">
+        <form onSubmit={save} className="mb-4 grid grid-cols-1 gap-4 rounded-sm border border-ink/10 bg-white p-6 md:grid-cols-2">
+          <h2 className="font-display text-xl font-semibold text-ink md:col-span-2">
             {editing ? 'Edit Product' : 'Add Product'}
           </h2>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Name *
             <input
               required
               minLength={2}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Price (₹) *
             <input
               required
@@ -239,27 +263,27 @@ function ArtisanProducts() {
               step="0.01"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             />
           </label>
 
-          <label className="text-sm text-amber-800 md:col-span-2">
+          <label className="text-sm text-ink-soft md:col-span-2">
             Description *
             <textarea
               required
               rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Category *
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             >
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -267,18 +291,18 @@ function ArtisanProducts() {
             </select>
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Craft type *
             <input
               required
               placeholder="e.g. Block Printing"
               value={form.craftType}
               onChange={(e) => setForm({ ...form, craftType: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
+          <label className="text-sm text-ink-soft">
             Stock *
             <input
               required
@@ -287,41 +311,42 @@ function ArtisanProducts() {
               step="1"
               value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-sm border border-ink/15 px-3 py-2 text-sm text-ink focus:border-terracotta focus:outline-none"
             />
           </label>
 
-          <label className="text-sm text-amber-800">
-            Image URL
-            <input
-              placeholder="https://... (comma-separate for several)"
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="mt-1 w-full border border-amber-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-amber-800">
+          <label className="flex items-center gap-2 text-sm text-ink-soft">
             <input
               type="checkbox"
               checked={form.isActive}
               onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+              className="accent-terracotta"
             />
             Active (visible in the shop)
           </label>
+
+          <div className="md:col-span-2">
+            <ImageManager
+              productId={editing?._id || null}
+              images={form.images}
+              onImagesChange={(images) => setForm((f) => ({ ...f, images }))}
+              files={pendingFiles}
+              onFilesChange={setPendingFiles}
+            />
+          </div>
 
           <div className="flex gap-3 md:col-span-2">
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm disabled:opacity-50"
+              className="rounded-sm bg-terracotta px-4 py-2 text-sm font-semibold text-white transition hover:bg-terracotta-dark disabled:opacity-50"
             >
               {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Product'}
             </button>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm"
+              onClick={closeForm}
+              className="rounded-sm bg-parchment px-4 py-2 text-sm text-ink transition hover:bg-linen"
             >
               Cancel
             </button>
@@ -333,8 +358,8 @@ function ArtisanProducts() {
       {!loading && error && (
         <div>
           <ErrorState message={error} />
-          <div className="text-center mt-4">
-            <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+          <div className="mt-4 text-center">
+            <button onClick={load} className="rounded-sm bg-terracotta px-4 py-2 text-sm font-semibold text-white">
               Retry
             </button>
           </div>
@@ -347,46 +372,42 @@ function ArtisanProducts() {
       )}
 
       {!loading && !error && products.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="overflow-x-auto rounded-sm border border-ink/10 bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
-                <th className="p-3">Product</th>
-                <th className="p-3">Price</th>
-                <th className="p-3">Stock</th>
-                <th className="p-3">Rating</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Actions</th>
+              <tr className="border-b border-ink/10 text-left text-ink-soft">
+                <th className="p-3 font-medium">Product</th>
+                <th className="p-3 font-medium">Price</th>
+                <th className="p-3 font-medium">Stock</th>
+                <th className="p-3 font-medium">Rating</th>
+                <th className="p-3 font-medium">Status</th>
+                <th className="p-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.map((product) => (
-                <tr key={product._id} className="border-b border-amber-50">
+                <tr key={product._id} className="border-b border-ink/5 last:border-0 hover:bg-parchment/40">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded bg-amber-100 overflow-hidden flex items-center justify-center shrink-0">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span>🏺</span>
-                        )}
-                      </div>
+                      <ProductImage
+                        src={product.images?.[0]}
+                        alt={product.name}
+                        frame="h-11 w-11 shrink-0 rounded-sm"
+                        w={96}
+                        h={96}
+                      />
                       <div className="min-w-0">
                         <Link
                           to={`/product/${product._id}`}
-                          className="font-medium text-amber-900 hover:text-amber-700 truncate block"
+                          className="block truncate font-medium text-ink hover:text-terracotta-dark"
                         >
                           {product.name}
                         </Link>
-                        <span className="text-xs text-amber-500">{product.craftType}</span>
+                        <span className="text-xs text-ink-faint">{product.craftType}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="p-3 text-amber-900">{inr(product.price)}</td>
+                  <td className="p-3 text-ink">{inr(product.price)}</td>
                   <td className="p-3">
                     <div className="flex gap-1">
                       <input
@@ -395,18 +416,18 @@ function ArtisanProducts() {
                         step="1"
                         value={stockDraft[product._id] ?? product.stock}
                         onChange={(e) => setStockDraft({ ...stockDraft, [product._id]: e.target.value })}
-                        className="w-20 border border-amber-200 rounded px-2 py-1"
+                        className="w-20 rounded-sm border border-ink/15 px-2 py-1 text-ink"
                       />
                       <button
                         onClick={() => saveStock(product)}
                         disabled={busyId === product._id}
-                        className="text-amber-700 hover:text-amber-900 disabled:opacity-40 text-xs"
+                        className="text-xs text-terracotta-dark hover:text-ink disabled:opacity-40"
                       >
                         Save
                       </button>
                     </div>
                   </td>
-                  <td className="p-3 text-amber-700">
+                  <td className="p-3 text-ink-soft">
                     {product.reviewCount > 0
                       ? `${Number(product.averageRating).toFixed(1)} ★ (${product.reviewCount})`
                       : 'No reviews'}
@@ -415,8 +436,8 @@ function ArtisanProducts() {
                     <button
                       onClick={() => toggleActive(product)}
                       disabled={busyId === product._id}
-                      className={`px-2 py-1 rounded text-xs disabled:opacity-40 ${
-                        product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'
+                      className={`rounded-sm px-2 py-1 text-xs disabled:opacity-40 ${
+                        product.isActive ? 'bg-moss-soft text-moss' : 'bg-clay-red-soft text-clay-red'
                       }`}
                     >
                       {product.isActive ? 'Active' : 'Inactive'}
@@ -426,13 +447,13 @@ function ArtisanProducts() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => openEdit(product)}
-                        className="text-amber-700 hover:text-amber-900"
+                        className="text-terracotta-dark hover:text-ink"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => remove(product)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-clay-red hover:text-ink"
                       >
                         Delete
                       </button>

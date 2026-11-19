@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/product/ProductCard';
+import ProductImage from '../../components/product/ProductImage';
+import SectionHeading from '../../components/layout/SectionHeading';
 import StarRating from '../../components/review/StarRating';
 import { Loading, ErrorState, EmptyState } from '../../components/admin/AdminShell';
 import { errMsg } from '../../components/Toast';
@@ -29,6 +31,14 @@ const CATEGORIES = [
   { name: 'Painting', emoji: '🎨', desc: 'Miniature & folk art' },
   { name: 'Embroidery', emoji: '🪡', desc: 'Intricate thread work' },
   { name: 'Sculpture', emoji: '🗿', desc: 'Stone & wood carvings' },
+];
+
+// Offsets that give the hero collage a gallery-wall rhythm.
+const COLLAGE = [
+  { height: 'h-44 md:h-56', emoji: '🏺' },
+  { height: 'h-40 md:h-48', emoji: '🧵', offset: 'md:pt-12' },
+  { height: 'h-40 md:h-48', emoji: '🎨' },
+  { height: 'h-44 md:h-56', emoji: '💎', offset: 'md:-mt-4' },
 ];
 
 const emptySection = { items: [], error: null };
@@ -116,52 +126,100 @@ function Home() {
     { key: 'workshops', value: stats.workshops, label: 'Live workshops', to: '/workshops' },
   ].filter((stat) => stat.value !== null && stat.value !== undefined);
 
+  const viewAll = (to) => (
+    <Link
+      to={to}
+      className="hidden border-b border-terracotta pb-0.5 text-sm font-semibold text-terracotta-dark transition hover:border-ink hover:text-ink sm:block"
+    >
+      View all →
+    </Link>
+  );
+
+  const collageColumns = [
+    [COLLAGE[0], COLLAGE[2]],
+    [COLLAGE[1], COLLAGE[3]],
+  ];
+
   return (
     <div>
-      <section className="relative bg-gradient-to-b from-amber-50 to-amber-100 py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
+      {/* ---------- hero ---------- */}
+      <section className="relative overflow-hidden border-b border-ink/10 bg-parchment py-16 md:py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex flex-col items-center gap-12 md:flex-row">
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-                Preserving Heritage,<br />One Craft at a Time
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-saffron-dark">
+                Handmade in India
+              </p>
+              <h1 className="mt-3 font-display text-4xl font-semibold leading-[1.1] text-ink md:text-5xl">
+                Preserving heritage,
+                <br />
+                <span className="italic text-terracotta-dark">one craft at a time</span>
               </h1>
-              <p className="text-lg text-amber-700 mb-8 max-w-xl">
+              <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-soft md:mx-0">
                 Discover authentic handmade products from India&apos;s finest traditional artisans.
                 Every purchase supports local communities and preserves centuries-old craftsmanship.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
                 <Link
                   to="/products"
-                  className="bg-amber-700 text-white px-8 py-3 rounded-lg hover:bg-amber-800 transition font-semibold"
+                  className="rounded-sm bg-terracotta px-8 py-3.5 font-semibold text-white transition hover:bg-terracotta-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
                 >
                   Explore Products
                 </Link>
                 <Link
                   to="/artisans"
-                  className="border-2 border-amber-700 text-amber-700 px-8 py-3 rounded-lg hover:bg-amber-50 transition font-semibold"
+                  className="rounded-sm border-2 border-ink/25 px-8 py-3.5 font-semibold text-ink transition hover:border-terracotta hover:text-terracotta-dark"
                 >
                   Meet Artisans
                 </Link>
               </div>
             </div>
-            <div className="flex-1 flex justify-center">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-amber-200 rounded-2xl w-32 h-32 md:w-40 md:h-40 flex items-center justify-center text-6xl">🏺</div>
-                <div className="bg-orange-200 rounded-2xl w-32 h-32 md:w-40 md:h-40 mt-8 flex items-center justify-center text-6xl">🧵</div>
-                <div className="bg-yellow-200 rounded-2xl w-32 h-32 md:w-40 md:h-40 -mt-4 flex items-center justify-center text-6xl">🎨</div>
-                <div className="bg-amber-300 rounded-2xl w-32 h-32 md:w-40 md:h-40 mt-4 flex items-center justify-center text-6xl">💎</div>
+
+            {/* collage of real product photos, with emoji tiles as fallback */}
+            <div className="flex flex-1 justify-center">
+              <div className="grid w-full max-w-md grid-cols-2 gap-4">
+                {collageColumns.map((column, ci) => (
+                  <div key={ci} className={`space-y-4 ${ci === 1 ? 'md:pt-4' : ''}`}>
+                    {column.map((tile, i) => {
+                      const product = products.items[ci * 2 + i];
+                      const src = product?.images?.[0];
+                      return (
+                        <div
+                          key={tile.emoji}
+                          className={`relative overflow-hidden rounded-sm border border-ink/10 bg-linen ${tile.height} ${tile.offset || ''}`}
+                        >
+                          {src ? (
+                            <ProductImage
+                              src={src}
+                              alt={product.name}
+                              frame="h-full w-full"
+                              w={480}
+                              h={600}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-5xl">
+                              {tile.emoji}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
+
+        <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-1.5 bg-terracotta lg:block" aria-hidden="true" />
       </section>
 
       {pageError && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
+        <section className="bg-white py-16">
+          <div className="mx-auto max-w-7xl px-4">
             <ErrorState message={pageError} />
-            <div className="text-center mt-4">
-              <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+            <div className="mt-4 text-center">
+              <button onClick={load} className="rounded-sm bg-terracotta px-4 py-2 text-sm font-semibold text-white">
                 Retry
               </button>
             </div>
@@ -170,22 +228,22 @@ function Home() {
       )}
 
       {!pageError && loading && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
+        <section className="bg-white py-16">
+          <div className="mx-auto max-w-7xl px-4">
             <Loading />
           </div>
         </section>
       )}
 
       {!pageError && !loading && statCards.length > 0 && (
-        <section className="py-10 bg-white border-b border-amber-100">
-          <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+        <section className="border-b border-ink/10 bg-white py-10">
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 text-center sm:grid-cols-3">
             {statCards.map((stat) => (
               <Link key={stat.key} to={stat.to} className="group">
-                <p className="text-3xl font-bold text-amber-900 group-hover:text-amber-700 transition">
+                <p className="font-display text-3xl font-semibold text-ink transition group-hover:text-terracotta-dark">
                   {stat.value.toLocaleString('en-IN')}
                 </p>
-                <p className="text-sm text-amber-600 mt-1">{stat.label}</p>
+                <p className="mt-1 text-sm uppercase tracking-[0.14em] text-ink-faint">{stat.label}</p>
               </Link>
             ))}
           </div>
@@ -194,24 +252,22 @@ function Home() {
 
       {!pageError && !loading && (
         <>
-          <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-amber-900 mb-2">Fresh from the Workshop</h2>
-                  <p className="text-amber-700">The latest handmade pieces added by our artisans</p>
-                </div>
-                <Link to="/products" className="text-amber-700 hover:text-amber-900 font-medium hidden sm:block">
-                  View all →
-                </Link>
-              </div>
+          {/* ---------- fresh from the workshop ---------- */}
+          <section className="bg-white py-16">
+            <div className="mx-auto max-w-7xl px-4">
+              <SectionHeading
+                eyebrow="New arrivals"
+                title="Fresh from the Workshop"
+                subtitle="The latest handmade pieces added by our artisans"
+                action={viewAll('/products')}
+              />
 
               {products.error && <ErrorState message={products.error} />}
               {!products.error && products.items.length === 0 && (
                 <EmptyState message="No products yet — check back soon." />
               )}
               {!products.error && products.items.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                   {products.items.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
@@ -220,72 +276,89 @@ function Home() {
             </div>
           </section>
 
-          <section className="py-16 bg-amber-50">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-amber-900 mb-2">Shop by Category</h2>
-                <p className="text-amber-700">Explore our curated collection of traditional crafts</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {/* ---------- categories ---------- */}
+          <section className="border-y border-ink/10 bg-cream py-16">
+            <div className="mx-auto max-w-7xl px-4">
+              <SectionHeading
+                eyebrow="Browse"
+                title="Shop by Category"
+                subtitle="Explore our curated collection of traditional crafts"
+                center
+              />
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {CATEGORIES.map((cat) => (
                   <Link
                     key={cat.name}
                     to={`/products?category=${cat.name.toLowerCase()}`}
-                    className="bg-white rounded-xl p-6 text-center hover:bg-amber-100 transition group"
+                    className="group rounded-sm border border-ink/10 bg-white p-6 text-center transition hover:border-terracotta/40 hover:shadow-[0_18px_40px_-30px_rgba(43,26,18,0.6)]"
                   >
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition">{cat.emoji}</div>
-                    <h3 className="font-semibold text-amber-900">{cat.name}</h3>
-                    <p className="text-sm text-amber-600 mt-1">{cat.desc}</p>
+                    <div className="mb-3 text-4xl transition group-hover:-translate-y-1">{cat.emoji}</div>
+                    <h3 className="font-heading text-lg font-semibold text-ink">{cat.name}</h3>
+                    <p className="mt-1 text-sm text-ink-soft">{cat.desc}</p>
                   </Link>
                 ))}
               </div>
             </div>
           </section>
 
-          <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-amber-900 mb-2">Featured Artisans</h2>
-                  <p className="text-amber-700">Meet the master craftspeople behind our products</p>
-                </div>
-                <Link to="/artisans" className="text-amber-700 hover:text-amber-900 font-medium hidden sm:block">
-                  View all →
-                </Link>
-              </div>
+          {/* ---------- featured artisans ---------- */}
+          <section className="bg-white py-16">
+            <div className="mx-auto max-w-7xl px-4">
+              <SectionHeading
+                eyebrow="The makers"
+                title="Featured Artisans"
+                subtitle="Meet the master craftspeople behind our products"
+                action={viewAll('/artisans')}
+              />
 
               {artisans.error && <ErrorState message={artisans.error} />}
               {!artisans.error && artisans.items.length === 0 && (
                 <EmptyState message="No verified artisans yet." />
               )}
               {!artisans.error && artisans.items.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                   {artisans.items.map((artisan) => (
                     <Link
                       key={artisan._id}
                       to={`/artisan/${artisan._id}`}
-                      className="bg-amber-50 rounded-xl p-6 shadow-md hover:shadow-lg transition"
+                      className="group overflow-hidden rounded-sm border border-ink/10 bg-white transition hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
                     >
-                      <div className="bg-amber-100 rounded-xl h-32 mb-4 flex items-center justify-center overflow-hidden">
-                        {artisan.profileImage ? (
-                          <img src={artisan.profileImage} alt={artisan.businessName} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-6xl">👩‍🎨</span>
-                        )}
+                      <div className="relative h-32 bg-linen">
+                        <ProductImage
+                          src={artisan.coverImage}
+                          alt=""
+                          frame="h-full w-full"
+                          w={800}
+                          h={320}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-ink/50 to-transparent" />
+                        <div className="absolute -bottom-6 left-5 h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-linen">
+                          <ProductImage
+                            src={artisan.profileImage}
+                            alt={artisan.businessName}
+                            frame="h-full w-full"
+                            w={160}
+                            h={160}
+                          />
+                        </div>
                       </div>
-                      <h3 className="text-xl font-semibold text-amber-900">{artisan.businessName}</h3>
-                      <p className="text-amber-600 text-sm mt-1">
-                        {[artisan.location?.city, artisan.location?.state].filter(Boolean).join(', ') || 'India'}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <StarRating value={artisan.rating || 0} size="text-sm" />
-                        <span className="text-sm text-amber-600">
-                          {artisan.reviewCount ? `(${artisan.reviewCount})` : ''}
-                        </span>
+                      <div className="p-5 pt-9">
+                        <h3 className="font-heading text-lg font-semibold text-ink transition group-hover:text-terracotta-dark">
+                          {artisan.businessName}
+                        </h3>
+                        <p className="mt-0.5 text-sm text-ink-soft">
+                          {[artisan.location?.city, artisan.location?.state].filter(Boolean).join(', ') || 'India'}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <StarRating value={artisan.rating || 0} size="text-sm" />
+                          <span className="text-sm text-ink-faint">
+                            {artisan.reviewCount ? `(${artisan.reviewCount})` : ''}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm font-medium text-saffron-dark">
+                          {(artisan.craftTypes || []).join(', ')}
+                        </p>
                       </div>
-                      <p className="text-amber-800 mt-2 font-medium text-sm">
-                        {(artisan.craftTypes || []).join(', ')}
-                      </p>
                     </Link>
                   ))}
                 </div>
@@ -293,47 +366,56 @@ function Home() {
             </div>
           </section>
 
-          <section className="py-16 bg-amber-50">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-amber-900 mb-2">Workshops</h2>
-                  <p className="text-amber-700">Learn traditional crafts directly from master artisans</p>
-                </div>
-                <Link to="/workshops" className="text-amber-700 hover:text-amber-900 font-medium hidden sm:block">
-                  View all →
-                </Link>
-              </div>
+          {/* ---------- workshops ---------- */}
+          <section className="border-y border-ink/10 bg-cream py-16">
+            <div className="mx-auto max-w-7xl px-4">
+              <SectionHeading
+                eyebrow="Learn"
+                title="Workshops"
+                subtitle="Learn traditional crafts directly from master artisans"
+                action={viewAll('/workshops')}
+              />
 
               {workshops.error && <ErrorState message={workshops.error} />}
               {!workshops.error && workshops.items.length === 0 && (
                 <EmptyState message="No workshops listed right now." />
               )}
               {!workshops.error && workshops.items.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                   {workshops.items.slice(0, 3).map((workshop) => {
                     const slot = upcomingSlot(workshop);
                     return (
-                      <div key={workshop._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
-                        <div className="bg-amber-100 h-36 flex items-center justify-center text-5xl">
-                          {workshop.images?.[0] ? (
-                            <img src={workshop.images[0]} alt={workshop.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <span>🧵</span>
-                          )}
-                        </div>
-                        <div className="p-5 flex flex-col flex-1">
-                          <span className="text-xs text-amber-600 font-medium uppercase">{workshop.craftType}</span>
-                          <h3 className="font-semibold text-amber-900 mt-1">{workshop.title}</h3>
-                          <p className="text-sm text-amber-600 mt-1">by {workshop.artisan?.businessName || 'Artisan'}</p>
-                          <p className="text-sm text-amber-700 mt-2">
+                      <div
+                        key={workshop._id}
+                        className="flex flex-col overflow-hidden rounded-sm border border-ink/10 bg-white transition hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
+                      >
+                        <ProductImage
+                          src={workshop.images?.[0]}
+                          alt={workshop.title}
+                          frame="h-40 w-full"
+                          w={640}
+                          h={360}
+                        />
+                        <div className="flex flex-1 flex-col p-5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-saffron-dark">
+                            {workshop.craftType}
+                          </span>
+                          <h3 className="mt-1 font-heading text-lg font-semibold text-ink">
+                            {workshop.title}
+                          </h3>
+                          <p className="mt-1 text-sm italic text-ink-soft">
+                            by {workshop.artisan?.businessName || 'Artisan'}
+                          </p>
+                          <p className="mt-2 text-sm text-ink-soft">
                             📅 {slot ? formatDate(slot.date) : 'Schedule to be announced'}
                           </p>
-                          <div className="mt-auto pt-4 flex items-center justify-between">
-                            <span className="font-bold text-amber-900">{inr(workshop.price)}</span>
+                          <div className="mt-auto flex items-center justify-between pt-4">
+                            <span className="font-display text-xl font-semibold text-ink">
+                              {inr(workshop.price)}
+                            </span>
                             <Link
                               to={`/workshop/${workshop._id}`}
-                              className="text-amber-700 hover:text-amber-900 font-medium text-sm"
+                              className="text-sm font-semibold text-terracotta-dark transition hover:text-ink"
                             >
                               Details →
                             </Link>
@@ -347,49 +429,63 @@ function Home() {
             </div>
           </section>
 
-          <section className="py-16 bg-amber-900 text-white">
-            <div className="max-w-7xl mx-auto px-4 text-center">
-              <h2 className="text-3xl font-bold mb-4">Preserve Heritage, Make a Difference</h2>
-              <p className="text-amber-200 mb-8 max-w-2xl mx-auto">
-                Your donations help traditional artisans sustain their craft and pass it on to future generations.
+          {/* ---------- donate ---------- */}
+          <section className="bg-indigo py-16 text-cream">
+            <div className="mx-auto max-w-7xl px-4 text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-saffron">
+                Support the craft
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-semibold">
+                Preserve Heritage, Make a Difference
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-cream/75">
+                Your donations help traditional artisans sustain their craft and pass it on to
+                future generations.
               </p>
               <Link
                 to="/donate"
-                className="inline-block bg-white text-amber-900 px-8 py-3 rounded-lg font-semibold hover:bg-amber-100 transition"
+                className="mt-8 inline-block rounded-sm bg-saffron px-8 py-3.5 font-semibold text-ink transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-saffron"
               >
                 Donate Now
               </Link>
             </div>
           </section>
 
-          <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-amber-900 mb-2">Heritage Stories</h2>
-                  <p className="text-amber-700">Explore the rich history behind India&apos;s crafts</p>
-                </div>
-                <Link to="/stories" className="text-amber-700 hover:text-amber-900 font-medium hidden sm:block">
-                  View all →
-                </Link>
-              </div>
+          {/* ---------- stories ---------- */}
+          <section className="bg-white py-16">
+            <div className="mx-auto max-w-7xl px-4">
+              <SectionHeading
+                eyebrow="From the archive"
+                title="Heritage Stories"
+                subtitle="Explore the rich history behind India's crafts"
+                action={viewAll('/stories')}
+              />
 
               {stories.error && <ErrorState message={stories.error} />}
               {!stories.error && stories.items.length === 0 && (
                 <EmptyState message="No stories published yet." />
               )}
               {!stories.error && stories.items.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                   {stories.items.map((story) => (
-                    <article key={story._id} className="bg-amber-50 rounded-xl overflow-hidden hover:shadow-md transition">
-                      <div className="bg-amber-200 h-40 flex items-center justify-center text-5xl">📜</div>
+                    <article
+                      key={story._id}
+                      className="overflow-hidden rounded-sm border border-ink/10 bg-parchment transition hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
+                    >
+                      <div className="flex h-40 items-center justify-center bg-linen text-5xl">📜</div>
                       <div className="p-6">
-                        <span className="text-xs text-amber-600 font-medium uppercase">{story.category}</span>
-                        <h3 className="text-lg font-semibold text-amber-900 mt-2 mb-2">{story.title}</h3>
-                        <p className="text-sm text-amber-700 line-clamp-3">{story.excerpt || story.content}</p>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-saffron-dark">
+                          {story.category}
+                        </span>
+                        <h3 className="mt-2 font-heading text-lg font-semibold text-ink">
+                          {story.title}
+                        </h3>
+                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink-soft">
+                          {story.excerpt || story.content}
+                        </p>
                         <Link
                           to={`/stories/${story.slug}`}
-                          className="inline-block mt-4 text-amber-700 hover:text-amber-900 font-medium"
+                          className="mt-4 inline-block border-b border-terracotta pb-0.5 text-sm font-semibold text-terracotta-dark transition hover:border-ink hover:text-ink"
                         >
                           Read More →
                         </Link>

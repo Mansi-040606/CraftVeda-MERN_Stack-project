@@ -57,14 +57,14 @@ function AdminOrders() {
 
   return (
     <AdminShell title="Orders">
-      <div className="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-center">
         <select
           value={orderStatus}
           onChange={(e) => {
             setOrderStatus(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           <option value="">All order statuses</option>
           {ORDER_STATUSES.map((s) => (
@@ -77,17 +77,17 @@ function AdminOrders() {
             setPaymentStatus(e.target.value);
             setPage(1);
           }}
-          className="border border-amber-200 rounded-lg px-3 py-2 text-sm"
+          className="border border-ink/10 rounded-sm px-3 py-2 text-sm"
         >
           <option value="">All payment statuses</option>
           {PAYMENT_STATUSES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button onClick={load} className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm">
+        <button onClick={load} className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm">
           Refresh
         </button>
-        <span className="text-sm text-amber-600">{total} orders</span>
+        <span className="text-sm text-ink-soft">{total} orders</span>
       </div>
 
       {loading && <Loading />}
@@ -95,10 +95,10 @@ function AdminOrders() {
       {!loading && !error && orders.length === 0 && <EmptyState message="No orders found" />}
 
       {!loading && !error && orders.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+        <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-amber-600 border-b border-amber-100">
+              <tr className="text-left text-ink-soft border-b border-ink/10">
                 <th className="p-3">Order</th>
                 <th className="p-3">Customer</th>
                 <th className="p-3">Items</th>
@@ -110,26 +110,26 @@ function AdminOrders() {
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={order._id} className="border-b border-amber-50">
-                  <td className="p-3 font-medium text-amber-900">
+                <tr key={order._id} className="border-b border-ink/5">
+                  <td className="p-3 font-medium text-ink">
                     #{String(order._id).slice(-6).toUpperCase()}
-                    <span className="block text-xs text-amber-500">
+                    <span className="block text-xs text-ink-faint">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </span>
                   </td>
-                  <td className="p-3 text-amber-700">
+                  <td className="p-3 text-terracotta-dark">
                     {order.user?.name || 'Unknown'}
-                    <span className="block text-xs text-amber-500">{order.user?.email}</span>
+                    <span className="block text-xs text-ink-faint">{order.user?.email}</span>
                   </td>
-                  <td className="p-3 text-amber-700">{(order.items || []).length}</td>
-                  <td className="p-3 font-medium text-amber-900">{inr(order.total)}</td>
+                  <td className="p-3 text-terracotta-dark">{(order.items || []).length}</td>
+                  <td className="p-3 font-medium text-ink">{inr(order.total)}</td>
                   <td className="p-3">
-                    <span className={`px-2 py-1 rounded text-xs ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                    <span className={`px-2 py-1 rounded text-xs ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-parchment text-ink-soft'}`}>
                       {order.paymentStatus}
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className="px-2 py-1 rounded text-xs bg-amber-100 text-amber-800">{order.orderStatus}</span>
+                    <span className="px-2 py-1 rounded text-xs bg-parchment text-ink-soft">{order.orderStatus}</span>
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2">
@@ -137,7 +137,7 @@ function AdminOrders() {
                         value={order.orderStatus}
                         disabled={busyId === order._id}
                         onChange={(e) => changeStatus(order, e.target.value)}
-                        className="border border-amber-200 rounded px-2 py-1"
+                        className="border border-ink/10 rounded px-2 py-1"
                       >
                         {ORDER_STATUSES.map((s) => (
                           <option key={s} value={s}>{s}</option>
