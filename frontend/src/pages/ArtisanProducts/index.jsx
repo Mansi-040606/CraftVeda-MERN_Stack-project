@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ArtisanShell from '../../components/artisan/ArtisanShell';
 import { Loading, ErrorState, EmptyState, Pager } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { productService } from '../../services/productService';
 import { inr } from '../../utils/format';
 import ProductImage from '../../components/product/ProductImage';
-import ImageManager from '../../components/product/ImageManager';
 
 const CATEGORIES = ['textiles', 'pottery', 'jewelry', 'woodwork', 'metalwork', 'painting', 'sculpture', 'embroidery', 'other'];
 
@@ -17,7 +16,6 @@ const emptyForm = {
   category: 'textiles',
   craftType: '',
   stock: 1,
-  images: [],
   isActive: true,
 };
 
@@ -42,10 +40,10 @@ const buildPayload = (form) => ({
   craftType: form.craftType.trim(),
   stock: Number(form.stock),
   isActive: form.isActive,
-  images: form.images,
 });
 
 function ArtisanProducts() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(0);
@@ -56,9 +54,7 @@ function ArtisanProducts() {
   const [busyId, setBusyId] = useState(null);
 
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [pendingFiles, setPendingFiles] = useState([]);
   const [saving, setSaving] = useState(false);
 
   const [stockDraft, setStockDraft] = useState({});
@@ -90,33 +86,16 @@ function ArtisanProducts() {
   }, [load]);
 
   const openAdd = () => {
-    setEditing(null);
     setForm(emptyForm);
-    setPendingFiles([]);
-    setShowForm(true);
-  };
-
-  const openEdit = (product) => {
-    setEditing(product);
-    setForm({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      craftType: product.craftType,
-      stock: product.stock,
-      images: [...(product.images || [])],
-      isActive: product.isActive,
-    });
-    setPendingFiles([]);
     setShowForm(true);
   };
 
   const closeForm = () => {
     setShowForm(false);
-    setPendingFiles([]);
   };
 
+  // Creating is only step one: the product document is created here (with its
+  // basics), then the artisan is taken to the edit page for photos + details.
   const save = async (e) => {
     e.preventDefault();
     const problem = validateForm(form);
@@ -127,32 +106,17 @@ function ArtisanProducts() {
 
     setSaving(true);
     try {
-      const payload = buildPayload(form);
-      let id = editing?._id;
-
-      if (editing) {
-        await productService.update(editing._id, payload);
-      } else {
-        const res = await productService.create(payload);
-        id = res.data.product?._id;
-      }
-
-      if (pendingFiles.length && id) {
-        try {
-          await productService.uploadImages(id, pendingFiles);
-        } catch (err) {
-          toast.error(errMsg(err, 'Saved, but some images failed to upload'));
-          closeForm();
-          load();
-          return;
-        }
-      }
-
-      toast.success(editing ? 'Product updated' : 'Product created');
+      const res = await productService.create(buildPayload(form));
+      const id = res.data.product?._id;
+      toast.success('Product created — now add photos and details');
       closeForm();
-      load();
+      if (id) {
+        navigate(`/artisan/products/${id}/edit`);
+      } else {
+        load();
+      }
     } catch (err) {
-      toast.error(errMsg(err, 'Failed to save product'));
+      toast.error(errMsg(err, 'Failed to create product'));
     } finally {
       setSaving(false);
     }
@@ -240,8 +204,11 @@ function ArtisanProducts() {
       {showForm && (
         <form onSubmit={save} className="mb-4 grid grid-cols-1 gap-4 rounded-sm border border-ink/10 bg-white p-6 md:grid-cols-2">
           <h2 className="font-display text-xl font-semibold text-ink md:col-span-2">
-            {editing ? 'Edit Product' : 'Add Product'}
+            Add Product
           </h2>
+          <p className="md:col-span-2 -mt-2 text-sm text-ink-soft">
+            Create the basics first — you will add photos and full details on the next screen.
+          </p>
 
           <label className="text-sm text-ink-soft">
             Name *
@@ -325,23 +292,13 @@ function ArtisanProducts() {
             Active (visible in the shop)
           </label>
 
-          <div className="md:col-span-2">
-            <ImageManager
-              productId={editing?._id || null}
-              images={form.images}
-              onImagesChange={(images) => setForm((f) => ({ ...f, images }))}
-              files={pendingFiles}
-              onFilesChange={setPendingFiles}
-            />
-          </div>
-
           <div className="flex gap-3 md:col-span-2">
             <button
               type="submit"
               disabled={saving}
               className="rounded-sm bg-terracotta px-4 py-2 text-sm font-semibold text-white transition hover:bg-terracotta-dark disabled:opacity-50"
             >
-              {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Product'}
+              {saving ? 'Saving...' : 'Create Product'}
             </button>
             <button
               type="button"
@@ -389,16 +346,18 @@ function ArtisanProducts() {
                 <tr key={product._id} className="border-b border-ink/5 last:border-0 hover:bg-parchment/40">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <ProductImage
-                        src={product.images?.[0]}
-                        alt={product.name}
-                        frame="h-11 w-11 shrink-0 rounded-sm"
-                        w={96}
-                        h={96}
-                      />
+                      <Link to={`/artisan/products/${product._id}/edit`} aria-label={`Edit ${product.name}`}>
+                        <ProductImage
+                          src={product.images?.[0]}
+                          alt={product.name}
+                          frame="h-11 w-11 shrink-0 rounded-sm"
+                          w={96}
+                          h={96}
+                        />
+                      </Link>
                       <div className="min-w-0">
                         <Link
-                          to={`/product/${product._id}`}
+                          to={`/artisan/products/${product._id}/edit`}
                           className="block truncate font-medium text-ink hover:text-terracotta-dark"
                         >
                           {product.name}
@@ -445,12 +404,12 @@ function ArtisanProducts() {
                   </td>
                   <td className="p-3">
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => openEdit(product)}
+                      <Link
+                        to={`/artisan/products/${product._id}/edit`}
                         className="text-terracotta-dark hover:text-ink"
                       >
                         Edit
-                      </button>
+                      </Link>
                       <button
                         onClick={() => remove(product)}
                         className="text-clay-red hover:text-ink"

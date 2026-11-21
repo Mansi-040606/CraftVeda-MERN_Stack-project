@@ -35,6 +35,7 @@ import ToastHost from './components/Toast';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ArtisanDashboard from './pages/ArtisanDashboard';
 import ArtisanProducts from './pages/ArtisanProducts';
+import ArtisanProductEdit from './pages/ArtisanProductEdit';
 import ArtisanOrders from './pages/ArtisanOrders';
 import ArtisanWorkshops from './pages/ArtisanWorkshops';
 import ArtisanProfileEdit from './pages/ArtisanProfileEdit';
@@ -138,6 +139,11 @@ function App() {
           <Route path="/artisan/products" element={
             <ProtectedRoute allowedRoles={['ARTISAN']}>
               <ArtisanProducts />
+            </ProtectedRoute>
+          } />
+          <Route path="/artisan/products/:id/edit" element={
+            <ProtectedRoute allowedRoles={['ARTISAN']}>
+              <ArtisanProductEdit />
             </ProtectedRoute>
           } />
           <Route path="/artisan/orders" element={

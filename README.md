@@ -195,10 +195,11 @@ node tests/step5-artisan.e2e.mjs        # artisan stats + own orders        → 
 node tests/step6-workshops.e2e.mjs      # workshop CRUD/booking/cancel      → 42 tests
 node tests/step8-timeseries.e2e.mjs     # admin dashboard time-series       → 14 tests
 node tests/step10-images.e2e.mjs        # image uploads (Cloudinary mocked) → 25 tests
+node tests/step11-product-edit.e2e.mjs  # product edit load/duplicate/update → 26 tests
 ```
 
-Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 — all passing.**
-Free ports `5095–5099` before running. There are no step 1–3 test scripts; the five above are the full suite.
+Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 · 26/26 — all passing.**
+Free ports `5094–5099` before running. There are no step 1–3 test scripts; the six above are the full suite.
 
 > `step10` runs with `CLOUDINARY_MOCK=1` and fake credentials — **no real Cloudinary
 > upload ever happens** — and it uses its own throwaway database.

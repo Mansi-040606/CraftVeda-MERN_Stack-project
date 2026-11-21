@@ -166,6 +166,22 @@ router.get('/mine', protect, artisanOnly, catchAsync(async (req, res) => {
   });
 }));
 
+// One of the logged-in artisan's own products (includes inactive ones).
+// This is what the product edit page loads — ownership is checked here so a
+// non-owner never even sees the document.
+router.get('/mine/:id', protect, artisanOnly, catchAsync(async (req, res) => {
+  const artisan = await getOwnArtisan(req);
+  if (!artisan) throw new ApiError(403, 'You need an artisan profile to manage products');
+
+  const product = await Product.findById(req.params.id);
+  if (!product) throw new ApiError(404, 'Product not found');
+  if (!product.artisan.equals(artisan._id)) {
+    throw new ApiError(403, 'You can only manage your own products');
+  }
+
+  res.json({ success: true, product });
+}));
+
 router.get('/:id', catchAsync(async (req, res) => {
   // `user` lets the frontend detect "this is my own product" (artisan ownership).
   // giTag powers the "Craft heritage" block; the extra artisan fields power
@@ -221,6 +237,36 @@ router.patch('/:id', protect, artisanOnly, [
 
   const updated = await Product.findByIdAndUpdate(product._id, updates, { new: true, runValidators: true });
   res.json({ success: true, product: updated });
+}));
+
+// Clone a product into a new draft: every detail is copied, the images are
+// NOT (they belong to the original upload) and the copy starts hidden so the
+// artisan can review it before showing it in the shop.
+router.post('/:id/duplicate', protect, artisanOnly, catchAsync(async (req, res) => {
+  const product = await findOwnedProduct(req, req.params.id);
+  const source = product.toObject();
+
+  const copy = await Product.create({
+    name: `Copy of ${source.name}`,
+    description: source.description,
+    price: source.price,
+    category: source.category,
+    craftType: source.craftType,
+    material: source.material,
+    dimensions: source.dimensions,
+    weight: source.weight,
+    color: source.color,
+    stock: source.stock,
+    tags: source.tags,
+    isCustomizable: source.isCustomizable,
+    customizationOptions: source.customizationOptions,
+    giTag: source.giTag,
+    artisan: source.artisan,
+    images: [],
+    isActive: false
+  });
+
+  res.status(201).json({ success: true, product: copy });
 }));
 
 // ----- product images (Cloudinary) -----

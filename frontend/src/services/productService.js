@@ -8,6 +8,10 @@ export const productService = {
   delete: (id) => api.delete(`/products/${id}`),
   // The artisan's own products (includes inactive ones).
   getMine: (params) => api.get('/products/mine', { params }),
+  // One of the artisan's own products — ownership is checked server-side.
+  getMineById: (id) => api.get(`/products/mine/${id}`),
+  // Clone into a hidden draft copy (no images).
+  duplicate: (id) => api.post(`/products/${id}/duplicate`),
   // Partial update: quick stock edit and activate/deactivate.
   patch: (id, data) => api.patch(`/products/${id}`, data),
 
