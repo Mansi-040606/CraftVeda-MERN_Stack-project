@@ -22,6 +22,7 @@ import Stories from './pages/Stories';
 import StoryDetail from './pages/Stories/Detail';
 import VerifyCertificate from './pages/VerifyCertificate';
 import Auth from './pages/Auth';
+import ForgotPassword from './pages/ForgotPassword';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/Admin/Users';
 import AdminOrders from './pages/Admin/Orders';
@@ -88,6 +89,7 @@ function App() {
           <Route path="/verify" element={<VerifyCertificate />} />
           <Route path="/verify/:certificateNumber" element={<VerifyCertificate />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           <Route path="/admin" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>

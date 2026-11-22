@@ -1,11 +1,23 @@
 import express from 'express';
 import { body } from 'express-validator';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
 import jwt from 'jsonwebtoken';
+import { verifyGoogleCredential } from '../utils/googleAuth.js';
+import {
+  forgotPassword,
+  verifyOtp,
+  resetPassword
+} from '../controllers/passwordResetController.js';
+import {
+  forgotPasswordValidators,
+  verifyOtpValidators,
+  resetPasswordValidators
+} from '../validators/passwordResetValidators.js';
 import {
   requireCloudinary,
   handleUpload,
@@ -84,6 +96,68 @@ router.get('/me', protect, catchAsync(async (req, res) => {
   const user = await User.findById(req.user._id).select('-password');
   res.json({ success: true, user });
 }));
+
+// Google sign-in: verifies the Google ID token, then issues our own JWT in
+// exactly the same shape as /login so the frontend reuses one code path.
+// Never creates ADMIN/ARTISAN and never changes an existing user's role.
+router.post('/google', [
+  body('credential').trim().notEmpty().withMessage('Google credential is required')
+], validate, catchAsync(async (req, res) => {
+  if (!process.env.GOOGLE_CLIENT_ID?.trim()) {
+    throw new ApiError(503, 'Google sign-in is not configured');
+  }
+
+  const payload = await verifyGoogleCredential(req.body.credential);
+
+  if (!payload?.email || payload.email_verified !== true) {
+    throw new ApiError(401, 'Google account email is not verified');
+  }
+
+  const email = String(payload.email).toLowerCase().trim();
+  let user = await User.findOne({ email });
+
+  if (user) {
+    if (user.status === 'BLOCKED') {
+      throw new ApiError(403, 'Account is blocked');
+    }
+    // Remember the Google id for future logins; role/status are never touched.
+    if (!user.googleId && payload.sub) {
+      user.googleId = payload.sub;
+      await user.save();
+    }
+  } else {
+    // The password field is required by the schema; a long random value makes
+    // it unusable — the owner signs in with Google or sets a real one through
+    // forgot-password. Role is always CUSTOMER (never ADMIN/ARTISAN here).
+    user = await User.create({
+      name: payload.name?.trim() || email.split('@')[0],
+      email,
+      password: crypto.randomBytes(48).toString('base64url'),
+      role: 'CUSTOMER',
+      status: 'ACTIVE',
+      avatar: payload.picture,
+      googleId: payload.sub
+    });
+  }
+
+  res.json({
+    success: true,
+    token: generateToken(user._id),
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status
+    }
+  });
+}));
+
+// --- Forgot password with email OTP ---------------------------------------
+// All three are mounted behind the strict OTP rate limiter in app.js.
+router.post('/forgot-password', forgotPasswordValidators, validate, forgotPassword);
+router.post('/verify-otp', verifyOtpValidators, validate, verifyOtp);
+router.post('/reset-password', resetPasswordValidators, validate, resetPassword);
 
 router.put('/profile', protect, catchAsync(async (req, res) => {
   const { name, phone, address, avatar } = req.body;

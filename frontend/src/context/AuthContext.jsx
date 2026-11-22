@@ -49,6 +49,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Same contract as login(): stores the token and returns the user, so the
+  // Auth page redirects exactly like a password sign-in.
+  const loginWithGoogle = async (credential) => {
+    const response = await authService.loginWithGoogle(credential);
+    if (response.data.success) {
+      const { token: newToken, user: userData } = response.data;
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(userData);
+      return userData;
+    }
+  };
+
   const register = async (name, email, password) => {
     const response = await authService.register({ name, email, password });
     if (response.data.success) {
@@ -79,6 +92,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     role: user?.role || null,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateUser

@@ -21,8 +21,20 @@ const userSchema = new mongoose.Schema({
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     quantity: { type: Number, default: 1 }
   }],
+  // Google sub (subject) id — sparse unique so the many users without it are
+  // not indexed and existing documents keep working untouched.
+  googleId: { type: String, unique: true, sparse: true },
+  // Password reset: a single-use random token (stored HASHED) plus the OTP
+  // state for the forgot-password flow. The OTP itself is never stored —
+  // only an HMAC-SHA256 of it, keyed with JWT_SECRET.
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  passwordResetOtpHash: String,
+  passwordResetOtpExpires: Date,
+  passwordResetOtpAttempts: { type: Number, default: 0 },
+  passwordResetOtpLastSentAt: Date,
+  passwordResetOtpWindowStart: Date,
+  passwordResetOtpRequestCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

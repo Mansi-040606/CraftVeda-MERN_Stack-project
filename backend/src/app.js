@@ -57,7 +57,23 @@ const authLimiter = rateLimit({
   max: 20,
   message: { message: 'Too many authentication attempts, please try again later.' }
 });
-app.use(['/api/auth/login', '/api/auth/register'], authLimiter);
+app.use(['/api/auth/login', '/api/auth/register', '/api/auth/google'], authLimiter);
+
+// Forgot-password / OTP endpoints: same strictness as authLimiter (20 per
+// 15 min), keyed by IP + email so one shared IP can never lock out other
+// accounts, while each account still gets its own strict bucket. The per-email
+// cooldown (60 s) and hourly cap (5) are enforced in the controller.
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => `${req.ip}:${String(req.body?.email || '').toLowerCase()}`,
+  message: { message: 'Too many attempts, please try again later.' }
+});
+app.use(
+  ['/api/auth/forgot-password', '/api/auth/verify-otp', '/api/auth/reset-password'],
+  otpLimiter
+);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/artisans', artisanRoutes);

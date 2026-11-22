@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
+import { toast, errMsg } from '../../components/Toast';
+
+// Hidden entirely when the operator has not configured a Google Client ID.
+const googleEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -12,11 +18,18 @@ const Auth = () => {
     password: ''
   });
 
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from;
+
+  // The Google button takes a pixel width — keep it inside the auth card on
+  // every viewport (card padding 32px + page padding 16px per side).
+  const googleBtnWidth = Math.min(
+    360,
+    Math.max(200, (typeof window !== 'undefined' ? window.innerWidth : 448) - 96)
+  );
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,6 +49,14 @@ const Auth = () => {
     }
   };
 
+  const redirectAfterAuth = (user) => {
+    // Come back to where the user was (e.g. /cart) instead of the dashboard.
+    const redirectPath = from?.pathname
+      ? `${from.pathname}${from.search || ''}`
+      : getRedirectPath(user.role);
+    navigate(redirectPath, { replace: true });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -48,17 +69,46 @@ const Auth = () => {
       } else {
         user = await register(formData.name, formData.email, formData.password);
       }
-
-      // Come back to where the user was (e.g. /cart) instead of the dashboard.
-      const redirectPath = from?.pathname
-        ? `${from.pathname}${from.search || ''}`
-        : getRedirectPath(user.role);
-      navigate(redirectPath, { replace: true });
+      redirectAfterAuth(user);
     } catch (err) {
       setError(err.response?.data?.message || (isLogin ? 'Invalid email or password' : 'Registration failed'));
     } finally {
       setLoading(false);
     }
+  };
+
+  // Google returns an ID token; the backend verifies it and answers with the
+  // same { token, user } shape as a normal login.
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential) {
+      toast.error('Google sign-in failed. Please try again.');
+      return;
+    }
+    setGoogleLoading(true);
+    try {
+      const user = await loginWithGoogle(credentialResponse.credential);
+      redirectAfterAuth(user);
+    } catch (err) {
+      const status = err.response?.status;
+      const backendMessage = err.response?.data?.message;
+      const message =
+        status === 503
+          ? 'Google sign-in is not configured yet.'
+          : status === 403
+            ? 'This account is blocked. Please contact support.'
+            : status === 401 && backendMessage === 'Google account email is not verified'
+              ? 'Your Google email is not verified. Verify it with Google, then try again.'
+              : status === 401
+                ? 'Google sign-in failed. Please try again.'
+                : errMsg(err, 'Google sign-in failed. Please try again.');
+      toast.error(message);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google sign-in was cancelled or failed. Please try again.');
   };
 
   return (
@@ -93,6 +143,34 @@ const Auth = () => {
             Register
           </button>
         </div>
+
+        {googleEnabled && (
+          <div className="mb-6">
+            {googleLoading ? (
+              <div className="w-full border border-ink/15 rounded-sm py-3 text-center text-ink-soft text-sm bg-parchment">
+                Completing Google sign-in…
+              </div>
+            ) : (
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  text="continue_with"
+                  theme="outline"
+                  shape="rectangular"
+                  size="large"
+                  width={googleBtnWidth}
+                />
+              </div>
+            )}
+
+            <div className="my-6 flex items-center gap-4">
+              <div className="flex-1 border-t border-ink/10"></div>
+              <span className="text-ink-soft text-sm">or</span>
+              <div className="flex-1 border-t border-ink/10"></div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
@@ -139,7 +217,7 @@ const Auth = () => {
 
           {isLogin && (
             <div className="flex justify-end">
-              <Link to="/auth/forgot" className="text-sm text-terracotta-dark hover:underline">
+              <Link to="/forgot-password" className="text-sm text-terracotta-dark hover:underline">
                 Forgot Password?
               </Link>
             </div>
@@ -153,17 +231,6 @@ const Auth = () => {
             {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
         </form>
-
-        <div className="my-6 flex items-center gap-4">
-          <div className="flex-1 border-t border-ink/10"></div>
-          <span className="text-ink-soft text-sm">or</span>
-          <div className="flex-1 border-t border-ink/10"></div>
-        </div>
-
-        <button className="w-full border border-ink/15 py-3 rounded-sm hover:bg-parchment transition flex items-center justify-center gap-3" disabled>
-          <span>G</span>
-          <span className="text-ink-soft">Continue with Google</span>
-        </button>
 
         <p className="text-center text-sm text-ink-soft mt-6">
           {isLogin ? "Don't have an account? " : "Already have an account? "}

@@ -12,6 +12,8 @@ MERN stack · role-based JWT auth · Razorpay-ready payments (COD works with zer
 ### Customer
 - Browse/search products with filters (category, craft type, price, sort, pagination) and full product detail pages (artisan story, GI tag, reviews)
 - Cart and wishlist (server-side persisted), checkout with address validation
+- Sign in with **email + password or Google** (Google-created accounts get a random unusable password and can set a real one later via Forgot password)
+- **Forgot password with email OTP** — 6-digit code by email, 10-minute validity, 60-second resend cooldown, 5 codes/hour cap, single-use reset token
 - Payment: **Cash on Delivery** (no keys needed) or Card/UPI/Net Banking/Wallet via Razorpay test mode
 - Order history, order detail, order cancellation (restores stock)
 - Reviews & ratings for purchased (delivered) products only — verified-purchase badge, "helpful" votes
@@ -44,10 +46,10 @@ MERN stack · role-based JWT auth · Razorpay-ready payments (COD works with zer
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19 · React Router v7 · Vite 8 · Tailwind CSS v4 · Axios · Chart.js / react-chartjs-2 · Oxlint |
-| Backend | Node.js (ESM) · Express 4 · Mongoose 8 · jsonwebtoken · bcryptjs · express-validator · helmet · morgan · express-rate-limit · qrcode · razorpay |
+| Frontend | React 19 · React Router v7 · Vite 8 · Tailwind CSS v4 · Axios · Chart.js / react-chartjs-2 · @react-oauth/google · Oxlint |
+| Backend | Node.js (ESM) · Express 4 · Mongoose 8 · jsonwebtoken · bcryptjs · express-validator · helmet · morgan · express-rate-limit · qrcode · razorpay · google-auth-library · nodemailer |
 | Database | MongoDB (local, `mongodb://localhost:27017/…`) |
-| Tooling | Vite dev proxy (`/api` → `:5000`), idempotent seed script, 4 E2E scripts |
+| Tooling | Vite dev proxy (`/api` → `:5000`), idempotent seed script, 7 E2E scripts |
 
 ---
 
@@ -68,21 +70,22 @@ CraftVeda/
 │   │   ├── middleware/       ← auth (protect/adminOnly/artisanOnly/allowRoles), errorHandler, validate
 │   │   ├── models/           ← 12 Mongoose models
 │   │   ├── routes/           ← 15 route files
-│   │   ├── controllers/      ← cart, wishlist, review, workshop, artisan stats, admin stats
+│   │   ├── controllers/      ← cart, password reset, wishlist, review, workshop, artisan stats, admin stats
 │   │   ├── validators/       ← express-validator rule sets
 │   │   ├── scripts/seedAdmin.js
-│   │   └── utils/            ← ApiError, catchAsync
-│   └── tests/                ← step4/5/6/8 E2E scripts
+│   │   └── utils/            ← ApiError, catchAsync, images, mailer (OTP e-mail), googleAuth
+│   └── tests/                ← step4/5/6/8/10/11/12 E2E scripts
 └── frontend/
     ├── index.html · vite.config.js (port 3000) · postcss.config.js · .oxlintrc.json
+    ├── .env.example          ← copy to .env (VITE_GOOGLE_CLIENT_ID)
     ├── public/favicon.svg
     └── src/
         ├── App.jsx           ← all routes + role guards
         ├── components/       ← Header/Footer, ProtectedRoute, Toast, AdminShell, ArtisanShell,
         │                       OrderStatus, ProductCard, review components
         ├── context/          ← AuthContext, CartContext
-        ├── pages/            ← 27 page directories (Home, Products, Artisans, Workshops, Cart,
-        │                       Checkout, Orders, Admin/*, Artisan*, CustomerDashboard, Donate, …)
+        ├── pages/            ← 28 page directories (Home, Products, Artisans, Workshops, Cart,
+        │                       Checkout, Orders, Auth, ForgotPassword, Admin/*, Artisan*, …)
         ├── services/         ← 15 axios service modules (auth, product, order, cart, adminApi, …)
         └── constants/, utils/format.js
 ```
@@ -97,6 +100,11 @@ CraftVeda/
 - *(Optional)* Razorpay **test** keys — only if you want to demo online payments
 - *(Optional)* **Cloudinary** credentials — only if you want real image hosting
   (without them every image upload returns a clear `503 Image upload is not configured`)
+- *(Optional)* a **Google OAuth Client ID** — only if you want the "Continue with Google"
+  button (without it the button is hidden and `POST /api/auth/google` returns `503`)
+- *(Optional)* **Gmail SMTP + App Password** — only if you want real forgot-password
+  e-mails (without it, development prints the code to the backend console and
+  production returns `503`)
 
 ---
 
@@ -120,6 +128,7 @@ npm run dev                 # http://localhost:5000  (auto-restarts on change)
 ```bash
 cd frontend
 npm install
+cp .env.example .env    # optional — only needed for VITE_GOOGLE_CLIENT_ID
 npm run dev                 # http://localhost:3000  (proxies /api → :5000)
 ```
 
@@ -166,18 +175,105 @@ Seeded certificates for the `/verify` page: **`CV-SEED-0001`**, **`CV-SEED-0002`
 | `CLOUDINARY_CLOUD_NAME` | **no** | *(empty)* | Cloudinary cloud name — product/profile image hosting |
 | `CLOUDINARY_API_KEY` | **no** | *(empty)* | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | **no** | *(empty)* | Cloudinary API secret (server-side only, never logged) |
+| `GOOGLE_CLIENT_ID` | **no** | *(empty)* | Google Web OAuth Client ID for "Continue with Google" — empty hides the button and makes `POST /api/auth/google` return 503 |
+| `SMTP_HOST` | **no** | *(empty)* | SMTP server host, e.g. `smtp.gmail.com` |
+| `SMTP_PORT` | **no** | `587` | SMTP port (`587` STARTTLS, `465` implicit TLS) |
+| `SMTP_USER` | **no** | *(empty)* | SMTP login (full Gmail address) |
+| `SMTP_PASS` | **no** | *(empty)* | SMTP password — for Gmail an **App Password**, never your real password |
+| `MAIL_FROM` | **no** | *(empty)* | From header, e.g. `CraftVeda <you@gmail.com>` |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | no | `admin@craftveda.com` / `Admin@123456` / `Admin` | Overrides for `npm run seed-admin` only |
 
-`frontend/.env` (optional):
+`frontend/.env` (copy from `frontend/.env.example`):
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:5000/api` | API base URL if the backend is not on localhost:5000 |
+| `VITE_GOOGLE_CLIENT_ID` | *(empty)* | Same Google Client ID as the backend — empty hides the "Continue with Google" button |
+
+> **Secrets rule:** `.env` files are git-ignored (`.env.example` files are committed
+> with **empty values only**). Read credentials from `process.env` /
+> `import.meta.env` only — never print, log or hardcode them. The only exception
+> is the forgot-password **OTP itself**: when SMTP is not configured *and* the
+> server is not in production, the 6-digit code is printed to the backend console
+> so the flow can be tested locally. It is **never** logged when SMTP works.
 
 > **Razorpay keys are optional.** Leave both empty and **Cash on Delivery works end-to-end**
 > (order → status flow → cancellation → stock restore). Online payment options
 > (Card/UPI/Net Banking/Wallet) return *"Razorpay is not configured"* until you add
 > test-mode keys from the Razorpay dashboard.
+
+---
+
+## Google sign-in (setup)
+
+The "Continue with Google" button on `/auth` sends a Google **ID token** to
+`POST /api/auth/google`, which verifies it with `google-auth-library`
+(audience = `GOOGLE_CLIENT_ID`, `email_verified` must be `true`).
+
+1. Go to <https://console.cloud.google.com/> and create (or pick) a project.
+2. **APIs & Services → OAuth consent screen**
+   - User type **External**, fill the app name ("CraftVeda") and your email.
+   - Scopes: keep the default (`email`, `profile`, `openid`) — no extra scopes needed.
+   - **Test users → Add users** → add *your own Gmail address*. While the app is in
+     "Testing" status only added test users can sign in.
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID**
+   - Application type: **Web application**.
+   - **Authorized JavaScript origins** → `http://localhost:3000`
+     (add your production origin later, e.g. `https://your-domain.com`).
+   - Authorized redirect URIs are **not** needed for the popup flow.
+4. Copy the **Client ID** (`…apps.googleusercontent.com`) into:
+   - `backend/.env` → `GOOGLE_CLIENT_ID=…`
+   - `frontend/.env` → `VITE_GOOGLE_CLIENT_ID=…`
+5. Restart both servers. The button appears above the email form on `/auth`.
+
+Behaviour (all covered by the E2E suite):
+
+- **Existing account with that email** → logged in; `googleId` stored on first
+  Google sign-in; **role/status never change** (an ARTISAN/ADMIN stays one).
+- **New email** → created as `CUSTOMER` / `ACTIVE` with the Google name + avatar
+  and a long random unusable password. Never `ADMIN`/`ARTISAN`.
+- **BLOCKED** → `403 Account is blocked` (identical to a password login).
+- **Unverified Google email** → `401`.
+- **Missing `GOOGLE_CLIENT_ID`** → `503 Google sign-in is not configured`
+  and the button is hidden in the UI.
+- Google-created users can always set a real password later via **Forgot password**.
+
+---
+
+## Forgot-password e-mails (Gmail SMTP)
+
+`POST /api/auth/forgot-password` e-mails a **6-digit code** (HMAC-hashed in the
+DB, valid 10 minutes) through `nodemailer`. Setup with a Gmail **App Password**:
+
+1. Your Google Account → **Security** → turn on **2-Step Verification**
+   (App Passwords only appear once 2FA is on).
+2. Security → **App passwords** (search "app passwords") → give it a name like
+   `craftveda-smtp` → **Create** → Google shows a **16-character password** once.
+3. Fill `backend/.env`:
+
+   ```dotenv
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=you@gmail.com
+   SMTP_PASS=xxxxxxxxxxxxxxxx    # the 16-char App Password, spaces removed
+   MAIL_FROM=CraftVeda <you@gmail.com>
+   ```
+
+4. Restart the backend.
+
+Without SMTP:
+
+- **Development** (`NODE_ENV` ≠ `production`): the server prints a clear warning
+  and the OTP itself to the console — the whole flow still works locally.
+- **Production**: `503 Email service is not configured`.
+- With SMTP configured the OTP is **never** written to any log.
+
+Rate limits (all silent, always the same generic success message so responses
+never reveal whether an e-mail is registered): **60-second resend cooldown**,
+**5 codes per hour per e-mail**, **5 wrong codes** then the code is invalidated,
+and the issued reset token is **single-use** (10 minutes). Endpoints sit behind
+a dedicated 20-requests/15-min limiter keyed by IP + e-mail (login/register/
+google keep the existing strict auth limiter).
 
 ---
 
@@ -196,13 +292,20 @@ node tests/step6-workshops.e2e.mjs      # workshop CRUD/booking/cancel      → 
 node tests/step8-timeseries.e2e.mjs     # admin dashboard time-series       → 14 tests
 node tests/step10-images.e2e.mjs        # image uploads (Cloudinary mocked) → 25 tests
 node tests/step11-product-edit.e2e.mjs  # product edit load/duplicate/update → 26 tests
+node tests/step12-auth-otp.e2e.mjs      # Google sign-in + OTP reset (both mocked) → 29 tests
 ```
 
-Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 · 26/26 — all passing.**
-Free ports `5094–5099` before running. There are no step 1–3 test scripts; the six above are the full suite.
+Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 · 26/26 · 29/29 — all passing.**
+Free ports `5093–5099` before running. There are no step 1–3 test scripts; the seven above are the full suite.
 
 > `step10` runs with `CLOUDINARY_MOCK=1` and fake credentials — **no real Cloudinary
 > upload ever happens** — and it uses its own throwaway database.
+>
+> `step12` runs with `GOOGLE_TOKEN_MOCK=1` (the ID token is a local base64url
+> payload, so Google is never contacted) and **blanks every SMTP variable**, so the
+> development fallback prints the OTP to the server console where the test captures
+> it — **no real e-mail is ever sent**. It restarts the server once without
+> `GOOGLE_CLIENT_ID` to prove the 503 path.
 
 Lint & build:
 
@@ -234,8 +337,14 @@ npm run build     # vite production build → frontend/dist
 | address | Object | `street`, `city`, `state`, `pincode`, `country` (default `India`) |
 | wishlist | [→ Product] | |
 | cart | [{ product → Product, quantity Number = 1 }] | |
-| resetPasswordToken | String | unused (no reset flow yet) |
-| resetPasswordExpire | Date | unused |
+| googleId | String | **sparse unique** — Google `sub` id; absent for password-only users (existing docs untouched) |
+| resetPasswordToken | String | SHA-256 **hash** of the single-use reset token returned by `verify-otp` (never the raw token) |
+| resetPasswordExpire | Date | reset-token expiry (10 min) |
+| passwordResetOtpHash | String | HMAC-SHA256 (keyed with `JWT_SECRET`) of the 6-digit code — the code itself is never stored |
+| passwordResetOtpExpires | Date | code expiry (10 min) |
+| passwordResetOtpAttempts | Number | wrong-code counter; at 5 the code is invalidated |
+| passwordResetOtpLastSentAt | Date | drives the 60-second resend cooldown |
+| passwordResetOtpWindowStart / passwordResetOtpRequestCount | Date / Number | hourly window for the max-5-codes cap |
 | createdAt / updatedAt | Date | managed by timestamps |
 
 ### artisans
@@ -457,9 +566,9 @@ npm run build     # vite production build → frontend/dist
 2. **Workshop payments** — bookings record `paymentStatus: pending` and never go through Razorpay; the seat is granted without charge.
 3. **Donation payments** — donations are created `pending` and the public feed totals only `completed` ones; the UI explicitly records donations without charging, and the backend's Razorpay donation path is unused by the frontend.
 4. **Razorpay is test-mode only** and optional (see Environment variables); no refunds flow even though `refunded` exists as a status.
-5. **No image upload** — `multer`/`cloudinary` installed but not wired; product images are URL strings. No password-reset e-mail (Nodemailer unused) and no Google OAuth.
+5. **Password rules are deliberately minimal** — register and reset-password both require only **min 6 characters**, so existing accounts and tests keep working. Suggested hardening (not implemented): min 8 with upper/lower/digit/symbol, a breached-password check (e.g. HaveIBeenPwned k-anonymity), and progressive lockout on repeated login failures.
 6. **Certificate generation is API-only** (`POST /api/certificates/generate`); the UI only verifies certificates.
-7. **No code-splitting** — the production bundle is a single ~720 kB chunk (Vite warns); lint reports 48 React warnings (0 errors).
+7. **No code-splitting** — the production bundle is a single ~775 kB chunk (Vite warns); lint reports React warnings (0 errors).
 
 ---
 

@@ -21,7 +21,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only bounce to /auth when an EXISTING session died (a token was sent
+    // and came back 401). Failed sign-in attempts carry no token — their
+    // 401 must reach the page so it can show the error/toast instead of
+    // reloading the browser.
+    if (error.response?.status === 401 && localStorage.getItem('token')) {
       localStorage.removeItem('token');
       window.location.href = '/auth';
     }
