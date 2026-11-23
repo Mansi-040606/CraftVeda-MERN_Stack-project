@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
-import { sendOtpEmail } from '../utils/mailer.js';
+import { sendOtpEmail, isMailerHealthy, redactMailerSecrets } from '../utils/mailer.js';
 
 const OTP_TTL_MS = 10 * 60 * 1000;          // code valid 10 minutes
 const RESEND_COOLDOWN_MS = 60 * 1000;        // one send per minute per email
@@ -18,6 +18,10 @@ const GENERIC_MESSAGE =
 // One message for every verify failure (unknown email, wrong code, expired,
 // locked) — so probing verify-otp cannot reveal whether an account exists.
 const VERIFY_FAILURE_MESSAGE = 'Invalid or expired verification code';
+
+// Uniform answer while SMTP is known-broken — sent for EVERY email so the
+// 503 itself never reveals whether an account exists.
+const MAIL_DOWN_MESSAGE = 'Email service is temporarily unavailable. Please try again later.';
 
 // The OTP is stored only as an HMAC keyed with a server secret, so a database
 // leak cannot be brute-forced down to the 6-digit code offline.
@@ -37,6 +41,13 @@ const normalizeEmail = (email) => String(email).toLowerCase().trim();
 
 // POST /api/auth/forgot-password — always the same generic response.
 export const forgotPassword = catchAsync(async (req, res) => {
+  // SMTP is known-broken (startup verify failed or the last send failed with
+  // an auth/connection error): one uniform 503 for EVERY email, so the state
+  // change is not an enumeration oracle.
+  if (!isMailerHealthy()) {
+    throw new ApiError(503, MAIL_DOWN_MESSAGE);
+  }
+
   const email = normalizeEmail(req.body.email);
   const user = await User.findOne({ email });
 
@@ -53,6 +64,15 @@ export const forgotPassword = catchAsync(async (req, res) => {
     if (!inCooldown && windowCount < MAX_REQUESTS_PER_HOUR) {
       const otp = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
 
+      // Remember the pre-write state so a failed send can undo everything.
+      const prev = {
+        lastSentAt: user.passwordResetOtpLastSentAt,
+        windowStart: user.passwordResetOtpWindowStart,
+        requestCount: user.passwordResetOtpRequestCount,
+        resetToken: user.resetPasswordToken,
+        resetExpire: user.resetPasswordExpire
+      };
+
       await User.updateOne({ _id: user._id }, {
         $set: {
           passwordResetOtpHash: hashOtp(otp),
@@ -66,9 +86,40 @@ export const forgotPassword = catchAsync(async (req, res) => {
         $unset: { resetPasswordToken: '', resetPasswordExpire: '' }
       });
 
-      // 503 in production when SMTP is missing; in development the code is
-      // printed to the server console instead. Never logged when SMTP works.
-      await sendOtpEmail(user.email, otp);
+      try {
+        // 503 in production when SMTP is missing; in development the code is
+        // printed to the server console instead. Never logged when SMTP works.
+        await sendOtpEmail(user.email, otp);
+      } catch (err) {
+        // Real error goes to the SERVER console only — error code and message
+        // with credentials redacted. Never the OTP, never SMTP_PASS/SMTP_USER.
+        console.error(
+          `[mailer] send failed for ${user.email} (code=${err?.code || 'n/a'}): ${redactMailerSecrets(err?.message)}`
+        );
+
+        // Undo the write: the cooldown, the hourly window and the stored code
+        // must not survive a send that never happened.
+        const $unset = {
+          passwordResetOtpHash: '',
+          passwordResetOtpExpires: '',
+          passwordResetOtpAttempts: ''
+        };
+        const $set = {};
+        if (prev.lastSentAt) $set.passwordResetOtpLastSentAt = prev.lastSentAt;
+        else $unset.passwordResetOtpLastSentAt = '';
+        if (prev.windowStart) $set.passwordResetOtpWindowStart = prev.windowStart;
+        else $unset.passwordResetOtpWindowStart = '';
+        if (prev.requestCount != null) $set.passwordResetOtpRequestCount = prev.requestCount;
+        else $unset.passwordResetOtpRequestCount = '';
+        if (prev.resetToken) $set.resetPasswordToken = prev.resetToken;
+        else $unset.resetPasswordToken = '';
+        if (prev.resetExpire) $set.resetPasswordExpire = prev.resetExpire;
+        else $unset.resetPasswordExpire = '';
+        await User.updateOne({ _id: user._id }, { $set, $unset });
+
+        // Fall through: a mail failure answers the SAME generic 200 as an
+        // unknown email (never a 500, never SMTP text).
+      }
     }
   }
 

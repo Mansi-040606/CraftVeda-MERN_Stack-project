@@ -1,11 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import { toast, errMsg } from '../../components/Toast';
+import { toast } from '../../components/Toast';
 
 const OTP_LENGTH = 6;
 const OTP_TTL_SECONDS = 10 * 60; // matches the backend's 10-minute code life
 const RESEND_SECONDS = 60;       // matches the backend's 60-second cooldown
+const GENERIC_ERROR = 'Something went wrong. Please try again.';
+
+// Our API's own 4xx/503 messages are safe to show. Everything else — 500s,
+// stack traces, internal/SMTP text, network errors — must never reach the
+// screen, so it is replaced with one generic line.
+const friendlyError = (err) => {
+  const status = err?.response?.status;
+  const data = err?.response?.data;
+  const known = status === 503 || (status >= 400 && status < 500);
+  if (known) {
+    if (typeof data?.message === 'string' && data.message.trim()) return data.message;
+    if (typeof data?.errors?.[0]?.msg === 'string' && data.errors[0].msg.trim()) return data.errors[0].msg;
+  }
+  return GENERIC_ERROR;
+};
 
 const emptyOtp = () => Array(OTP_LENGTH).fill('');
 
@@ -82,7 +97,7 @@ const ForgotPassword = () => {
       startOtpStep();
       if (options.resend) toast.success(`A new code was sent to ${maskEmail(email.trim())}`);
     } catch (err) {
-      setError(errMsg(err, 'Could not send the code. Please try again.'));
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }
@@ -175,7 +190,7 @@ const ForgotPassword = () => {
       setError(
         attempts >= 5
           ? 'Too many incorrect attempts. Please request a new code.'
-          : errMsg(err, 'Invalid or expired verification code')
+          : friendlyError(err)
       );
       setOtp(emptyOtp());
       inputRefs.current[0]?.focus();
@@ -206,7 +221,7 @@ const ForgotPassword = () => {
       toast.success('Password changed');
       navigate('/auth', { replace: true });
     } catch (err) {
-      setError(errMsg(err, 'Could not reset the password. Please request a new code.'));
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }

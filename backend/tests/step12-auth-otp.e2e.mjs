@@ -3,6 +3,11 @@
 // SMTP_* are blanked so the development fallback prints the code to the server
 // console, and the test captures it from there — no real email, no real Google
 // call, no network beyond localhost).
+// Mail-failure hooks (test-only envs, same idea as GOOGLE_TOKEN_MOCK):
+//   MAILER_MOCK_FAIL='a@b=EAUTH,c@d=EDATA' -> the FIRST send to each listed
+//     address throws an SMTP-like error with that code; later sends succeed.
+//   MAILER_MOCK_VERIFY_FAIL=1              -> the startup transporter.verify()
+//     fails, so the mailer starts unhealthy.
 // Run from backend/: node tests/step12-auth-otp.e2e.mjs
 // NEVER touches craftveda / craftveda_dev — hard-guarded below.
 // Runs on a throwaway database and always stops the server + drops the DB.
@@ -18,6 +23,13 @@ const PORT = 5093;
 const BASE = `http://127.0.0.1:${PORT}/api`;
 const TEST_TIMEOUT_MS = 120_000;
 const GOOGLE_CLIENT_ID = 'e2e-google-client-id';
+
+// Mock SMTP failures: generic (EDATA) for failgen, auth (EAUTH) for failauth —
+// first send to each address throws, the next one succeeds (lets the suite
+// prove both rollback and recovery inside one server process).
+const MAILER_MOCK_FAIL = 'failgen@e2e.test=EDATA,failauth@e2e.test=EAUTH';
+const MAIL_DOWN_MESSAGE = 'Email service is temporarily unavailable. Please try again later.';
+const SMTP_LEAK_MARKERS = ['535', 'Username and Password', 'SMTP', 'nodemailer', 'EAUTH'];
 
 const FORBIDDEN_DBS = ['craftveda', 'craftveda_dev'];
 if (!MONGO_URI.endsWith(`/${TEST_DB}`) || FORBIDDEN_DBS.includes(TEST_DB)) {
@@ -102,11 +114,16 @@ function serverEnv() {
     NODE_ENV: 'test',
     GOOGLE_CLIENT_ID,
     GOOGLE_TOKEN_MOCK: '1',
+    // HOST stays empty -> isSmtpConfigured() is false -> dev fallback prints
+    // the code. Dummy user/pass prove credentials are redacted in logs and
+    // override any real values from backend/.env (dotenv never overwrites).
     SMTP_HOST: '',
     SMTP_PORT: '',
-    SMTP_USER: '',
-    SMTP_PASS: '',
-    MAIL_FROM: ''
+    SMTP_USER: 'e2e-smtp-user@gmail.com',
+    SMTP_PASS: 'e2e-smtp-secret',
+    MAIL_FROM: 'CraftVeda <e2e-smtp-user@gmail.com>',
+    MAILER_MOCK_FAIL,
+    MAILER_MOCK_VERIFY_FAIL: ''
   };
 }
 
@@ -205,6 +222,14 @@ async function getUser(email) {
   return mongoose.connection.db.collection('users').findOne({ email });
 }
 
+// A response body must never carry SMTP transcripts / error codes / secrets.
+function assertNoSmtpText(json, where) {
+  const text = JSON.stringify(json ?? {});
+  for (const marker of SMTP_LEAK_MARKERS) {
+    assert(!text.includes(marker), `SMTP text leaked at ${where}: ${text.slice(0, 300)}`);
+  }
+}
+
 // ---------- mock Google ID tokens (base64url JSON, checked like the real one) ----------
 const googleToken = (payload) => Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
 
@@ -227,7 +252,9 @@ async function seed() {
     { name: 'E2E Google Artisan', email: 'google-artisan@e2e.test', password: 'Test@1234', role: 'ARTISAN', status: 'ACTIVE' },
     { name: 'E2E Google Blocked', email: 'google-blocked@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'BLOCKED' },
     { name: 'E2E Reset User', email: 'reset-user@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'ACTIVE' },
-    { name: 'E2E Blocked Reset', email: 'blocked-reset@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'BLOCKED' }
+    { name: 'E2E Blocked Reset', email: 'blocked-reset@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'BLOCKED' },
+    { name: 'E2E Fail Generic', email: 'failgen@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'ACTIVE' },
+    { name: 'E2E Fail Auth', email: 'failauth@e2e.test', password: 'Test@1234', role: 'CUSTOMER', status: 'ACTIVE' }
   ]);
 }
 
@@ -238,12 +265,14 @@ async function login(email, password) {
 const RESET_EMAIL = 'reset-user@e2e.test';
 const UNKNOWN_EMAIL = 'nobody-here@e2e.test';
 const GENERIC_MESSAGE_SENTINEL = 'sent';
+// Captured from the first unknown-email response; shared with the later
+// phases so every "same generic 200" assertion compares against one value.
+let genericMessage = null;
 
 // ---------- the tests ----------
 async function runTests() {
   // Reference shape: every Google response must match a normal login response.
   let loginShape = null;
-  let genericMessage = null;
   let otp1 = null;
   let otp2 = null;
   let otp3 = null;
@@ -583,6 +612,70 @@ async function runTests() {
     assert(lJson.user.role === 'CUSTOMER', `role=${lJson.user.role}`);
   });
 
+  // ================= mail failure handling =================
+  await check('mailer failure (generic) -> same generic 200 as unknown email, no SMTP text, OTP state rolled back', async () => {
+    // An outstanding reset token must survive a send that never happened.
+    await mongoose.connection.db.collection('users').updateOne(
+      { email: 'failgen@e2e.test' },
+      { $set: { resetPasswordToken: 'a'.repeat(64), resetPasswordExpire: new Date(Date.now() + 60_000) } }
+    );
+
+    const mark = allLoggedOtps().length;
+    const { status, json } = await req('POST', '/auth/forgot-password', { body: { email: 'failgen@e2e.test' } });
+    assert(status === 200, `got ${status}: ${JSON.stringify(json)}`);
+    assert(json.success === true, 'success flag missing');
+    assert(json.message === genericMessage, `not the generic 200 message: ${json.message}`);
+    assertNoSmtpText(json, 'generic mail failure');
+
+    const doc = await getUser('failgen@e2e.test');
+    assert(!doc.passwordResetOtpHash, 'OTP hash survived the failed send');
+    assert(!doc.passwordResetOtpExpires, 'OTP expiry survived the failed send');
+    assert(doc.passwordResetOtpAttempts === undefined, 'attempts not rolled back');
+    assert(!doc.passwordResetOtpLastSentAt, '60-second cooldown consumed by the failed send');
+    // Pre-write value restored (schema default 0, or unset for older docs).
+    assert(!doc.passwordResetOtpRequestCount, `hourly count consumed by the failed send: ${doc.passwordResetOtpRequestCount}`);
+    assert(doc.resetPasswordToken === 'a'.repeat(64), 'outstanding reset token destroyed by a failed send');
+
+    const logs = serverLogs.join('');
+    assert(logs.includes('[mailer] send failed'), 'send failure was not logged on the server');
+    assert(logs.includes('EDATA'), 'error code was not logged on the server');
+
+    // Cooldown/hourly were NOT consumed -> the very next request may send.
+    const retry = await req('POST', '/auth/forgot-password', { body: { email: 'failgen@e2e.test' } });
+    assert(retry.status === 200 && retry.json.message === genericMessage, `retry: ${retry.status} ${retry.json?.message}`);
+    const otps = await waitForOtpCount(mark + 1);
+    assert(otps.length === mark + 1, 'immediate retry after the failed send produced no OTP (cooldown/hourly stayed consumed)');
+    const after = await getUser('failgen@e2e.test');
+    assert(after.passwordResetOtpRequestCount === 1, `requestCount=${after.passwordResetOtpRequestCount}, expected 1`);
+  });
+
+  await check('mailer auth failure -> 503 for BOTH existing and unknown email, identical body, no SMTP text', async () => {
+    // The failing request itself still answers the generic 200 (mail failure
+    // handling), and flips mailerHealthy to false on the way.
+    const trigger = await req('POST', '/auth/forgot-password', { body: { email: 'failauth@e2e.test' } });
+    assert(trigger.status === 200 && trigger.json.message === genericMessage, `trigger: ${trigger.status} ${trigger.json?.message}`);
+    assertNoSmtpText(trigger.json, 'auth failure trigger');
+
+    const existing = await req('POST', '/auth/forgot-password', { body: { email: 'google-existing@e2e.test' } });
+    const unknown = await req('POST', '/auth/forgot-password', { body: { email: UNKNOWN_EMAIL } });
+    assert(existing.status === 503, `existing email got ${existing.status}: ${JSON.stringify(existing.json)}`);
+    assert(unknown.status === 503, `unknown email got ${unknown.status}: ${JSON.stringify(unknown.json)}`);
+    assert(existing.json.message === MAIL_DOWN_MESSAGE, `existing message: ${existing.json.message}`);
+    assert(JSON.stringify(unknown.json) === JSON.stringify(existing.json), '503 bodies differ for existing vs unknown — enumeration oracle');
+    assertNoSmtpText(existing.json, '503 existing');
+    assertNoSmtpText(unknown.json, '503 unknown');
+
+    const doc = await getUser('failauth@e2e.test');
+    assert(!doc.passwordResetOtpHash, 'OTP hash stored by the failed auth send');
+    assert(!doc.passwordResetOtpLastSentAt, 'cooldown consumed by the failed auth send');
+    const logs = serverLogs.join('');
+    assert(logs.includes('[mailer] send failed'), 'auth send failure not logged');
+    assert(logs.includes('EAUTH'), 'auth error code not logged');
+    assert(logs.includes('[redacted]'), 'SMTP username was not redacted in the server log');
+    assert(!logs.includes('e2e-smtp-user@gmail.com'), 'SMTP user leaked into the server log');
+    assert(!logs.includes('e2e-smtp-secret'), 'SMTP password leaked into the server log');
+  });
+
   await check('no OTP or hash ever appears in any response body', async () => {
     const otps = allLoggedOtps();
     assert(otps.length >= 6, `only ${otps.length} OTPs were captured`);
@@ -604,6 +697,87 @@ async function runMissingConfigTest() {
     });
     assert(status === 503, `got ${status}`);
     assert(/not configured/i.test(json.message), `message: ${json.message}`);
+  });
+}
+
+// Phase C: server started with a failing transporter.verify() — the mailer
+// must come up unhealthy, log one clear warning, and answer a uniform 503.
+async function runMailerVerifyFailTest() {
+  await check('startup verify failure -> "SMTP not usable" warning, uniform 503 for existing and unknown', async () => {
+    const logs = serverLogs.join('');
+    assert(logs.includes('SMTP not usable:'), `startup never logged the SMTP warning. tail: ${logs.slice(-400)}`);
+    assert(!logs.includes('e2e-smtp-secret'), 'SMTP password leaked into the log');
+
+    const existing = await req('POST', '/auth/forgot-password', { body: { email: 'google-existing@e2e.test' } });
+    const unknown = await req('POST', '/auth/forgot-password', { body: { email: UNKNOWN_EMAIL } });
+    assert(existing.status === 503, `existing email got ${existing.status}: ${JSON.stringify(existing.json)}`);
+    assert(unknown.status === 503, `unknown email got ${unknown.status}: ${JSON.stringify(unknown.json)}`);
+    assert(existing.json.message === MAIL_DOWN_MESSAGE, `existing message: ${existing.json.message}`);
+    assert(JSON.stringify(unknown.json) === JSON.stringify(existing.json), 'verify-fail 503 bodies differ — enumeration oracle');
+    assertNoSmtpText(existing.json, 'verify-fail 503 existing');
+    assertNoSmtpText(unknown.json, 'verify-fail 503 unknown');
+    const mark = allLoggedOtps().length;
+    await req('POST', '/auth/forgot-password', { body: { email: 'failgen@e2e.test' } });
+    await expectNoNewOtp(mark, 'verify-fail phase must not send');
+  });
+}
+
+// Phase D: mailer healed (fresh process, startup verify OK, no mock failures)
+// — a successful send must bring forgot-password back to the normal generic
+// 200 for every email.
+async function runMailerRecoveryTest() {
+  await check('after a successful send the mailer returns to normal generic 200', async () => {
+    const mark = allLoggedOtps().length;
+    const existing = await req('POST', '/auth/forgot-password', { body: { email: 'failauth@e2e.test' } });
+    assert(existing.status === 200, `existing email got ${existing.status}: ${JSON.stringify(existing.json)}`);
+    assert(existing.json.message === genericMessage, `not the generic message: ${existing.json.message}`);
+    const otps = await waitForOtpCount(mark + 1);
+    assert(otps.length === mark + 1, 'no successful send after the mailer healed');
+
+    const other = await req('POST', '/auth/forgot-password', { body: { email: 'google-existing@e2e.test' } });
+    const unknown = await req('POST', '/auth/forgot-password', { body: { email: UNKNOWN_EMAIL } });
+    assert(other.status === 200 && other.json.message === genericMessage, `existing after recovery: ${other.status} ${other.json?.message}`);
+    assert(unknown.status === 200 && unknown.json.message === genericMessage, `unknown after recovery: ${unknown.status} ${unknown.json?.message}`);
+    assertNoSmtpText(existing.json, 'recovery existing');
+    assertNoSmtpText(unknown.json, 'recovery unknown');
+  });
+}
+
+// Phase E: NODE_ENV=production — error bodies must carry no stack, no SMTP
+// text and no internal messages, while our own ApiError messages still work.
+async function runProductionErrorTest() {
+  await check('production error responses contain no stack, SMTP details or internal messages', async () => {
+    // Malformed JSON takes the raw (non-ApiError) path through errorHandler.
+    const res = await fetch(`${BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"email":'
+    });
+    const text = await res.text();
+    assert(res.status >= 400, `unexpected status ${res.status}`);
+    assert(!text.includes('"stack"'), 'stack key present in a production error body');
+    assert(!/\bat\s+\S+\.js:\d+/.test(text), 'stack frame present in a production error body');
+    for (const marker of ['535', 'Username and Password', 'nodemailer', 'Unexpected token']) {
+      assert(!text.includes(marker), `production error leaked "${marker}": ${text.slice(0, 300)}`);
+    }
+
+    // Our controlled ApiError messages still reach the client in production.
+    const bad = await req('POST', '/auth/login', { body: { email: 'nobody-here@e2e.test', password: 'wrong-pass' } });
+    assert(bad.status === 401, `login got ${bad.status}`);
+    assert(/invalid/i.test(bad.json?.message || ''), `message: ${bad.json?.message}`);
+    assert(!JSON.stringify(bad.json).includes('"stack"'), 'stack leaked on an ApiError response');
+    assertNoSmtpText(bad.json, 'production 401');
+  });
+
+  await check('production without SMTP: uniform 503 for existing and unknown email, identical body', async () => {
+    const existing = await req('POST', '/auth/forgot-password', { body: { email: 'google-existing@e2e.test' } });
+    const unknown = await req('POST', '/auth/forgot-password', { body: { email: UNKNOWN_EMAIL } });
+    assert(existing.status === 503, `existing email got ${existing.status}: ${JSON.stringify(existing.json)}`);
+    assert(unknown.status === 503, `unknown email got ${unknown.status}: ${JSON.stringify(unknown.json)}`);
+    assert(existing.json.message === MAIL_DOWN_MESSAGE, `existing message: ${existing.json.message}`);
+    assert(JSON.stringify(unknown.json) === JSON.stringify(existing.json), 'production 503 bodies differ — enumeration oracle');
+    assertNoSmtpText(existing.json, 'production 503 existing');
+    assertNoSmtpText(unknown.json, 'production 503 unknown');
   });
 }
 
@@ -636,6 +810,31 @@ async function main() {
       await waitForHealth();
       console.log('Second server started without GOOGLE_CLIENT_ID.');
       await runMissingConfigTest();
+
+      // Restart with a failing startup verify() — mailer starts unhealthy.
+      stopServer();
+      await waitForServerDown();
+      serverProc = startServer({ MAILER_MOCK_VERIFY_FAIL: '1' });
+      await waitForHealth();
+      console.log('Third server started with a failing SMTP verify.');
+      await runMailerVerifyFailTest();
+
+      // Restart with the mock failures removed — startup verify is fine, so a
+      // successful send brings forgot-password back to the normal generic 200.
+      stopServer();
+      await waitForServerDown();
+      serverProc = startServer({ MAILER_MOCK_FAIL: '' });
+      await waitForHealth();
+      console.log('Fourth server started with a healthy mailer.');
+      await runMailerRecoveryTest();
+
+      // Restart in production — hardened error responses.
+      stopServer();
+      await waitForServerDown();
+      serverProc = startServer({ NODE_ENV: 'production' });
+      await waitForHealth();
+      console.log('Fifth server started with NODE_ENV=production.');
+      await runProductionErrorTest();
       stopServer();
       await waitForServerDown();
     })(),
