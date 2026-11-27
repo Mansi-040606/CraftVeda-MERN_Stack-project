@@ -20,6 +20,45 @@ const generateValidators = [
     .isMongoId().withMessage('Product must be a valid id')
 ];
 
+router.get('/mine', protect, catchAsync(async (req, res) => {
+  const certificates = await Certificate.find({ buyer: req.user._id })
+    .populate('product', 'name images category craftType')
+    .populate('artisan', 'businessName')
+    .sort('-createdAt');
+
+  res.json({ success: true, certificates });
+}));
+
+router.get('/order/:orderId', protect, catchAsync(async (req, res) => {
+  const order = await Order.findById(req.params.orderId).select('user');
+  if (!order) throw new ApiError(404, 'Order not found');
+  if (!order.user.equals(req.user._id) && req.user.role !== 'ADMIN') {
+    throw new ApiError(403, 'Not authorized');
+  }
+
+  const certificates = await Certificate.find({ order: order._id })
+    .populate('product', 'name images category craftType')
+    .populate('artisan', 'businessName');
+
+  res.json({ success: true, certificates });
+}));
+
+router.get('/verify/:certificateNumber', catchAsync(async (req, res) => {
+  const certificate = await Certificate.findOne({ 
+    certificateNumber: req.params.certificateNumber 
+  });
+
+  if (!certificate) {
+    return res.json({ success: false, valid: false, message: 'Certificate not found' });
+  }
+  
+  res.json({
+    success: true,
+    valid: certificate.isValid,
+    message: certificate.isValid ? 'Certificate is valid' : 'Certificate has been revoked'
+  });
+}));
+
 router.get('/:certificateNumber', catchAsync(async (req, res) => {
   const certificate = await Certificate.findOne({ 
     certificateNumber: req.params.certificateNumber 
@@ -53,8 +92,12 @@ router.post('/generate', protect, generateValidators, validate, catchAsync(async
   }
   const targetProductId = productId || orderedProductIds[0];
 
-  const product = await Product.findById(targetProductId).select('artisan name');
+  const product = await Product.findById(targetProductId)
+    .select('artisan name craftType material')
+    .populate('artisan', 'location businessName');
   if (!product) throw new ApiError(404, 'Product not found');
+
+  const artisanId = product.artisan?._id || product.artisan;
 
   // One certificate per order + product.
   const existing = await Certificate.findOne({ order: order._id, product: product._id });
@@ -65,38 +108,31 @@ router.post('/generate', protect, generateValidators, validate, catchAsync(async
   const qrData = JSON.stringify({
     cert: certificateNumber,
     product: product._id.toString(),
-    artisan: product.artisan.toString(),
+    artisan: artisanId.toString(),
     timestamp: Date.now()
   });
 
   const qrCode = await QRCode.toDataURL(qrData);
 
+  const origin = [product.artisan?.location?.city, product.artisan?.location?.state]
+    .filter(Boolean)
+    .join(', ');
+
   const certificate = await Certificate.create({
     order: order._id,
     product: product._id,
-    artisan: product.artisan,
+    artisan: artisanId,
     buyer: req.user._id,
     certificateNumber,
-    qrCode
+    qrCode,
+    craftDetails: {
+      craftType: product.craftType || undefined,
+      material: product.material || undefined,
+      origin: origin || undefined
+    }
   });
 
   res.status(201).json({ success: true, certificate });
-}));
-
-router.get('/verify/:certificateNumber', catchAsync(async (req, res) => {
-  const certificate = await Certificate.findOne({ 
-    certificateNumber: req.params.certificateNumber 
-  });
-
-  if (!certificate) {
-    return res.json({ success: false, valid: false, message: 'Certificate not found' });
-  }
-  
-  res.json({
-    success: true,
-    valid: certificate.isValid,
-    message: certificate.isValid ? 'Certificate is valid' : 'Certificate has been revoked'
-  });
 }));
 
 export default router;

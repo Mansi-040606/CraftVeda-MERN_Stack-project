@@ -199,6 +199,28 @@ function ArtisanWorkshops() {
     }
   };
 
+  const updateBooking = async (workshopId, bookingId, patch) => {
+    try {
+      const res = await workshopService.updateMineBooking(workshopId, bookingId, patch);
+      const updated = res.data.booking;
+      setBookings((prev) =>
+        prev.map((b) =>
+          b._id === bookingId
+            ? {
+                ...b,
+                status: updated?.status ?? b.status,
+                joinLink: updated?.joinLink ?? b.joinLink,
+              }
+            : b
+        )
+      );
+      toast.success('Booking updated');
+      if (patch.status === 'cancelled') load();
+    } catch (err) {
+      toast.error(errMsg(err, 'Failed to update booking'));
+    }
+  };
+
   const addSlot = () => {
     setForm((prev) => ({ ...prev, schedule: [...prev.schedule, { date: '', startTime: '', endTime: '' }] }));
   };
@@ -557,6 +579,8 @@ function ArtisanWorkshops() {
                             <th className="p-2">Seats</th>
                             <th className="p-2">Date</th>
                             <th className="p-2">Time</th>
+                            <th className="p-2">Payment</th>
+                            <th className="p-2">Session Link</th>
                             <th className="p-2">Status</th>
                           </tr>
                         </thead>
@@ -574,16 +598,35 @@ function ArtisanWorkshops() {
                               <td className="p-2 text-ink-soft">
                                 {booking.startTime} – {booking.endTime}
                               </td>
+                              <td className="p-2 text-xs text-ink-soft">
+                                {booking.paymentStatus || 'pending'}
+                              </td>
                               <td className="p-2">
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-xs ${
-                                    booking.status === 'cancelled'
-                                      ? 'bg-red-100 text-red-700'
-                                      : 'bg-green-100 text-green-800'
-                                  }`}
+                                <input
+                                  type="url"
+                                  defaultValue={booking.joinLink || ''}
+                                  placeholder="https://meet..."
+                                  onBlur={(e) => {
+                                    const val = e.target.value.trim();
+                                    if (val !== (booking.joinLink || '')) {
+                                      updateBooking(workshop._id, booking._id, { joinLink: val });
+                                    }
+                                  }}
+                                  className="border border-ink/10 rounded px-2 py-1 text-xs w-36"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <select
+                                  value={booking.status}
+                                  onChange={(e) =>
+                                    updateBooking(workshop._id, booking._id, { status: e.target.value })
+                                  }
+                                  className="border border-ink/10 rounded px-2 py-1 text-xs"
                                 >
-                                  {booking.status}
-                                </span>
+                                  {['booked', 'confirmed', 'completed', 'cancelled'].map((s) => (
+                                    <option key={s} value={s}>{s}</option>
+                                  ))}
+                                </select>
                               </td>
                             </tr>
                           ))}

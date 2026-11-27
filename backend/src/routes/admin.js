@@ -99,7 +99,7 @@ router.get('/orders', protect, adminOnly, catchAsync(async (req, res) => {
 }));
 
 router.put('/orders/:id/status', protect, adminOnly, catchAsync(async (req, res) => {
-  const { orderStatus } = req.body;
+  const { orderStatus, trackingNumber, trackingUrl } = req.body;
   const allowed = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
   if (!allowed.includes(orderStatus)) {
     throw new ApiError(400, `Order status must be one of: ${allowed.join(', ')}`);
@@ -115,6 +115,8 @@ router.put('/orders/:id/status', protect, adminOnly, catchAsync(async (req, res)
   }
 
   order.orderStatus = orderStatus;
+  if (trackingNumber !== undefined) order.trackingNumber = String(trackingNumber).trim();
+  if (trackingUrl !== undefined) order.trackingUrl = String(trackingUrl).trim();
   await order.save();
 
   res.json({ success: true, order });

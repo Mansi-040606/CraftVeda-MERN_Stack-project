@@ -16,6 +16,8 @@ export const workshopService = {
   update: (id, data) => api.put(`/workshops/mine/${id}`, data),
   remove: (id) => api.delete(`/workshops/mine/${id}`),
   getMineBookings: (id) => api.get(`/workshops/mine/${id}/bookings`),
+  updateMineBooking: (id, bookingId, data) =>
+    api.patch(`/workshops/mine/${id}/bookings/${bookingId}`, data),
 };
 
 export default workshopService;

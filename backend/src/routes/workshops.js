@@ -7,7 +7,8 @@ import {
   createWorkshopValidators,
   updateWorkshopValidators,
   bookWorkshopValidators,
-  idParamValidators
+  idParamValidators,
+  updateBookingValidators
 } from '../validators/workshopValidators.js';
 import {
   listWorkshops,
@@ -16,6 +17,7 @@ import {
   listMine,
   createWorkshop,
   listMineWorkshopBookings,
+  updateBookingByArtisan,
   updateWorkshop,
   deleteWorkshop,
   listMyBookings,
@@ -36,6 +38,7 @@ router.get('/admin', protect, adminOnly, adminListWorkshops);
 router.get('/mine', protect, artisanOnly, listMine);
 router.post('/mine', protect, artisanOnly, createWorkshopValidators, validate, createWorkshop);
 router.get('/mine/:id/bookings', protect, artisanOnly, idParamValidators, validate, listMineWorkshopBookings);
+router.patch('/mine/:id/bookings/:bookingId', protect, artisanOnly, updateBookingValidators, validate, updateBookingByArtisan);
 router.put('/mine/:id', protect, artisanOnly, updateWorkshopValidators, validate, updateWorkshop);
 router.delete('/mine/:id', protect, artisanOnly, idParamValidators, validate, deleteWorkshop);
 

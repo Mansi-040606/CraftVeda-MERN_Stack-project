@@ -1,0 +1,6 @@
+{
+  "name": "craftveda-shared",
+  "private": true,
+  "type": "module",
+  "description": "Modules imported by both the CraftVeda backend and frontend."
+}

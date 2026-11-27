@@ -159,28 +159,50 @@ router.post('/forgot-password', forgotPasswordValidators, validate, forgotPasswo
 router.post('/verify-otp', verifyOtpValidators, validate, verifyOtp);
 router.post('/reset-password', resetPasswordValidators, validate, resetPassword);
 
-router.put('/profile', protect, catchAsync(async (req, res) => {
+router.put('/profile', protect, [
+  body('name').optional().isString().trim().notEmpty().withMessage('Name cannot be empty'),
+  body('phone').optional().isString().trim(),
+  body('address').optional().isObject().withMessage('Address must be an object'),
+  body('avatar').optional().isString().trim()
+], validate, catchAsync(async (req, res) => {
   const { name, phone, address, avatar } = req.body;
+  const updates = {};
+  if (name !== undefined) updates.name = name;
+  if (phone !== undefined) updates.phone = phone;
+  if (avatar !== undefined) updates.avatar = avatar;
+  if (address !== undefined) {
+    updates.address = {
+      street: address.street?.trim() || '',
+      city: address.city?.trim() || '',
+      state: address.state?.trim() || '',
+      pincode: address.pincode?.trim() || '',
+      country: address.country?.trim() || 'India'
+    };
+  }
+
   const user = await User.findByIdAndUpdate(
     req.user._id,
-    { name, phone, address, avatar },
+    updates,
     { new: true, runValidators: true }
   ).select('-password');
-  
+
   res.json({ success: true, user });
 }));
 
-router.put('/password', protect, catchAsync(async (req, res) => {
+router.put('/password', protect, [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
+], validate, catchAsync(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  
+
   const user = await User.findById(req.user._id);
   if (!(await user.comparePassword(currentPassword))) {
     throw new ApiError(400, 'Current password is incorrect');
   }
-  
+
   user.password = newPassword;
   await user.save();
-  
+
   res.json({ success: true, message: 'Password updated successfully' });
 }));
 

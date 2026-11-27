@@ -146,6 +146,9 @@ function Header() {
                       <Link to={getDashboardLink()} className={menuLink} onClick={() => setShowDropdown(false)}>
                         Dashboard
                       </Link>
+                      <Link to="/profile" className={menuLink} onClick={() => setShowDropdown(false)}>
+                        My Profile
+                      </Link>
 
                       {user?.role === 'ARTISAN' && (
                         <>

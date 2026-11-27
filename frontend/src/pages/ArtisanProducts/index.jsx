@@ -351,8 +351,7 @@ function ArtisanProducts() {
                           src={product.images?.[0]}
                           alt={product.name}
                           frame="h-11 w-11 shrink-0 rounded-sm"
-                          w={96}
-                          h={96}
+                          preset="thumb_140"
                         />
                       </Link>
                       <div className="min-w-0">

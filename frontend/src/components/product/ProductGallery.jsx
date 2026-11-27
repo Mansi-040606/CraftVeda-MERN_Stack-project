@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import ProductImage from './ProductImage';
+import { presetUrl } from '../../utils/imageUrl';
+
+// Warm presets from shared/imagePresets.js (pre-generated at upload + warmed).
+const MAIN_PRESETS = ['detail_640', 'detail_1000'];
+const MAIN_SIZES = '(min-width: 768px) 576px, calc(100vw - 5rem)';
 
 /* Small inline icons — the app has no icon library. */
 function ChevronLeft({ className = 'h-5 w-5' }) {
@@ -83,8 +88,8 @@ export default function ProductGallery({ images = [], alt = '', priority = false
             src={current}
             alt={`${alt} — image ${index + 1}`}
             frame="aspect-square"
-            w={1200}
-            h={1200}
+            presets={MAIN_PRESETS}
+            sizes={MAIN_SIZES}
             priority={priority}
             imgClassName="cursor-zoom-in"
           />
@@ -121,7 +126,7 @@ export default function ProductGallery({ images = [], alt = '', priority = false
                       : 'border-ink/10 opacity-70 hover:opacity-100'
                   } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta`}
                 >
-                  <ProductImage src={src} alt="" frame="h-full w-full" w={160} h={160} />
+                  <ProductImage src={src} alt="" frame="h-full w-full" preset="thumb_140" />
                 </button>
               </li>
             ))}
@@ -148,9 +153,11 @@ export default function ProductGallery({ images = [], alt = '', priority = false
           </button>
 
           <img
-            src={current}
+            src={presetUrl(current, 'lightbox_1600')}
             alt={`${alt} — image ${index + 1} of ${list.length}`}
             onClick={(e) => e.stopPropagation()}
+            decoding="async"
+            fetchPriority="high"
             className="max-h-[85vh] max-w-full rounded-sm object-contain shadow-2xl"
           />
 

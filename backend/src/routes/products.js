@@ -96,11 +96,19 @@ router.get('/', catchAsync(async (req, res) => {
   }
 
   const total = await Product.countDocuments(query);
+  // Public list = card data only: lean + field selection + 2 images (cards show
+  // images[0]; [1] covers retry). Cuts payload size and lets populate return a
+  // plain object instead of a full hydrated subdocument.
   const products = await Product.find(query)
-    .populate('artisan', 'businessName profileImage')
+    .select('name price category craftType stock images artisan')
+    .populate('artisan', 'businessName')
     .sort(sort)
     .skip((page - 1) * limit)
-    .limit(Number(limit));
+    .limit(Number(limit))
+    .lean()
+    .then((docs) =>
+      docs.map((doc) => ({ ...doc, images: (doc.images || []).slice(0, 2) }))
+    );
 
   res.json({
     success: true,

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Loading, ErrorState, EmptyState } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { workshopService } from '../../services/workshopService';
+import { runRazorpayPayment } from '../../services/orderService';
+import { useAuth } from '../../context/AuthContext';
 import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
 
@@ -17,10 +19,12 @@ const STATUS_STYLES = {
 };
 
 function MyBookings() {
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [payingId, setPayingId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,6 +56,24 @@ function MyBookings() {
       toast.error(errMsg(err, 'Failed to cancel booking'));
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const payBooking = async (booking) => {
+    setPayingId(booking._id);
+    try {
+      await runRazorpayPayment({
+        referenceType: 'workshop',
+        referenceId: booking._id,
+        description: booking.workshop?.title || 'Workshop Booking',
+        user,
+      });
+      toast.success('Workshop payment completed!');
+      load();
+    } catch (err) {
+      toast.error(errMsg(err, 'Payment could not be completed'));
+    } finally {
+      setPayingId(null);
     }
   };
 
@@ -121,8 +143,21 @@ function MyBookings() {
                     </p>
                     <p className="text-sm text-ink-soft">
                       {booking.participants} participant{booking.participants === 1 ? '' : 's'} ·{' '}
-                      {inr(booking.amount)}
+                      {inr(booking.amount)} ·{' '}
+                      <span className={booking.paymentStatus === 'paid' ? 'text-green-700 font-medium' : ''}>
+                        {booking.amount === 0 ? 'Free' : `Payment: ${booking.paymentStatus || 'pending'}`}
+                      </span>
                     </p>
+                    {booking.joinLink && !cancelled && (
+                      <a
+                        href={booking.joinLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block mt-1 text-xs font-semibold text-terracotta-dark underline"
+                      >
+                        Join session link →
+                      </a>
+                    )}
                   </div>
 
                   <span
@@ -132,6 +167,16 @@ function MyBookings() {
                   >
                     {booking.status}
                   </span>
+
+                  {!cancelled && !past && booking.amount > 0 && booking.paymentStatus !== 'paid' && (
+                    <button
+                      onClick={() => payBooking(booking)}
+                      disabled={payingId === booking._id}
+                      className="px-3 py-1.5 rounded-sm text-sm bg-terracotta text-white hover:bg-terracotta-dark transition disabled:opacity-50"
+                    >
+                      {payingId === booking._id ? 'Paying…' : 'Pay Online'}
+                    </button>
+                  )}
 
                   {!cancelled && !past && (
                     <button

@@ -25,6 +25,50 @@ router.get('/admin', protect, adminOnly, catchAsync(async (req, res) => {
   res.json({ success: true, giTags, page: Number(page), pages: Math.ceil(total / limit), total });
 }));
 
+router.post('/', protect, adminOnly, [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+  body('type').trim().notEmpty().withMessage('Type is required'),
+  body('description').trim().notEmpty().withMessage('Description is required'),
+  body('location.state').trim().notEmpty().withMessage('State is required'),
+  body('isActive').optional().isBoolean()
+], validate, catchAsync(async (req, res) => {
+  const { name, type, description, location, products, history, significance, technique, wikipediaUrl, isActive } = req.body;
+  const giTag = await GITag.create({
+    name,
+    type,
+    description,
+    location: {
+      state: location?.state?.trim(),
+      district: location?.district?.trim() || undefined,
+      region: location?.region?.trim() || undefined
+    },
+    products: Array.isArray(products) ? products.map((p) => String(p).trim()).filter(Boolean) : [],
+    history,
+    significance,
+    technique,
+    wikipediaUrl,
+    isActive: isActive !== undefined ? Boolean(isActive) : true
+  });
+  res.status(201).json({ success: true, giTag });
+}));
+
+router.put('/:id', protect, adminOnly, [
+  body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+  body('type').optional().trim().notEmpty().withMessage('Type cannot be empty'),
+  body('description').optional().trim().notEmpty().withMessage('Description cannot be empty'),
+  body('location').optional().isObject(),
+  body('isActive').optional().isBoolean()
+], validate, catchAsync(async (req, res) => {
+  const allowed = ['name', 'type', 'description', 'location', 'products', 'history', 'significance', 'technique', 'wikipediaUrl', 'isActive'];
+  const updates = {};
+  for (const key of allowed) {
+    if (req.body[key] !== undefined) updates[key] = req.body[key];
+  }
+  const giTag = await GITag.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+  if (!giTag) throw new ApiError(404, 'GI Tag not found');
+  res.json({ success: true, giTag });
+}));
+
 router.patch('/:id', protect, adminOnly, [
   body('isActive').optional().isBoolean().withMessage('isActive must be a boolean')
 ], validate, catchAsync(async (req, res) => {

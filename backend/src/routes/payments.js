@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import Order from '../models/Order.js';
 import Donation from '../models/Donation.js';
+import WorkshopBooking from '../models/WorkshopBooking.js';
 import { protect } from '../middleware/auth.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
@@ -24,8 +25,8 @@ router.post('/create-order', protect, catchAsync(async (req, res) => {
   assertConfigured();
 
   const { currency = 'INR', referenceType, referenceId } = req.body;
-  if (!['order', 'donation'].includes(referenceType)) {
-    throw new ApiError(400, 'referenceType must be "order" or "donation"');
+  if (!['order', 'donation', 'workshop'].includes(referenceType)) {
+    throw new ApiError(400, 'referenceType must be "order", "donation", or "workshop"');
   }
   if (!referenceId) throw new ApiError(400, 'referenceId is required');
 
@@ -36,12 +37,22 @@ router.post('/create-order', protect, catchAsync(async (req, res) => {
     if (!order.user.equals(req.user._id)) throw new ApiError(403, 'Not authorized');
     if (order.paymentStatus === 'paid') throw new ApiError(400, 'Order is already paid');
     expectedAmount = order.total;
-  } else {
+  } else if (referenceType === 'donation') {
     const donation = await Donation.findById(referenceId);
     if (!donation) throw new ApiError(404, 'Donation not found');
     if (!donation.donor.equals(req.user._id)) throw new ApiError(403, 'Not authorized');
     if (donation.paymentStatus === 'completed') throw new ApiError(400, 'Donation is already paid');
     expectedAmount = donation.amount;
+  } else {
+    const booking = await WorkshopBooking.findById(referenceId);
+    if (!booking) throw new ApiError(404, 'Booking not found');
+    if (!booking.user.equals(req.user._id)) throw new ApiError(403, 'Not authorized');
+    if (booking.status === 'cancelled') throw new ApiError(400, 'Booking is cancelled');
+    if (booking.paymentStatus === 'paid') throw new ApiError(400, 'Booking is already paid');
+    if (!booking.amount || booking.amount <= 0) {
+      throw new ApiError(400, 'Free workshop bookings do not require payment');
+    }
+    expectedAmount = booking.amount;
   }
 
   const razorpayOrder = await getRazorpay().orders.create({
@@ -120,6 +131,22 @@ router.post('/verify', protect, catchAsync(async (req, res) => {
     await donation.save();
 
     return res.json({ success: true, donation });
+  }
+
+  if (referenceType === 'workshop') {
+    const booking = await WorkshopBooking.findById(referenceId);
+    if (!booking) throw new ApiError(404, 'Booking not found');
+    if (!booking.user.equals(req.user._id)) throw new ApiError(403, 'Not authorized');
+    if (razorpayOrder.amount !== Math.round(booking.amount * 100)) {
+      throw new ApiError(400, 'Payment amount does not match booking');
+    }
+
+    booking.paymentStatus = 'paid';
+    booking.paymentId = razorpay_payment_id;
+    if (booking.status === 'booked') booking.status = 'confirmed';
+    await booking.save();
+
+    return res.json({ success: true, booking });
   }
 
   throw new ApiError(400, 'Unknown payment receipt type');

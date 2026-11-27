@@ -191,8 +191,7 @@ const ArtisanDashboard = () => {
                             src={row.product.images?.[0]}
                             alt={row.product.name}
                             frame="h-full w-full"
-                            w={128}
-                            h={128}
+                            preset="thumb_140"
                           />
                         ) : (
                           <span className="text-2xl">🏺</span>

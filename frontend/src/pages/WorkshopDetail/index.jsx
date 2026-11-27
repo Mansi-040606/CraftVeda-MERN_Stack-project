@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Loading, ErrorState } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { workshopService } from '../../services/workshopService';
+import { runRazorpayPayment } from '../../services/orderService';
 import { useAuth } from '../../context/AuthContext';
 import ProductImage from '../../components/product/ProductImage';
 import { inr } from '../../utils/format';
@@ -25,6 +26,7 @@ function WorkshopDetail() {
   const [customDate, setCustomDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [payOnline, setPayOnline] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,7 +120,29 @@ function WorkshopDetail() {
     setBooking(true);
     try {
       const res = await workshopService.book(id, body);
-      toast.success(res.data?.message || 'Booking confirmed — pay at the venue');
+      const createdBooking = res.data?.booking;
+      const totalAmount = Number(workshop.price || 0) * count;
+
+      if (payOnline && totalAmount > 0 && createdBooking?._id) {
+        try {
+          await runRazorpayPayment({
+            referenceType: 'workshop',
+            referenceId: createdBooking._id,
+            description: workshop.title,
+            user,
+          });
+          toast.success('Booking confirmed and paid!');
+        } catch (payErr) {
+          const raw = errMsg(payErr, 'Payment not completed');
+          if (/razorpay is not configured/i.test(raw)) {
+            toast.error('Online payment is not configured on this server; seat reserved — pay at venue.');
+          } else {
+            toast.error(`${raw} Your seat is reserved — you can pay from My Bookings.`);
+          }
+        }
+      } else {
+        toast.success(res.data?.message || 'Booking confirmed — pay at the venue');
+      }
       navigate('/my-bookings');
     } catch (err) {
       toast.error(errMsg(err, 'Failed to book workshop'));
@@ -336,12 +360,41 @@ function WorkshopDetail() {
                   Total: <span className="font-bold">{inr(workshop.price * Number(participants || 0))}</span>
                 </p>
 
+                {workshop.price > 0 && (
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setPayOnline(false)}
+                      className={`p-2 rounded-sm border text-left ${
+                        !payOnline ? 'border-terracotta bg-parchment text-ink font-semibold' : 'border-ink/10 text-ink-soft'
+                      }`}
+                    >
+                      Pay at Venue
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPayOnline(true)}
+                      className={`p-2 rounded-sm border text-left ${
+                        payOnline ? 'border-terracotta bg-parchment text-ink font-semibold' : 'border-ink/10 text-ink-soft'
+                      }`}
+                    >
+                      Pay Online
+                    </button>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={booking}
                   className="w-full px-4 py-2 bg-terracotta text-white rounded-sm text-sm hover:bg-terracotta-dark transition disabled:opacity-50"
                 >
-                  {booking ? 'Booking...' : isAuthenticated ? 'Book Now' : 'Sign in to Book'}
+                  {booking
+                    ? 'Booking...'
+                    : !isAuthenticated
+                      ? 'Sign in to Book'
+                      : payOnline && workshop.price > 0
+                        ? 'Book & Pay Online'
+                        : 'Book Now'}
                 </button>
               </form>
             )}

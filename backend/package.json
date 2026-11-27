@@ -7,7 +7,8 @@
         "start": "node server.js",
         "lint": "oxlint src",
         "seed-admin": "node src/scripts/seedAdmin.js",
-        "seed": "node seed.js"
+        "seed": "node seed.js",
+        "warm-images": "node src/scripts/warmImages.js"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",

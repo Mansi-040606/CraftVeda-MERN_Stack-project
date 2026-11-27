@@ -17,6 +17,8 @@ function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [editingTracking, setEditingTracking] = useState(null);
+  const [trackingForm, setTrackingForm] = useState({ trackingNumber: '', trackingUrl: '' });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,6 +52,34 @@ function AdminOrders() {
       load();
     } catch (err) {
       toast.error(errMsg(err, 'Failed to update order status'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const openTracking = (order) => {
+    setEditingTracking(order);
+    setTrackingForm({
+      trackingNumber: order.trackingNumber || '',
+      trackingUrl: order.trackingUrl || '',
+    });
+  };
+
+  const saveTracking = async (e) => {
+    e.preventDefault();
+    if (!editingTracking) return;
+    setBusyId(editingTracking._id);
+    try {
+      await adminApi.updateOrderStatus(editingTracking._id, {
+        orderStatus: editingTracking.orderStatus,
+        trackingNumber: trackingForm.trackingNumber.trim(),
+        trackingUrl: trackingForm.trackingUrl.trim(),
+      });
+      toast.success('Tracking details saved');
+      setEditingTracking(null);
+      load();
+    } catch (err) {
+      toast.error(errMsg(err, 'Failed to save tracking details'));
     } finally {
       setBusyId(null);
     }
@@ -94,6 +124,45 @@ function AdminOrders() {
       {!loading && error && <ErrorState message={error} />}
       {!loading && !error && orders.length === 0 && <EmptyState message="No orders found" />}
 
+      {editingTracking && (
+        <form onSubmit={saveTracking} className="bg-white rounded-sm border border-ink/10 p-4 mb-4 flex flex-wrap gap-3 items-end">
+          <div className="min-w-44">
+            <p className="text-xs font-semibold text-ink mb-1">
+              Tracking for #{String(editingTracking._id).slice(-6).toUpperCase()}
+            </p>
+            <input
+              value={trackingForm.trackingNumber}
+              onChange={(e) => setTrackingForm((f) => ({ ...f, trackingNumber: e.target.value }))}
+              placeholder="Tracking number"
+              className="w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="flex-1 min-w-56">
+            <p className="text-xs text-ink-soft mb-1">Tracking URL (optional)</p>
+            <input
+              value={trackingForm.trackingUrl}
+              onChange={(e) => setTrackingForm((f) => ({ ...f, trackingUrl: e.target.value }))}
+              placeholder="https://carrier.example/track/..."
+              className="w-full border border-ink/10 rounded-sm px-3 py-2 text-sm"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={busyId === editingTracking._id}
+            className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm disabled:opacity-50"
+          >
+            Save Tracking
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditingTracking(null)}
+            className="px-4 py-2 bg-parchment text-ink-soft rounded-sm text-sm"
+          >
+            Cancel
+          </button>
+        </form>
+      )}
+
       {!loading && !error && orders.length > 0 && (
         <div className="bg-white rounded-sm border border-ink/10 overflow-x-auto">
           <table className="w-full text-sm">
@@ -132,7 +201,7 @@ function AdminOrders() {
                     <span className="px-2 py-1 rounded text-xs bg-parchment text-ink-soft">{order.orderStatus}</span>
                   </td>
                   <td className="p-3">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <select
                         value={order.orderStatus}
                         disabled={busyId === order._id}
@@ -143,6 +212,13 @@ function AdminOrders() {
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
+                      <button
+                        type="button"
+                        onClick={() => openTracking(order)}
+                        className="text-xs text-terracotta-dark hover:underline whitespace-nowrap"
+                      >
+                        {order.trackingNumber ? 'Edit tracking' : '+ Tracking'}
+                      </button>
                     </div>
                   </td>
                 </tr>

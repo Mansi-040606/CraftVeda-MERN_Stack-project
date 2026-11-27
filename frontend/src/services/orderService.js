@@ -52,4 +52,58 @@ export const loadRazorpay = () =>
     );
   });
 
+// Shared Razorpay flow for orders, donations, and workshop bookings.
+export const runRazorpayPayment = async ({ referenceType, referenceId, description, user }) => {
+  const payRes = await orderService.createPayment({ referenceType, referenceId });
+  const { key, razorpayOrderId, amount, currency } = payRes.data;
+  const Razorpay = await loadRazorpay();
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let failureMessage = null;
+
+    const settleFailure = () => {
+      if (settled) return;
+      settled = true;
+      reject(new Error(failureMessage || 'Payment was cancelled. You can retry anytime.'));
+    };
+
+    const checkout = new Razorpay({
+      key,
+      amount,
+      currency,
+      order_id: razorpayOrderId,
+      name: 'CraftVeda',
+      description: description || `CraftVeda ${referenceType}`,
+      prefill: {
+        name: user?.name || '',
+        email: user?.email || '',
+        contact: user?.phone || '',
+      },
+      theme: { color: '#b45309' },
+      handler: async (response) => {
+        if (settled) return;
+        settled = true;
+        try {
+          const verifyRes = await orderService.verifyPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          resolve(verifyRes.data);
+        } catch (err) {
+          reject(new Error(err?.response?.data?.message || err?.message || 'Payment verification failed.'));
+        }
+      },
+      modal: { ondismiss: settleFailure },
+    });
+
+    checkout.on('payment.failed', (resp) => {
+      failureMessage = resp.error?.description || 'Payment failed. Please try again.';
+    });
+
+    checkout.open();
+  });
+};
+
 export default orderService;

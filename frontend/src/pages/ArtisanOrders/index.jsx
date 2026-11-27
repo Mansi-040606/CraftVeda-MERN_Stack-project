@@ -123,8 +123,7 @@ function ArtisanOrders() {
                           src={item.product?.images?.[0]}
                           alt={item.product?.name || 'Product'}
                           frame="h-full w-full"
-                          w={96}
-                          h={96}
+                          preset="thumb_140"
                         />
                       ) : (
                         <span>🏺</span>

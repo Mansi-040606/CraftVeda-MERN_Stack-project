@@ -1,6 +1,19 @@
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import ApiError from './ApiError.js';
+import {
+  EAGER_TRANSFORMS,
+  ORIGINAL_CAP_TRANSFORM,
+  incomingTransformParams,
+} from '../../../shared/imagePresets.js';
+
+// The single source of truth for every delivery transform lives in
+// shared/imagePresets.js (imported by the frontend too). Two effects here:
+//   1. incoming — the stored original is capped at 1600px + q_auto on upload,
+//      so no raw URL can ever ship a huge file;
+//   2. eager    — all preset derivatives are generated at upload time, so the
+//      first visitor never pays Cloudinary's on-demand transform cost.
+const INCOMING_TRANSFORM = incomingTransformParams(ORIGINAL_CAP_TRANSFORM);
 
 // --- rules shared by every image endpoint ---------------------------------
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB per file
@@ -125,10 +138,30 @@ const randomId = () => `img_${Date.now().toString(36)}${Math.random().toString(3
 const mockUrl = (publicId) =>
   `https://res.cloudinary.com/mockcloud/image/upload/v1700000000/${publicId}.jpg`;
 
+// Pre-generates every preset derivative for a stored asset (fire-and-forget).
+// Best effort by design: a failure here never affects the upload — the image
+// simply falls back to Cloudinary's on-demand transform, and warmImages.js
+// covers legacy assets anyway.
+export const generatePresetDerivatives = (publicId) => {
+  if (!publicId || isMock() || !isCloudinaryConfigured()) return Promise.resolve(undefined);
+  try {
+    configureCloudinary();
+    return cloudinary.uploader
+      .explicit(publicId, { type: 'upload', eager: [...EAGER_TRANSFORMS] })
+      .catch(() => undefined);
+  } catch {
+    return Promise.resolve(undefined);
+  }
+};
+
 // Uploads one buffer. Returns { secure_url, public_id }.
-// Delivery uses f_auto/q_auto + size variants built from this one URL on the
-// client (see frontend/src/utils/imageUrl.js) — never a second upload.
-export const uploadImageBuffer = async (buffer, { folder, publicId } = {}) => {
+// The stored original is capped at 1600px (ORIGINAL_CAP_TRANSFORM), and all
+// preset derivatives are requested eagerly right after — see shared/imagePresets.js
+// for the transform strings used by both this upload and the client's srcset.
+// `transformation` (params object) is an escape hatch used ONLY by the seed
+// script (SVG artwork -> small JPEG); product/profile uploads always use the
+// plain incoming cap.
+export const uploadImageBuffer = async (buffer, { folder, publicId, transformation } = {}) => {
   const targetFolder = folder || PRODUCT_FOLDER;
   const id = publicId || randomId();
   const fullPublicId = publicId ? `${targetFolder}/${publicId}` : `${targetFolder}/${id}`;
@@ -146,12 +179,16 @@ export const uploadImageBuffer = async (buffer, { folder, publicId } = {}) => {
         public_id: publicId,
         overwrite: Boolean(publicId),
         unique_filename: !publicId,
-        resource_type: 'image'
+        resource_type: 'image',
+        transformation: transformation || INCOMING_TRANSFORM
       },
       (error, result) => {
         if (error) {
           return reject(new ApiError(502, 'Image upload failed — please try again'));
         }
+        // Do not await: preset generation runs in the background so the upload
+        // response stays fast while the first visitor finds warm cache entries.
+        generatePresetDerivatives(result.public_id);
         resolve({ secure_url: result.secure_url, public_id: result.public_id });
       }
     );

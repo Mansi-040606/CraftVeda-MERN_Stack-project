@@ -3,9 +3,16 @@ import { categoryLabel } from '../../constants/categories';
 import { inr } from '../../utils/format';
 import ProductImage from './ProductImage';
 
+// Responsive card delivery: one warm preset per device pixel ratio
+// (shared/imagePresets.js). `sizes` mirrors the grids the card is used in
+// (Products has a 256px filter sidebar; Home is full width).
+const CARD_PRESETS = ['card_360', 'card_640'];
+export const CARD_SIZES = '(min-width: 1024px) 300px, (min-width: 640px) 45vw, calc(100vw - 2rem)';
+
 // Reusable product card for listing pages (Products, search results, ...).
 // Styled as a small gallery print: cream frame, serif title, terracotta price.
-function ProductCard({ product }) {
+// @param {boolean} [props.priority] above-the-fold card: eager + fetchpriority
+function ProductCard({ product, priority = false }) {
   const artisanName = product.artisan?.businessName;
   const outOfStock = product.stock < 1;
 
@@ -19,8 +26,9 @@ function ProductCard({ product }) {
           src={product.images?.[0]}
           alt={product.name}
           frame="aspect-[4/5]"
-          w={640}
-          h={800}
+          presets={CARD_PRESETS}
+          sizes={CARD_SIZES}
+          priority={priority}
           imgClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
         />
         {outOfStock && (

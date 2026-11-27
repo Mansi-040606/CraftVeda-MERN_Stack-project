@@ -84,8 +84,7 @@ function Wishlist() {
                     src={product.images?.[0]}
                     alt={product.name}
                     frame="h-full w-full"
-                    w={256}
-                    h={256}
+                    preset="thumb_140"
                   />
                 </Link>
                 <div className="flex-1 min-w-0">

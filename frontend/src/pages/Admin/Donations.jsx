@@ -4,6 +4,7 @@ import { toast, errMsg } from '../../components/Toast';
 import { AdminShell, Loading, ErrorState, EmptyState, Pager } from '../../components/admin/AdminShell';
 
 const STATUSES = ['', 'pending', 'completed', 'failed', 'refunded'];
+const EDITABLE_STATUSES = ['pending', 'completed', 'failed', 'refunded'];
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 function AdminDonations() {
@@ -15,6 +16,7 @@ function AdminDonations() {
   const [paymentStatus, setPaymentStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [busyId, setBusyId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,6 +41,19 @@ function AdminDonations() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const changeStatus = async (donation, nextStatus) => {
+    setBusyId(donation._id);
+    try {
+      await adminApi.updateDonationStatus(donation._id, nextStatus);
+      toast.success(`Donation marked ${nextStatus}`);
+      load();
+    } catch (err) {
+      toast.error(errMsg(err, 'Failed to update donation status'));
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const sumFor = (status) => totals.find((t) => t._id === status)?.total || 0;
 
@@ -95,6 +110,7 @@ function AdminDonations() {
                 <th className="p-3">Amount</th>
                 <th className="p-3">Craft type</th>
                 <th className="p-3">Status</th>
+                <th className="p-3">Update</th>
               </tr>
             </thead>
             <tbody>
@@ -117,6 +133,18 @@ function AdminDonations() {
                     }`}>
                       {donation.paymentStatus}
                     </span>
+                  </td>
+                  <td className="p-3">
+                    <select
+                      value={donation.paymentStatus}
+                      disabled={busyId === donation._id}
+                      onChange={(e) => changeStatus(donation, e.target.value)}
+                      className="border border-ink/10 rounded px-2 py-1 text-xs"
+                    >
+                      {EDITABLE_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               ))}

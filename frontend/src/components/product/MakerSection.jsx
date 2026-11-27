@@ -21,8 +21,7 @@ export default function MakerSection({ artisan }) {
           src={artisan.coverImage}
           alt=""
           frame="h-full w-full"
-          w={1200}
-          h={400}
+          preset="lightbox_1600"
           imgClassName="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink/55 via-ink/20 to-transparent" />
@@ -35,8 +34,7 @@ export default function MakerSection({ artisan }) {
               src={artisan.profileImage}
               alt={artisan.businessName}
               frame="h-full w-full"
-              w={240}
-              h={240}
+              preset="avatar_160"
             />
           </div>
           <div className="pb-1">

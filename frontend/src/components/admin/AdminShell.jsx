@@ -9,6 +9,7 @@ const links = [
   { to: '/admin/workshops', label: 'Workshops' },
   { to: '/admin/donations', label: 'Donations' },
   { to: '/admin/gi-tags', label: 'GI Tags' },
+  { to: '/admin/stories', label: 'Craft Stories' },
   { to: '/admin/reviews', label: 'Reviews' },
 ];
 

@@ -140,8 +140,7 @@ function Cart() {
                       src={product?.images?.[0]}
                       alt={product?.name || 'Product'}
                       frame="h-full w-full"
-                      w={256}
-                      h={256}
+                      preset="thumb_140"
                     />
                   </Link>
 

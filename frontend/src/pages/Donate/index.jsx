@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loading, ErrorState, EmptyState } from '../../components/admin/AdminShell';
 import { toast, errMsg } from '../../components/Toast';
 import { donationService } from '../../services/donationService';
+import { runRazorpayPayment } from '../../services/orderService';
 import { useAuth } from '../../context/AuthContext';
 import { CATEGORIES } from '../../constants/categories';
 import { inr } from '../../utils/format';
@@ -22,6 +23,7 @@ function Donate() {
   const [craftType, setCraftType] = useState('');
   const [message, setMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [payOnline, setPayOnline] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [receipt, setReceipt] = useState(null);
 
@@ -71,12 +73,37 @@ function Donate() {
       if (message.trim()) payload.message = message.trim();
 
       const res = await donationService.create(payload);
+      const created = res.data.donation;
+      let status = created?.paymentStatus || 'pending';
+
+      if (payOnline && created?._id) {
+        try {
+          const verified = await runRazorpayPayment({
+            referenceType: 'donation',
+            referenceId: created._id,
+            description: 'CraftVeda Heritage Preservation Donation',
+            user,
+          });
+          status = verified.donation?.paymentStatus || 'completed';
+          toast.success('Thank you — your donation payment was completed!');
+        } catch (payErr) {
+          const raw = errMsg(payErr, 'Payment could not be completed');
+          if (/razorpay is not configured/i.test(raw)) {
+            toast.error('Online payments are not configured on this server; your pledge was saved as pending.');
+          } else {
+            toast.error(`${raw} Your pledge was saved as pending.`);
+          }
+        }
+      } else {
+        toast.success('Thank you — your donation pledge has been recorded.');
+      }
+
       setReceipt({
-        amount: res.data.donation?.amount ?? value,
-        craftType: res.data.donation?.craftType || craftType || null,
-        id: res.data.donation?._id,
+        amount: created?.amount ?? value,
+        craftType: created?.craftType || craftType || null,
+        id: created?._id,
+        status,
       });
-      toast.success('Thank you — your donation has been recorded.');
       setMessage('');
       loadImpact();
     } catch (err) {
@@ -116,12 +143,14 @@ function Donate() {
                 <div className="text-6xl mb-4">🙏</div>
                 <h3 className="text-2xl font-bold text-ink mb-2">Thank you!</h3>
                 <p className="text-terracotta-dark mb-1">
-                  Your donation of <strong>{inr(receipt.amount)}</strong> has been recorded
+                  Your donation of <strong>{inr(receipt.amount)}</strong> has been{' '}
+                  {receipt.status === 'completed' ? 'completed' : 'recorded as pending'}
                   {receipt.craftType ? ` for ${receipt.craftType} crafts` : ''}.
                 </p>
                 <p className="text-sm text-ink-soft mb-6 max-w-md mx-auto">
-                  This is a record only — CraftVeda does not process online payments, so no money has been
-                  deducted from your account.
+                  {receipt.status === 'completed'
+                    ? 'Your contribution is now reflected in the live impact total.'
+                    : 'Pending pledges appear in the public impact feed once payment is completed or verified by an admin.'}
                 </p>
                 <button
                   onClick={reset}
@@ -220,7 +249,7 @@ function Donate() {
                   <p className="text-xs text-ink-soft mt-1">{message.length}/500</p>
                 </div>
 
-                <label className="flex items-center gap-2 mb-6 text-sm text-ink-soft">
+                <label className="flex items-center gap-2 mb-4 text-sm text-ink-soft">
                   <input
                     type="checkbox"
                     checked={isAnonymous}
@@ -230,17 +259,40 @@ function Donate() {
                   Show my name as “Anonymous”
                 </label>
 
+                <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPayOnline(true)}
+                    className={`p-3 rounded-sm border-2 text-left text-sm transition ${
+                      payOnline ? 'border-terracotta bg-parchment text-ink' : 'border-ink/10 text-ink-soft'
+                    }`}
+                  >
+                    <p className="font-semibold">Pay Online (Razorpay)</p>
+                    <p className="text-xs text-ink-soft">Card, UPI, Net Banking, Wallet</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPayOnline(false)}
+                    className={`p-3 rounded-sm border-2 text-left text-sm transition ${
+                      !payOnline ? 'border-terracotta bg-parchment text-ink' : 'border-ink/10 text-ink-soft'
+                    }`}
+                  >
+                    <p className="font-semibold">Record Pledge Only</p>
+                    <p className="text-xs text-ink-soft">Complete payment later / offline</p>
+                  </button>
+                </div>
+
                 <button
                   type="submit"
                   disabled={submitting || !isAuthenticated}
                   className="w-full bg-terracotta text-white py-4 rounded-sm hover:bg-terracotta-dark transition font-semibold text-lg disabled:opacity-50"
                 >
-                  {submitting ? 'Recording…' : `Donate ${inr(Number(amount) || 0)}`}
+                  {submitting
+                    ? 'Processing…'
+                    : payOnline
+                      ? `Donate & Pay ${inr(Number(amount) || 0)}`
+                      : `Record Pledge of ${inr(Number(amount) || 0)}`}
                 </button>
-
-                <p className="text-center text-sm text-ink-soft mt-4">
-                  Donations are recorded in CraftVeda — no online payment is processed, so nothing is charged.
-                </p>
               </form>
             )}
           </div>

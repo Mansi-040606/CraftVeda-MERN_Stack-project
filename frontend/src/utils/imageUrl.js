@@ -1,61 +1,52 @@
 /**
  * Cloudinary URL helpers.
  *
- * Product / artisan images are stored as plain Cloudinary `secure_url` strings.
- * Cloudinary supports on-the-fly delivery transforms in the URL itself, so we
- * can ask for a resized, auto-format, auto-quality copy without any upload-time
- * work — e.g. `.../image/upload/v123/foo.jpg` -> `.../image/upload/f_auto,q_auto,w_800/v123/foo.jpg`
+ * Product / artisan images are stored as plain Cloudinary `secure_url`
+ * strings, and every size we deliver comes from ONE shared preset list:
  *
- * Non-Cloudinary URLs (local seed art, external, empty) pass through untouched.
+ *   shared/imagePresets.js   <- imported by BOTH the frontend and the backend
+ *
+ * The preset transform strings are used verbatim here and verbatim in the
+ * backend's eager transformations (backend/src/utils/images.js), so a URL the
+ * browser requests is byte-identical to the derived asset generated at upload
+ * time / by warmImages.js. Cloudinary treats any deviation (even the order of
+ * `w_` and `c_`) as a different image, so never build transform strings by
+ * hand — use `presetUrl()` / `srcsetAttr()`.
+ *
+ * `imgSrc()` remains for the few non-preset surfaces (workshops, stories,
+ * admin previews) that are not part of the warmed preset set.
  */
 
-const CLOUDINARY_RE = /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//;
+import {
+  IMAGE_PRESETS,
+  PRESET_NAMES,
+  isCloudinaryImageUrl,
+  withTransform as withSharedTransform,
+  presetUrl,
+  srcsetAttr,
+} from '../../../shared/imagePresets.js';
+
+export { IMAGE_PRESETS, PRESET_NAMES, presetUrl, srcsetAttr };
 
 /** True when the URL is a Cloudinary image delivery URL. */
 export function isCloudinaryUrl(url) {
-  return typeof url === 'string' && CLOUDINARY_RE.test(url);
+  return isCloudinaryImageUrl(url);
 }
 
 /**
- * Insert a Cloudinary transform segment into an image URL.
- * Handles URLs that already carry transforms (comma-separated) and keeps the
- * leading `v<version>` segment in place:
- *
- *   .../upload/v123/folder/a.jpg  ->  .../upload/f_auto,q_auto,w_640/v123/folder/a.jpg
+ * Insert a Cloudinary transform segment into an image URL (replaces any
+ * transform already present — see shared/imagePresets.js).
  */
 export function withTransform(url, transform) {
-  if (!isCloudinaryUrl(url) || !transform) return url;
-  const [base] = url.split(/[?#]/);
-  const segments = base.split('/');
-  const uploadIdx = segments.indexOf('upload');
-  if (uploadIdx < 0) return url;
-
-  const rest = segments.slice(uploadIdx + 1);
-
-  // An existing transform is a comma-joined segment sitting before the version.
-  let existing = null;
-  if (rest.length > 1 && rest[0].includes(',')) existing = rest.shift();
-
-  // The version segment (v123) always comes before the folder/file path.
-  let version = null;
-  if (rest.length && /^v\d+$/.test(rest[0])) version = rest.shift();
-
-  const merged = existing ? `${existing},${transform}` : transform;
-
-  return [
-    ...segments.slice(0, uploadIdx + 1),
-    merged,
-    ...(version ? [version] : []),
-    ...rest,
-  ].join('/');
+  return withSharedTransform(url, transform);
 }
 
 /**
- * Best image URL for a given display box.
+ * Non-preset delivery for surfaces outside the shared preset set.
+ * Prefer a preset wherever one fits — each unique transform is a distinct
+ * Cloudinary cache entry.
  * @param {string|undefined|null} url stored URL
  * @param {{w?:number, h?:number, crop?:'fill'|'fit', dpr?:number}} box
- *   `crop: 'fill'` crops to exactly the box (default for fixed frames);
- *   `crop: 'fit'` only downscales, never crops.
  * @returns {string} URL safe to put in an <img src>
  */
 export function imgSrc(url, { w, h, crop = 'fill', dpr } = {}) {
@@ -79,6 +70,28 @@ export const FALLBACK_IMAGE =
       </g>
       <text x="200" y="420" text-anchor="middle" font-family="Georgia, serif"
             font-size="20" fill="#8A7563">CraftVeda</text>
+    </svg>`
+  );
+
+/**
+ * Tiny blurred wash shown behind an image while it loads (blur-up).
+ * A few hundred bytes of inline SVG — no extra request, no layout shift.
+ */
+export const BLUR_PLACEHOLDER =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#EFE3D0"/>
+          <stop offset="0.55" stop-color="#E3CDB6"/>
+          <stop offset="1" stop-color="#D9BEA4"/>
+        </linearGradient>
+        <filter id="f"><feGaussianBlur stdDeviation="2.4"/></filter>
+      </defs>
+      <rect width="32" height="32" fill="url(#b)"/>
+      <ellipse cx="10" cy="12" rx="12" ry="9" fill="#C9A183" opacity="0.55" filter="url(#f)"/>
+      <ellipse cx="24" cy="24" rx="10" ry="8" fill="#B98F6E" opacity="0.45" filter="url(#f)"/>
     </svg>`
   );
 

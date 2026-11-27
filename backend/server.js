@@ -11,8 +11,20 @@ connectDB().then(async () => {
   // transporter has bounded timeouts). On failure it logs one clear warning
   // and flags the mailer unhealthy; the server keeps running.
   await verifyMailer();
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+  });
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(
+        `Port ${PORT} is already in use — another CraftVeda backend is still running.\n` +
+        `Find and stop it with:\n` +
+        `  netstat -ano | findstr :${PORT}\n` +
+        `  taskkill /PID <pid> /F`
+      );
+      process.exit(1);
+    }
+    throw err;
   });
 }).catch((err) => {
   console.error('Failed to connect to database:', err);

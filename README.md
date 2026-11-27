@@ -293,10 +293,12 @@ node tests/step8-timeseries.e2e.mjs     # admin dashboard time-series       → 
 node tests/step10-images.e2e.mjs        # image uploads (Cloudinary mocked) → 25 tests
 node tests/step11-product-edit.e2e.mjs  # product edit load/duplicate/update → 26 tests
 node tests/step12-auth-otp.e2e.mjs      # Google sign-in + OTP reset (both mocked) → 29 tests
+node tests/imagePresets.test.mjs        # shared image preset contract (no DB)   → 6 checks
 ```
 
 Latest results: **28/28 · 22/22 · 42/42 · 14/14 · 25/25 · 26/26 · 29/29 — all passing.**
-Free ports `5093–5099` before running. There are no step 1–3 test scripts; the seven above are the full suite.
+Free ports `5093–5099` before running. There are no step 1–3 test scripts; the seven E2E
+scripts above are the suite, plus `imagePresets.test.mjs` (pure assertions, no server).
 
 > `step10` runs with `CLOUDINARY_MOCK=1` and fake credentials — **no real Cloudinary
 > upload ever happens** — and it uses its own throwaway database.
@@ -580,6 +582,7 @@ npm run build     # vite production build → frontend/dist
 | backend | `npm start` | `node server.js` |
 | backend | `npm run seed` | idempotent demo data |
 | backend | `npm run seed-admin` | create/ensure admin only |
+| backend | `npm run warm-images` | pre-warm Cloudinary preset URLs for every stored image |
 | backend | `npm run lint` | oxlint over `src/` |
 | frontend | `npm run dev` | Vite dev server on :3000 |
 | frontend | `npm run build` | production build → `dist/` |

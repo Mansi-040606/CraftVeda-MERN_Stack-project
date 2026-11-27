@@ -174,9 +174,41 @@ export const listMineWorkshopBookings = catchAsync(async (req, res) => {
       startTime: booking.startTime,
       endTime: booking.endTime,
       amount: booking.amount,
+      paymentStatus: booking.paymentStatus,
+      joinLink: booking.joinLink || '',
       status: booking.status
     }))
   });
+});
+
+// PATCH /api/workshops/mine/:id/bookings/:bookingId — artisan updates booking status or joinLink.
+export const updateBookingByArtisan = catchAsync(async (req, res) => {
+  const workshop = await findOwnedWorkshop(req);
+  const booking = await WorkshopBooking.findOne({
+    _id: req.params.bookingId,
+    workshop: workshop._id
+  });
+  if (!booking) throw new ApiError(404, 'Booking not found');
+
+  const { status, joinLink } = req.body;
+  const previousStatus = booking.status;
+
+  if (status !== undefined) booking.status = status;
+  if (joinLink !== undefined) booking.joinLink = joinLink;
+  await booking.save();
+
+  if (status === 'cancelled' && previousStatus !== 'cancelled') {
+    await Workshop.updateOne(
+      { _id: workshop._id },
+      { $inc: { currentParticipants: -booking.participants } }
+    );
+    await Workshop.updateOne(
+      { _id: workshop._id, currentParticipants: { $lt: 0 } },
+      { $set: { currentParticipants: 0 } }
+    );
+  }
+
+  res.json({ success: true, booking });
 });
 
 // PUT /api/workshops/mine/:id — artisan updates their own workshop.

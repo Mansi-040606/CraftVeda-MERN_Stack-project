@@ -193,8 +193,9 @@ function Home() {
                               src={src}
                               alt={product.name}
                               frame="h-full w-full"
-                              w={480}
-                              h={600}
+                              presets={['card_360', 'card_640']}
+                              sizes="(min-width: 768px) 224px, 45vw"
+                              priority
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-5xl">
@@ -268,8 +269,8 @@ function Home() {
               )}
               {!products.error && products.items.length > 0 && (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {products.items.map((product) => (
-                    <ProductCard key={product._id} product={product} />
+                  {products.items.map((product, index) => (
+                    <ProductCard key={product._id} product={product} priority={index < 4} />
                   ))}
                 </div>
               )}
@@ -328,8 +329,7 @@ function Home() {
                           src={artisan.coverImage}
                           alt=""
                           frame="h-full w-full"
-                          w={800}
-                          h={320}
+                          preset="lightbox_1600"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-ink/50 to-transparent" />
                         <div className="absolute -bottom-6 left-5 h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-linen">
@@ -337,8 +337,7 @@ function Home() {
                             src={artisan.profileImage}
                             alt={artisan.businessName}
                             frame="h-full w-full"
-                            w={160}
-                            h={160}
+                            preset="avatar_160"
                           />
                         </div>
                       </div>

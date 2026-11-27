@@ -99,8 +99,7 @@ function ArtisanProfile() {
                 src={artisan.coverImage}
                 alt=""
                 frame="h-full w-full"
-                w={1600}
-                h={500}
+                preset="lightbox_1600"
               />
             </div>
             <div className="absolute inset-0 bg-ink/70" aria-hidden="true" />
@@ -113,8 +112,7 @@ function ArtisanProfile() {
                 src={artisan.profileImage}
                 alt={artisan.businessName}
                 frame="w-32 h-32 rounded-full border-4 border-cream/40"
-                w={256}
-                h={256}
+                preset="avatar_160"
               />
             ) : (
               <div className="text-8xl">👩‍🎨</div>
@@ -184,8 +182,7 @@ function ArtisanProfile() {
                             src={product.images?.[0]}
                             alt={product.name}
                             frame="h-full w-full"
-                            w={480}
-                            h={480}
+                            preset="thumb_140"
                             imgClassName="transition-transform duration-700 group-hover:scale-105"
                           />
                         ) : (

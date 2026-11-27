@@ -12,6 +12,12 @@ import CraftStory from './src/models/CraftStory.js';
 import Certificate from './src/models/Certificate.js';
 import QRCode from 'qrcode';
 import { isCloudinaryConfigured, uploadImageBuffer } from './src/utils/images.js';
+import { buildWarmUrls, warmUrls } from './src/utils/imageWarmup.js';
+import { SEED_CAP_TRANSFORM, incomingTransformParams } from '../shared/imagePresets.js';
+
+// Seed artwork is SVG: cap it at 1600px and rasterize to JPEG so a re-seed
+// stores a small file instead of Cloudinary's default full-size PNG.
+const SEED_TRANSFORMATION = incomingTransformParams(SEED_CAP_TRANSFORM);
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/craftveda';
 
@@ -274,7 +280,7 @@ const seedImages = async (products, artisanProfiles) => {
     for (let n = 1; n <= 3; n++) {
       const { secure_url } = await uploadImageBuffer(
         Buffer.from(productArtwork(product.name, i + n), 'utf8'),
-        { folder: SEED_FOLDER, publicId: `product-${i}-${n}` }
+        { folder: SEED_FOLDER, publicId: `product-${i}-${n}`, transformation: SEED_TRANSFORMATION }
       );
       urls.push(secure_url);
     }
@@ -297,7 +303,7 @@ const seedImages = async (products, artisanProfiles) => {
         .toUpperCase();
       const { secure_url } = await uploadImageBuffer(
         Buffer.from(profileArtwork(initials, i), 'utf8'),
-        { folder: SEED_FOLDER, publicId: `artisan-${i}-profile` }
+        { folder: SEED_FOLDER, publicId: `artisan-${i}-profile`, transformation: SEED_TRANSFORMATION }
       );
       profile.profileImage = secure_url;
     }
@@ -305,7 +311,7 @@ const seedImages = async (products, artisanProfiles) => {
     if (!profile.coverImage) {
       const { secure_url } = await uploadImageBuffer(
         Buffer.from(coverArtwork(profile.businessName, i + 1), 'utf8'),
-        { folder: SEED_FOLDER, publicId: `artisan-${i}-cover` }
+        { folder: SEED_FOLDER, publicId: `artisan-${i}-cover`, transformation: SEED_TRANSFORMATION }
       );
       profile.coverImage = secure_url;
     }
@@ -313,6 +319,29 @@ const seedImages = async (products, artisanProfiles) => {
     await profile.save();
     console.log(`  seeded profile images for ${profile.businessName}`);
   }
+};
+
+const warmSeedImages = async (products, artisanProfiles) => {
+  if (!isCloudinaryConfigured()) return;
+
+  const assets = [];
+  for (const product of products) {
+    for (const url of product.images || []) assets.push({ url, role: 'product' });
+  }
+  for (const profile of artisanProfiles) {
+    if (profile.coverImage) assets.push({ url: profile.coverImage, role: 'cover' });
+    if (profile.profileImage) assets.push({ url: profile.profileImage, role: 'avatar' });
+  }
+
+  const urls = buildWarmUrls(assets);
+  if (urls.length === 0) return;
+
+  console.log(`  warming ${urls.length} preset URLs for seed images...`);
+  const stats = await warmUrls(urls);
+  console.log(
+    `  warmed ${stats.ok}/${stats.total} preset URLs in ${(stats.ms / 1000).toFixed(1)}s` +
+      (stats.failed ? ` (${stats.failed} failed)` : '')
+  );
 };
 
 const ensureUser = async (data) => {
@@ -385,6 +414,10 @@ const seed = async () => {
 
   // Images come after the product documents exist (create first, upload after).
   await seedImages(products, artisanProfiles);
+
+  // Pre-generate every preset derivative for the seeded images so the very
+  // first page load already hits a warm Cloudinary cache entry.
+  await warmSeedImages(products, artisanProfiles);
 
   if ((await Order.countDocuments()) === 0) {
     for (let i = 0; i < 10; i++) {

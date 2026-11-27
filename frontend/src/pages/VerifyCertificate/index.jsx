@@ -139,6 +139,31 @@ function VerifyCertificate() {
 
             {certificate && (
               <div className="p-6 space-y-5">
+                {certificate.qrCode && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-cream rounded-sm p-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={certificate.qrCode}
+                        alt={`QR code for ${certificate.certificateNumber}`}
+                        className="w-24 h-24 rounded-sm border border-ink/10 bg-white p-1"
+                      />
+                      <div className="text-sm">
+                        <p className="font-semibold text-ink">Authenticity QR Code</p>
+                        <p className="text-ink-soft">
+                          Scan or quote <span className="font-mono">{certificate.certificateNumber}</span> to verify this craft.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="px-4 py-2 border border-ink/15 bg-white text-ink rounded-sm text-sm font-medium hover:bg-parchment transition print:hidden"
+                    >
+                      Print Certificate
+                    </button>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="bg-cream rounded-sm p-4">
                     <p className="font-semibold text-ink mb-1">Product</p>

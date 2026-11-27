@@ -31,8 +31,10 @@ import AdminApplications from './pages/Admin/Applications';
 import AdminWorkshops from './pages/Admin/Workshops';
 import AdminDonations from './pages/Admin/Donations';
 import AdminGITags from './pages/Admin/GITags';
+import AdminStories from './pages/Admin/Stories';
 import AdminReviews from './pages/Admin/Reviews';
 import ToastHost from './components/Toast';
+import Profile from './pages/Profile';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ArtisanDashboard from './pages/ArtisanDashboard';
 import ArtisanProducts from './pages/ArtisanProducts';
@@ -123,8 +125,17 @@ function App() {
           <Route path="/admin/gi-tags" element={
             <ProtectedRoute allowedRoles={['ADMIN']}><AdminGITags /></ProtectedRoute>
           } />
+          <Route path="/admin/stories" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}><AdminStories /></ProtectedRoute>
+          } />
           <Route path="/admin/reviews" element={
             <ProtectedRoute allowedRoles={['ADMIN']}><AdminReviews /></ProtectedRoute>
+          } />
+
+          <Route path="/profile" element={
+            <ProtectedRoute allowedRoles={['CUSTOMER', 'ARTISAN', 'ADMIN']}>
+              <Profile />
+            </ProtectedRoute>
           } />
           
           <Route path="/customer/dashboard" element={

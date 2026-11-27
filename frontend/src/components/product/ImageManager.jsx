@@ -159,7 +159,7 @@ export default function ImageManager({
                 dragIndex === i ? 'opacity-40' : 'border-ink/15'
               } ${i === 0 ? 'ring-2 ring-terracotta/45' : ''}`}
             >
-              <ProductImage src={url} alt={`Image ${i + 1}`} frame="h-full w-full" w={240} h={240} />
+              <ProductImage src={url} alt={`Image ${i + 1}`} frame="h-full w-full" preset="thumb_140" />
               {i === 0 && (
                 <span className="absolute bottom-0 left-0 right-0 bg-ink/75 py-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-cream">
                   Cover

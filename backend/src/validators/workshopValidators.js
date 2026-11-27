@@ -225,3 +225,17 @@ export const bookWorkshopValidators = [
 export const idParamValidators = [
   param('id').isMongoId().withMessage('Workshop id must be a valid id')
 ];
+
+// Rules for PATCH /api/workshops/mine/:id/bookings/:bookingId.
+export const updateBookingValidators = [
+  param('id').isMongoId().withMessage('Workshop id must be a valid id'),
+  param('bookingId').isMongoId().withMessage('Booking id must be a valid id'),
+  body('status')
+    .optional()
+    .isIn(['booked', 'confirmed', 'completed', 'cancelled'])
+    .withMessage('Status must be one of: booked, confirmed, completed, cancelled'),
+  body('joinLink')
+    .optional()
+    .isString().withMessage('Join link must be a string')
+    .trim()
+];

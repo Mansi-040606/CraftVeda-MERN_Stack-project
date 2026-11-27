@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
+import { certificateService } from '../../services/certificateService';
 import { useCart } from '../../context/CartContext';
 import { toast, errMsg } from '../../components/Toast';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/order/OrderStatus';
@@ -31,12 +32,25 @@ function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  const [certificates, setCertificates] = useState([]);
+  const [generatingFor, setGeneratingFor] = useState(null);
 
   const load = useCallback(async () => {
     try {
       const res = await orderService.getById(id);
-      setOrder(res.data.order);
+      const loadedOrder = res.data.order;
+      setOrder(loadedOrder);
       setError(null);
+      if (loadedOrder?.orderStatus === 'delivered') {
+        try {
+          const certRes = await certificateService.getByOrder(id);
+          setCertificates(certRes.data.certificates || []);
+        } catch {
+          setCertificates([]);
+        }
+      } else {
+        setCertificates([]);
+      }
     } catch (err) {
       setError(errMsg(err, 'Failed to load this order'));
     } finally {
@@ -72,6 +86,22 @@ function OrderDetail() {
       toast.error(errMsg(err, 'Could not cancel this order'));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleGenerateCertificate = async (productId) => {
+    setGeneratingFor(productId);
+    try {
+      const res = await certificateService.generate(order._id, productId);
+      const created = res.data.certificate;
+      if (created) {
+        setCertificates((prev) => [...prev, created]);
+      }
+      toast.success('Authenticity certificate generated');
+    } catch (err) {
+      toast.error(errMsg(err, 'Could not generate certificate'));
+    } finally {
+      setGeneratingFor(null);
     }
   };
 
@@ -203,8 +233,7 @@ function OrderDetail() {
                     src={item.product?.images?.[0]}
                     alt={item.product?.name || 'Product'}
                     frame="h-full w-full"
-                    w={128}
-                    h={128}
+                    preset="thumb_140"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -268,6 +297,31 @@ function OrderDetail() {
             {order.trackingNumber && (
               <p className="text-sm text-terracotta-dark mt-4">
                 <span className="font-semibold">Tracking:</span> {order.trackingNumber}
+                {order.trackingUrl && (
+                  <>
+                    {' · '}
+                    <a
+                      href={order.trackingUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline text-ink hover:text-terracotta-dark"
+                    >
+                      Track shipment →
+                    </a>
+                  </>
+                )}
+              </p>
+            )}
+            {!order.trackingNumber && order.trackingUrl && (
+              <p className="text-sm text-terracotta-dark mt-4">
+                <a
+                  href={order.trackingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-ink hover:text-terracotta-dark"
+                >
+                  Track shipment →
+                </a>
               </p>
             )}
             {order.notes && (
@@ -305,6 +359,71 @@ function OrderDetail() {
             </div>
           </div>
         </div>
+
+        {order.orderStatus === 'delivered' && (
+          <div className="bg-white rounded-sm border border-ink/10 p-6 mt-6">
+            <h2 className="font-bold text-ink mb-2">Authenticity Certificates</h2>
+            <p className="text-sm text-ink-soft mb-4">
+              Generate verifiable QR certificates for the handcrafted items in this delivered order.
+            </p>
+            <div className="divide-y divide-ink/10">
+              {(order.items || []).map((item, index) => {
+                const productId = item.product?._id || item.product;
+                const cert = certificates.find(
+                  (c) => String(c.product?._id || c.product) === String(productId)
+                );
+                return (
+                  <div
+                    key={productId || index}
+                    className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      {cert?.qrCode && (
+                        <img
+                          src={cert.qrCode}
+                          alt={`QR for ${cert.certificateNumber}`}
+                          className="w-14 h-14 border border-ink/10 rounded-sm bg-white p-0.5 shrink-0"
+                        />
+                      )}
+                      <div>
+                        <p className="font-medium text-ink">
+                          {item.product?.name || 'Handcrafted Item'}
+                        </p>
+                        {cert ? (
+                          <p className="text-xs text-green-700 font-mono mt-0.5">
+                            Issued: {cert.certificateNumber}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-ink-soft mt-0.5">
+                            No certificate generated yet
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {cert ? (
+                      <Link
+                        to={`/verify/${encodeURIComponent(cert.certificateNumber)}`}
+                        className="px-4 py-2 bg-parchment text-ink rounded-sm text-sm font-medium hover:bg-linen transition text-center"
+                      >
+                        View &amp; Print Certificate →
+                      </Link>
+                    ) : productId ? (
+                      <button
+                        type="button"
+                        onClick={() => handleGenerateCertificate(productId)}
+                        disabled={generatingFor === productId}
+                        className="px-4 py-2 bg-terracotta text-white rounded-sm text-sm font-semibold hover:bg-terracotta-dark transition disabled:opacity-50"
+                      >
+                        {generatingFor === productId ? 'Generating…' : 'Generate Certificate'}
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <Link
           to="/orders"

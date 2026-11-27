@@ -9,7 +9,8 @@ const adminApi = {
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
 
   orders: (params) => api.get('/admin/orders', { params }),
-  updateOrderStatus: (id, orderStatus) => api.put(`/admin/orders/${id}/status`, { orderStatus }),
+  updateOrderStatus: (id, payload) =>
+    api.put(`/admin/orders/${id}/status`, typeof payload === 'string' ? { orderStatus: payload } : payload),
 
   products: (params) => api.get('/products/admin', { params }),
   createProduct: (data) => api.post('/products', data),
@@ -25,9 +26,17 @@ const adminApi = {
   patchWorkshop: (id, data) => api.patch(`/workshops/${id}`, data),
 
   donations: (params) => api.get('/donations/all', { params }),
+  updateDonationStatus: (id, paymentStatus) => api.patch(`/donations/${id}`, { paymentStatus }),
 
   giTags: (params) => api.get('/gi-tags/admin', { params }),
+  createGITag: (data) => api.post('/gi-tags', data),
+  updateGITag: (id, data) => api.put(`/gi-tags/${id}`, data),
   patchGITag: (id, data) => api.patch(`/gi-tags/${id}`, data),
+
+  stories: (params) => api.get('/craft-stories', { params }),
+  createStory: (data) => api.post('/craft-stories', data),
+  updateStory: (id, data) => api.put(`/craft-stories/${id}`, data),
+  deleteStory: (id) => api.delete(`/craft-stories/${id}`),
 
   reviews: (params) => api.get('/reviews', { params }),
   patchReview: (id, data) => api.patch(`/reviews/${id}`, data),
