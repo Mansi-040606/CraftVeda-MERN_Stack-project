@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { authService } from '../../services/authService';
 import { errMsg, toast } from '../Toast';
 import UploadButton from '../common/UploadButton';
+import { LogoMark, Wordmark } from '../common/Logo';
 
 const navLink =
   'text-sm font-medium uppercase tracking-[0.1em] text-ink-soft transition hover:text-terracotta-dark relative after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-terracotta after:transition-all hover:after:w-full';
@@ -55,14 +56,9 @@ function Header() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex shrink-0 items-center gap-2">
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-terracotta text-lg text-white"
-              aria-hidden="true"
-            >
-              🏺
-            </span>
+            <LogoMark className="h-9 w-9" decorative />
             <span className="flex flex-col leading-none">
-              <span className="font-display text-xl font-bold tracking-tight text-ink">CraftVeda</span>
+              <Wordmark className="text-xl" />
               <span className="text-[9px] font-semibold uppercase tracking-[0.28em] text-ink-faint">
                 Heritage crafts
               </span>

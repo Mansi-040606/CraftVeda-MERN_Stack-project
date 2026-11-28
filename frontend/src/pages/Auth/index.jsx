@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { toast, errMsg } from '../../components/Toast';
+import { LogoMark, Wordmark } from '../../components/common/Logo';
 
 // Hidden entirely when the operator has not configured a Google Client ID.
 const googleEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
@@ -115,8 +116,8 @@ const Auth = () => {
     <div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
       <div className="bg-white rounded-sm border border-ink/10 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <span className="text-4xl">🏺</span>
-          <h1 className="text-2xl font-bold text-ink mt-2">CraftVeda</h1>
+          <LogoMark className="mx-auto h-14 w-14" decorative />
+          <Wordmark className="mt-2 text-2xl" />
         </div>
 
         {error && (

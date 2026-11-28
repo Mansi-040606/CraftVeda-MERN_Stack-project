@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { toast } from '../../components/Toast';
+import { LogoMark } from '../../components/common/Logo';
 
 const OTP_LENGTH = 6;
 const OTP_TTL_SECONDS = 10 * 60; // matches the backend's 10-minute code life
@@ -234,7 +235,7 @@ const ForgotPassword = () => {
     <div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4">
       <div className="bg-white rounded-sm border border-ink/10 p-8 w-full max-w-md">
         <div className="text-center mb-6">
-          <span className="text-4xl">🏺</span>
+          <LogoMark className="mx-auto h-14 w-14" decorative />
           <h1 className="text-2xl font-bold text-ink mt-2">Forgot password</h1>
           <p className="text-sm text-ink-soft mt-1">Reset it with a code sent to your email</p>
         </div>

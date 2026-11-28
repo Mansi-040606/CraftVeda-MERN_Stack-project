@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { LogoMark, Wordmark } from '../common/Logo';
 
 const colLink =
   'text-sm text-cream/70 transition hover:text-saffron';
@@ -10,13 +11,8 @@ function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
             <div className="mb-4 flex items-center gap-2">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-terracotta text-lg text-white"
-                aria-hidden="true"
-              >
-                🏺
-              </span>
-              <span className="font-display text-xl font-bold text-cream">CraftVeda</span>
+              <LogoMark className="h-9 w-9" decorative />
+              <Wordmark className="text-xl" tone="light" />
             </div>
             <p className="max-w-xs text-sm leading-relaxed text-cream/70">
               Connecting traditional artisans with the world. Preserving Indian heritage, one craft
