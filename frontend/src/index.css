@@ -81,6 +81,36 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-ink);
 }
 
+.home-hero-pattern {
+  background-image:
+    linear-gradient(30deg, rgba(250, 246, 239, 0.12) 12%, transparent 12.5%, transparent 87%, rgba(250, 246, 239, 0.12) 87.5%, rgba(250, 246, 239, 0.12)),
+    linear-gradient(150deg, rgba(250, 246, 239, 0.12) 12%, transparent 12.5%, transparent 87%, rgba(250, 246, 239, 0.12) 87.5%, rgba(250, 246, 239, 0.12)),
+    linear-gradient(30deg, rgba(250, 246, 239, 0.12) 12%, transparent 12.5%, transparent 87%, rgba(250, 246, 239, 0.12) 87.5%, rgba(250, 246, 239, 0.12)),
+    linear-gradient(150deg, rgba(250, 246, 239, 0.12) 12%, transparent 12.5%, transparent 87%, rgba(250, 246, 239, 0.12) 87.5%, rgba(250, 246, 239, 0.12));
+  background-size: 72px 126px;
+  background-position: 0 0, 0 0, 36px 63px, 36px 63px;
+}
+
+.home-collage-image {
+  transform: scale(1.01);
+  animation: cv-collage-breathe 10s ease-in-out infinite alternate;
+}
+
+.category-card-image {
+  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1), filter 500ms ease;
+  filter: saturate(0.88) contrast(1.03);
+}
+
+.group:hover .category-card-image {
+  transform: scale(1.07);
+  filter: saturate(1.08) contrast(1.02);
+}
+
+@keyframes cv-collage-breathe {
+  0% { transform: scale(1.01) translateY(0); }
+  100% { transform: scale(1.055) translateY(-2px); }
+}
+
 /* --- loading skeletons --------------------------------------------------- */
 @keyframes cv-shimmer {
   100% { transform: translateX(100%); }

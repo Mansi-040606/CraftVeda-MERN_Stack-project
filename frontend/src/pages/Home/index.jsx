@@ -23,22 +23,173 @@ const upcomingSlot = (workshop) => {
 };
 
 const CATEGORIES = [
-  { name: 'Textiles', emoji: '🧵', desc: 'Handwoven fabrics & garments' },
-  { name: 'Pottery', emoji: '🏺', desc: 'Terracotta & ceramic artistry' },
-  { name: 'Jewelry', emoji: '💎', desc: 'Traditional metal & beadwork' },
-  { name: 'Woodwork', emoji: '🪵', desc: 'Carved furniture & decor' },
-  { name: 'Metalwork', emoji: '⚱️', desc: 'Brass & bronze craftsmanship' },
-  { name: 'Painting', emoji: '🎨', desc: 'Miniature & folk art' },
-  { name: 'Embroidery', emoji: '🪡', desc: 'Intricate thread work' },
-  { name: 'Sculpture', emoji: '🗿', desc: 'Stone & wood carvings' },
+  {
+    name: 'Textiles',
+    mark: 'TX',
+    desc: 'Handwoven fabrics & garments',
+    image: '/images/craft-categories/textiles.jpg',
+    photoTitle: 'India - Colours of India - Cotton threads becoming a lungi',
+    photoCreator: 'mckaysavage',
+    photoSource: 'https://www.flickr.com/photos/56796376@N00/2508141336',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  {
+    name: 'Pottery',
+    mark: 'PT',
+    desc: 'Terracotta & ceramic artistry',
+    image: '/images/craft-categories/pottery.jpg',
+    photoTitle: 'Goan Pottery 2',
+    photoCreator: "Joel's Goa Pics",
+    photoSource: 'https://www.flickr.com/photos/52243088@N00/11382440995',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
+  {
+    name: 'Jewelry',
+    mark: 'JW',
+    desc: 'Traditional metal & beadwork',
+    image: '/images/craft-categories/jewelry.jpg',
+    photoTitle: 'Bargaining for Bangals',
+    photoCreator: 'VinceHuang',
+    photoSource: 'https://www.flickr.com/photos/43408627@N00/372863905',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  {
+    name: 'Woodwork',
+    mark: 'WD',
+    desc: 'Carved furniture & decor',
+    image: '/images/craft-categories/woodwork.jpg',
+    photoTitle: 'Indian Woodblocks',
+    photoCreator: 'volitarian',
+    photoSource: 'https://www.flickr.com/photos/68747803@N00/7913567484',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  {
+    name: 'Metalwork',
+    mark: 'MT',
+    desc: 'Brass & bronze craftsmanship',
+    image: '/images/craft-categories/metalwork.jpg',
+    photoTitle: 'Worksop in Thathera market of Jandiala Guru. 07',
+    photoCreator: 'Harvinder Chandigarh',
+    photoSource: 'https://commons.wikimedia.org/w/index.php?curid=154801415',
+    license: 'CC BY 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+  },
+  {
+    name: 'Painting',
+    mark: 'PN',
+    desc: 'Miniature & folk art',
+    image: '/images/craft-categories/painting.jpg',
+    photoTitle: 'Madhubani painting, Bihar',
+    photoCreator: 'jepoirrier',
+    photoSource: 'https://www.flickr.com/photos/57519914@N00/5398953719',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
+  {
+    name: 'Embroidery',
+    mark: 'EM',
+    desc: 'Intricate thread work',
+    image: '/images/craft-categories/embroidery.jpg',
+    photoTitle: 'Gorgeous hand embroidery from early 20th century Rajasthan',
+    photoCreator: 'shankar s.',
+    photoSource: 'https://www.flickr.com/photos/77742560@N06/44223430402',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  {
+    name: 'Sculpture',
+    mark: 'SC',
+    desc: 'Stone & wood carvings',
+    image: '/images/craft-categories/sculpture.jpg',
+    photoTitle: 'Belur, Chennakeshava Temple, beauty and mirror',
+    photoCreator: 'Arian Zwegers',
+    photoSource: 'https://www.flickr.com/photos/67769030@N07/9882265124',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
 ];
+
+const WORKSHOP_PHOTOS = {
+  default: {
+    craft: 'Artisan at work',
+    alt: 'Artisan working with traditional tools',
+    image: '/images/workshops/artisan.jpg',
+    title: 'crafts',
+    creator: 'fredericknoronha',
+    source: 'https://www.flickr.com/photos/17364099@N00/100421675',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
+  textiles: {
+    craft: 'Hand block printing',
+    alt: 'Artisan hand block printing fabric',
+    image: '/images/workshops/block-printing.jpg',
+    title: 'Traditional Bagh hand block print master craftsman-artisan-artist Mohammed Bilal Khatri, Madhya Pradesh, India',
+    creator: 'Bsfs',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=53286376',
+    license: 'CC BY-SA 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+  },
+  pottery: {
+    craft: 'Pottery wheel',
+    alt: 'Potter shaping clay on a wheel',
+    image: '/images/workshops/pottery-wheel.jpg',
+    title: "Potter's Hands",
+    creator: 'Walt Stoneburner',
+    source: 'https://www.flickr.com/photos/8404611@N06/5745387762',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  woodwork: {
+    craft: 'Sandalwood carving',
+    alt: 'Detailed sandalwood carving',
+    image: '/images/workshops/wood-carving.jpg',
+    title: 'Sandalwood sitar work',
+    creator: 'Rohitjangidartist',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=82280158',
+    license: 'CC BY-SA 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+  },
+};
+
+const STORY_PHOTOS = {
+  default: WORKSHOP_PHOTOS.default,
+  'sanganeri-block-printing': {
+    ...WORKSHOP_PHOTOS.textiles,
+    craft: 'Sanganeri block printing',
+  },
+  'blue-pottery-of-jaipur': {
+    craft: 'Jaipur blue pottery',
+    alt: 'Artisans displaying colorful Jaipur blue pottery',
+    image: '/images/stories/blue-pottery.jpg',
+    title: 'blue pottery',
+    creator: 'chamko rani',
+    source: 'https://www.flickr.com/photos/58739507@N00/1308983849',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
+  'mysore-sandalwood-carving': {
+    craft: 'Wood carving',
+    alt: 'Artisan carving wood in a workshop',
+    image: '/images/stories/sandalwood-carving.jpg',
+    title: 'An old man carving wooden furniture in a workshop',
+    creator: 'Ivan Radic',
+    source: 'https://www.flickr.com/photos/26344495@N05/48630281498',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+};
 
 // Offsets that give the hero collage a gallery-wall rhythm.
 const COLLAGE = [
-  { height: 'h-44 md:h-56', emoji: '🏺' },
-  { height: 'h-40 md:h-48', emoji: '🧵', offset: 'md:pt-12' },
-  { height: 'h-40 md:h-48', emoji: '🎨' },
-  { height: 'h-44 md:h-56', emoji: '💎', offset: 'md:-mt-4' },
+  { height: 'h-52 md:h-64', mark: '01' },
+  { height: 'h-44 md:h-56', mark: '02', offset: 'md:mt-10' },
+  { height: 'h-44 md:h-56', mark: '03' },
+  { height: 'h-52 md:h-64', mark: '04', offset: 'md:-mt-4' },
 ];
 
 const emptySection = { items: [], error: null };
@@ -143,50 +294,82 @@ function Home() {
   return (
     <div>
       {/* ---------- hero ---------- */}
-      <section className="relative overflow-hidden border-b border-ink/10 bg-parchment py-16 md:py-20">
+      <section className="relative isolate overflow-hidden bg-[#18372a] py-14 text-cream md:py-20">
+        <div className="home-hero-pattern absolute inset-0 -z-10 opacity-20" aria-hidden="true" />
+        <div className="absolute -left-32 top-20 -z-10 h-80 w-80 rounded-full border border-saffron/20" aria-hidden="true" />
+        <div className="absolute -right-24 -top-32 -z-10 h-96 w-96 rounded-full border border-cream/10" aria-hidden="true" />
+
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex flex-col items-center gap-12 md:flex-row">
-            <div className="flex-1 text-center md:text-left">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-saffron-dark">
-                Handmade in India
-              </p>
-              <h1 className="mt-3 font-display text-4xl font-semibold leading-[1.1] text-ink md:text-5xl">
-                Preserving heritage,
+          <div className="grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-3 rounded-full border border-cream/15 bg-white/5 px-4 py-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-saffron" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cream/85">
+                  India&apos;s living craft heritage
+                </p>
+              </div>
+              <h1
+                className="mt-6 font-display text-5xl font-semibold leading-[1.02] md:text-6xl lg:text-[72px]"
+                style={{ color: 'var(--color-cream)' }}
+              >
+                Carry a story.
                 <br />
-                <span className="italic text-terracotta-dark">one craft at a time</span>
+                <span className="italic text-saffron">Keep a tradition.</span>
               </h1>
-              <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-soft md:mx-0">
-                Discover authentic handmade products from India&apos;s finest traditional artisans.
-                Every purchase supports local communities and preserves centuries-old craftsmanship.
+              <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-cream/70 md:text-lg lg:mx-0">
+                Shop extraordinary handmade objects, meet the hands behind them,
+                and help centuries of Indian craftsmanship thrive.
               </p>
-              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                 <Link
                   to="/products"
-                  className="rounded-sm bg-terracotta px-8 py-3.5 font-semibold text-white transition hover:bg-terracotta-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+                  className="group inline-flex items-center justify-center gap-3 rounded-sm bg-saffron px-7 py-4 text-sm font-bold text-ink transition hover:bg-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-saffron"
                 >
                   Explore Products
+                  <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
                 </Link>
                 <Link
                   to="/artisans"
-                  className="rounded-sm border-2 border-ink/25 px-8 py-3.5 font-semibold text-ink transition hover:border-terracotta hover:text-terracotta-dark"
+                  className="inline-flex items-center justify-center rounded-sm border border-cream/25 px-7 py-4 text-sm font-semibold text-cream transition hover:border-saffron hover:bg-white/5"
                 >
                   Meet Artisans
                 </Link>
               </div>
+              {statCards.length > 0 && (
+                <div className="mt-10 flex justify-center divide-x divide-cream/15 border-t border-cream/10 pt-6 lg:justify-start">
+                  {statCards.map((stat) => (
+                    <Link key={stat.key} to={stat.to} className="group px-5 first:pl-0">
+                      <p className="font-display text-2xl font-semibold text-cream transition group-hover:text-saffron">
+                        {stat.value.toLocaleString('en-IN')}+
+                      </p>
+                      <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-cream/55">
+                        {stat.label}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* collage of real product photos, with emoji tiles as fallback */}
-            <div className="flex flex-1 justify-center">
-              <div className="grid w-full max-w-md grid-cols-2 gap-4">
+            <div className="relative mx-auto w-full max-w-[620px]">
+              <div className="absolute -bottom-5 -right-4 hidden h-24 w-24 border-b border-r border-saffron/50 md:block" aria-hidden="true" />
+              <div className="absolute -left-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-saffron/40 bg-ink/80 p-2 shadow-xl md:flex" aria-hidden="true">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-saffron/70 text-center">
+                  <span className="text-[9px] font-bold uppercase leading-4 tracking-[0.18em] text-saffron">
+                    Made<br />by hand
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {collageColumns.map((column, ci) => (
-                  <div key={ci} className={`space-y-4 ${ci === 1 ? 'md:pt-4' : ''}`}>
+                  <div key={ci} className={`space-y-3 md:space-y-4 ${ci === 1 ? 'md:pt-2' : ''}`}>
                     {column.map((tile, i) => {
                       const product = products.items[ci * 2 + i];
                       const src = product?.images?.[0];
                       return (
                         <div
-                          key={tile.emoji}
-                          className={`relative overflow-hidden rounded-sm border border-ink/10 bg-linen ${tile.height} ${tile.offset || ''}`}
+                          key={tile.mark}
+                          className={`relative overflow-hidden rounded-sm border border-cream/15 bg-linen shadow-[0_24px_60px_-28px_rgba(0,0,0,0.75)] ${tile.height} ${tile.offset || ''}`}
                         >
                           {src ? (
                             <ProductImage
@@ -196,10 +379,16 @@ function Home() {
                               presets={['card_360', 'card_640']}
                               sizes="(min-width: 768px) 224px, 45vw"
                               priority
+                              imgClassName="home-collage-image"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-5xl">
-                              {tile.emoji}
+                            <div className="flex h-full w-full items-center justify-center bg-parchment">
+                              <span className="font-display text-5xl italic text-terracotta/30">{tile.mark}</span>
+                            </div>
+                          )}
+                          {src && (
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent p-3 pt-12">
+                              <p className="truncate text-xs font-semibold text-white">{product.name}</p>
                             </div>
                           )}
                         </div>
@@ -232,21 +421,6 @@ function Home() {
         <section className="bg-white py-16">
           <div className="mx-auto max-w-7xl px-4">
             <Loading />
-          </div>
-        </section>
-      )}
-
-      {!pageError && !loading && statCards.length > 0 && (
-        <section className="border-b border-ink/10 bg-white py-10">
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 text-center sm:grid-cols-3">
-            {statCards.map((stat) => (
-              <Link key={stat.key} to={stat.to} className="group">
-                <p className="font-display text-3xl font-semibold text-ink transition group-hover:text-terracotta-dark">
-                  {stat.value.toLocaleString('en-IN')}
-                </p>
-                <p className="mt-1 text-sm uppercase tracking-[0.14em] text-ink-faint">{stat.label}</p>
-              </Link>
-            ))}
           </div>
         </section>
       )}
@@ -291,14 +465,64 @@ function Home() {
                   <Link
                     key={cat.name}
                     to={`/products?category=${cat.name.toLowerCase()}`}
-                    className="group rounded-sm border border-ink/10 bg-white p-6 text-center transition hover:border-terracotta/40 hover:shadow-[0_18px_40px_-30px_rgba(43,26,18,0.6)]"
+                    className="group relative min-h-52 overflow-hidden rounded-sm border border-ink/10 bg-ink shadow-[0_18px_40px_-34px_rgba(43,26,18,0.8)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_55px_-30px_rgba(43,26,18,0.68)]"
                   >
-                    <div className="mb-3 text-4xl transition group-hover:-translate-y-1">{cat.emoji}</div>
-                    <h3 className="font-heading text-lg font-semibold text-ink">{cat.name}</h3>
-                    <p className="mt-1 text-sm text-ink-soft">{cat.desc}</p>
+                    <ProductImage
+                      src={cat.image}
+                      alt=""
+                      frame="absolute inset-0 h-full w-full"
+                      preset="card_640"
+                      imgClassName="category-card-image"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent transition duration-500 group-hover:from-ink/95 group-hover:via-ink/35" />
+                    <span className="absolute right-4 top-4 rounded-full border border-white/35 bg-ink/35 px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] text-white backdrop-blur-sm">
+                      {cat.mark}
+                    </span>
+                    <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                      <span className="mb-3 block h-px w-8 bg-saffron transition-all duration-500 group-hover:w-14" />
+                      <h3
+                        className="font-heading text-xl font-semibold"
+                        style={{ color: 'var(--color-cream)' }}
+                      >
+                        {cat.name}
+                      </h3>
+                      <p className="mt-1 max-w-[15rem] text-sm leading-relaxed text-cream/75">{cat.desc}</p>
+                      <span className="mt-3 inline-block translate-y-2 text-xs font-bold uppercase tracking-[0.16em] text-saffron opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        Explore collection →
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
+              <details className="mt-5 text-xs text-ink-faint">
+                <summary className="cursor-pointer font-semibold transition hover:text-ink">
+                  Image credits & licenses
+                </summary>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {CATEGORIES.map((cat) => (
+                    <li key={cat.name}>
+                      {cat.name}: “{cat.photoTitle}” by {cat.photoCreator} —{' '}
+                      <a
+                        href={cat.photoSource}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 hover:text-terracotta-dark"
+                      >
+                        source
+                      </a>
+                      {' · '}
+                      <a
+                        href={cat.licenseUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 hover:text-terracotta-dark"
+                      >
+                        {cat.license}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </div>
           </section>
 
@@ -330,6 +554,7 @@ function Home() {
                           alt=""
                           frame="h-full w-full"
                           preset="lightbox_1600"
+                          imgClassName="transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-ink/50 to-transparent" />
                         <div className="absolute -bottom-6 left-5 h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-linen">
@@ -383,17 +608,21 @@ function Home() {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                   {workshops.items.slice(0, 3).map((workshop) => {
                     const slot = upcomingSlot(workshop);
+                    const fallbackPhoto =
+                      WORKSHOP_PHOTOS[workshop.craftType?.toLowerCase()] || WORKSHOP_PHOTOS.default;
+                    const workshopImage = workshop.images?.[0] || fallbackPhoto.image;
                     return (
                       <div
                         key={workshop._id}
-                        className="flex flex-col overflow-hidden rounded-sm border border-ink/10 bg-white transition hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
+                        className="group flex flex-col overflow-hidden rounded-sm border border-ink/10 bg-white transition hover:-translate-y-1 hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
                       >
                         <ProductImage
-                          src={workshop.images?.[0]}
-                          alt={workshop.title}
-                          frame="h-40 w-full"
+                          src={workshopImage}
+                          alt={workshop.images?.[0] ? workshop.title : fallbackPhoto.alt}
+                          frame="h-52 w-full"
                           w={640}
                           h={360}
+                          imgClassName="transition-transform duration-700 group-hover:scale-[1.04]"
                         />
                         <div className="flex flex-1 flex-col p-5">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-saffron-dark">
@@ -434,7 +663,7 @@ function Home() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-saffron">
                 Support the craft
               </p>
-              <h2 className="mt-2 font-display text-3xl font-semibold">
+              <h2 className="mt-2 font-display text-3xl font-semibold" style={{ color: 'var(--color-cream)' }}>
                 Preserve Heritage, Make a Difference
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-cream/75">
@@ -466,33 +695,102 @@ function Home() {
               )}
               {!stories.error && stories.items.length > 0 && (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  {stories.items.map((story) => (
-                    <article
-                      key={story._id}
-                      className="overflow-hidden rounded-sm border border-ink/10 bg-parchment transition hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
-                    >
-                      <div className="flex h-40 items-center justify-center bg-linen text-5xl">📜</div>
-                      <div className="p-6">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-saffron-dark">
-                          {story.category}
-                        </span>
-                        <h3 className="mt-2 font-heading text-lg font-semibold text-ink">
-                          {story.title}
-                        </h3>
-                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink-soft">
-                          {story.excerpt || story.content}
-                        </p>
-                        <Link
-                          to={`/stories/${story.slug}`}
-                          className="mt-4 inline-block border-b border-terracotta pb-0.5 text-sm font-semibold text-terracotta-dark transition hover:border-ink hover:text-ink"
-                        >
-                          Read More →
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
+                  {stories.items.map((story) => {
+                    const fallbackPhoto = STORY_PHOTOS[story.slug] || STORY_PHOTOS.default;
+                    return (
+                      <article
+                        key={story._id}
+                        className="group overflow-hidden rounded-sm border border-ink/10 bg-parchment transition hover:-translate-y-1 hover:shadow-[0_22px_45px_-30px_rgba(43,26,18,0.6)]"
+                      >
+                        <ProductImage
+                          src={story.coverImage || fallbackPhoto.image}
+                          alt={story.coverImage ? story.title : fallbackPhoto.alt}
+                          frame="h-44 w-full"
+                          preset="card_640"
+                          imgClassName="transition-transform duration-700 group-hover:scale-[1.05]"
+                        />
+                        <div className="p-6">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-saffron-dark">
+                            {story.category}
+                          </span>
+                          <h3 className="mt-2 font-heading text-lg font-semibold text-ink">
+                            {story.title}
+                          </h3>
+                          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink-soft">
+                            {story.excerpt || story.content}
+                          </p>
+                          <Link
+                            to={`/stories/${story.slug}`}
+                            className="mt-4 inline-block border-b border-terracotta pb-0.5 text-sm font-semibold text-terracotta-dark transition hover:border-ink hover:text-ink"
+                          >
+                            Read More →
+                          </Link>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               )}
+              <details className="mt-5 text-xs text-ink-faint">
+                <summary className="cursor-pointer font-semibold transition hover:text-ink">
+                  Workshop image credits & licenses
+                </summary>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {Object.values(WORKSHOP_PHOTOS).map((photo) => (
+                    <li key={photo.craft}>
+                      {photo.craft}: “{photo.title}” by {photo.creator} —{' '}
+                      <a
+                        href={photo.source}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 hover:text-terracotta-dark"
+                      >
+                        source
+                      </a>
+                      {' · '}
+                      <a
+                        href={photo.licenseUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 hover:text-terracotta-dark"
+                      >
+                        {photo.license}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+              <details className="mt-3 text-xs text-ink-faint">
+                <summary className="cursor-pointer font-semibold transition hover:text-ink">
+                  Story image credits & licenses
+                </summary>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {Object.entries(STORY_PHOTOS)
+                    .filter(([slug]) => slug !== 'default')
+                    .map(([slug, photo]) => (
+                      <li key={slug}>
+                        {photo.craft}: “{photo.title}” by {photo.creator} —{' '}
+                        <a
+                          href={photo.source}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-2 hover:text-terracotta-dark"
+                        >
+                          source
+                        </a>
+                        {' · '}
+                        <a
+                          href={photo.licenseUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-2 hover:text-terracotta-dark"
+                        >
+                          {photo.license}
+                        </a>
+                      </li>
+                    ))}
+                </ul>
+              </details>
             </div>
           </section>
         </>
